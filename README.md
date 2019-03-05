@@ -1,7 +1,7 @@
 # (Factored) Bayes-Adaptive POMDP
 
 * written by Sammie Katt (katt.s at husky dot neu dot edu)
-* find it @ git@bitbucket.org:samdjo/po-rl.git
+* find it @ https://github.com/samkatt/fba-pomdp
 
 A code base to run (Bayes-Adaptive) reinforcement learning experiments on
 partially observable domains. This project is meant for reinforcement learning
