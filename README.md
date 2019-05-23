@@ -11,6 +11,10 @@ discrete. Note that this project has mostly been written for personal use,
 research, and thus may lack the documentation that one would typically expect
 from open source projects.
 
+## Related research:
+* BA-POMCP paper ICML 2017 http://proceedings.mlr.press/v70/katt17a/katt17a.pdf
+* FBA-POMDP paper AAMAS 2019 http://ifaamas.org/Proceedings/aamas2019/pdfs/p7.pdf
+
 ## Installation
 
 ```console
