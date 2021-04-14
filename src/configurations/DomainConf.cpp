@@ -14,7 +14,7 @@ void DomainConf::addOptions(boost::program_options::options_description* descr)
         po::value(&domain),
         "The domain to experiment in (dummy, linear_dummy, factored-dummy, episodic-tiger, "
         "continuous-tiger, agr, (boutilier-)coffee, episodic-factored-tiger, "
-        "continuous-factored-tiger, gridworld or (random/centered)-collision-avoidance)")
+        "continuous-factored-tiger, gridworld, gridworldcoffee or (random/centered)-collision-avoidance)")
         (
         "size",
         po::value(&size)->default_value(size),
@@ -47,6 +47,7 @@ void DomainConf::validate() const
                                               "episodic-factored-tiger",
                                               "continuous-factored-tiger",
                                               "gridworld",
+                                              "gridworldcoffee",
                                               "random-collision-avoidance",
                                               "centered-collision-avoidance"};
 
@@ -55,7 +56,7 @@ void DomainConf::validate() const
         throw error(
             "please enter a legit domain: dummy, linear_dummy, factored-dummy, episodic-tiger, "
             "continuous-tiger, agr, (boutilier-)coffee, episodic-factored-tiger, "
-            "continuous-factored-tiger, independent-sysadmin, linear-sysadmin, gridworld, or "
+            "continuous-factored-tiger, independent-sysadmin, linear-sysadmin, gridworld, gridworldcoffee, or "
             "(random/centered)-collision-avoidance. Given: "
             + domain);
     }

@@ -7,6 +7,7 @@
 #include "domains/dummy/DummyDomain.hpp"
 #include "domains/dummy/FactoredDummyDomain.hpp"
 #include "domains/dummy/LinearDummyDomain.hpp"
+#include "domains/gridworld-coffee-trap/GridWorldCoffee.hpp"
 #include "domains/gridworld/GridWorld.hpp"
 #include "domains/sysadmin/SysAdmin.hpp"
 #include "domains/tiger/FactoredTiger.hpp"
@@ -49,6 +50,8 @@ std::unique_ptr<Environment> makeEnvironment(configurations::DomainConf const& c
             new domains::FactoredTiger(domains::FactoredTiger::CONTINUOUS, c.size));
     if (c.domain == "gridworld")
         return std::unique_ptr<Environment>(new domains::GridWorld(c.size));
+    if (c.domain == "gridworldcoffee")
+        return std::unique_ptr<Environment>(new domains::GridWorldCoffee());
     if (c.domain == "random-collision-avoidance")
     {
 
