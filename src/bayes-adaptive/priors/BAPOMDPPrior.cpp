@@ -13,6 +13,8 @@
 #include "domains/collision-avoidance/CollisionAvoidancePriors.hpp"
 #include "domains/dummy/DummyDomainPrior.hpp"
 #include "domains/dummy/FactoredDummyDomainPriors.hpp"
+#include "domains/gridworld-coffee-trap/GridWorldCoffee.hpp"
+#include "domains/gridworld-coffee-trap/GridWorldCoffeeBAPriors.hpp"
 #include "domains/gridworld/GridWorld.hpp"
 #include "domains/gridworld/GridWorldBAPriors.hpp"
 #include "domains/sysadmin/SysAdmin.hpp"
@@ -49,6 +51,9 @@ std::unique_ptr<BAPOMDPPrior>
     if (d == "gridworld")
         return std::unique_ptr<BAPOMDPPrior>(
             new priors::GridWorldFlatBAPrior(static_cast<domains::GridWorld const&>(domain), c));
+    if (d == "gridworldcoffee")
+        return std::unique_ptr<BAPOMDPPrior>(
+            new priors::GridWorldCoffeeFlatBAPrior(static_cast<domains::GridWorldCoffee const&>(domain), c));
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<BAPOMDPPrior>(new priors::CollisionAvoidanceTablePrior(
             static_cast<domains::CollisionAvoidance const&>(domain), c));

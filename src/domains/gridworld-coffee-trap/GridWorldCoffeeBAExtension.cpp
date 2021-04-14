@@ -81,10 +81,6 @@ Terminal GridWorldCoffeeBAExtension::terminal(State const* s, Action const* a, S
 
     auto const gw_state = static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s);
 
-
-//    domains::GridWorldCoffee::pos const goal_location; // = {0, 4};
-
-
     return Terminal(domains::GridWorldCoffee::goal_location == gw_state->_agent_position);
 }
 

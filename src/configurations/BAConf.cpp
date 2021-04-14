@@ -79,7 +79,8 @@ void BAConf::validate() const
                                                      "linear-sysadmin",
                                                      "random-collision-avoidance",
                                                      "centered-collision-avoidance",
-                                                     "gridworld"};
+                                                     "gridworld",
+                                                     "gridworldcoffee"};
 
     Conf::validate();
 

@@ -214,292 +214,292 @@ BAPOMDPState* GridWorldCoffeeFlatBAPrior::sampleBAPOMDPState(State const* s) con
 /**
  * FACTORED STUFF
  */
-GridWorldCoffeeFactBAPrior::GridWorldCoffeeFactBAPrior(
-    GridWorldCoffee const& domain,
-    configurations::FBAConf const& c) :
-    FBAPOMDPPrior(c),
-    _size(domain.size()),
-    _noise(c.noise),
-    _unknown_counts_total(c.counts_total),
-//    _only_know_loc_matters(c.structure_prior == "match-uniform"),
-    _domain_size(0, 0, 0), // initialized below
-    _domain_feature_size({}, {}), // initialized below
-    _indexing_steps({}, {}), // initialized below
-    _correct_struct_prior(), // initialized below
-    _domain(domain)
-{
-
-    bayes_adaptive::domain_extensions::GridWorldCoffeeBAExtension ba_ext;
-    bayes_adaptive::domain_extensions::GridWorldCoffeeFBAExtension fba_ext;
-
-    _domain_size         = ba_ext.domainSize();
-    _domain_feature_size = fba_ext.domainFeatureSize();
-
-    _indexing_steps = {indexing::stepSize(_domain_feature_size._S),
-                       indexing::stepSize(_domain_feature_size._O)};
-
-    _correct_struct_prior = {&_domain_size, &_domain_feature_size, &_indexing_steps};
-
-//    if (_noise < 0 || _noise > (1 - GridWorldCoffee::slow_move_prob))
+//GridWorldCoffeeFactBAPrior::GridWorldCoffeeFactBAPrior(
+//    GridWorldCoffee const& domain,
+//    configurations::FBAConf const& c) :
+//    FBAPOMDPPrior(c),
+//    _size(domain.size()),
+//    _noise(c.noise),
+//    _unknown_counts_total(c.counts_total),
+////    _only_know_loc_matters(c.structure_prior == "match-uniform"),
+//    _domain_size(0, 0, 0), // initialized below
+//    _domain_feature_size({}, {}), // initialized below
+//    _indexing_steps({}, {}), // initialized below
+//    _correct_struct_prior(), // initialized below
+//    _domain(domain)
+//{
+//
+//    bayes_adaptive::domain_extensions::GridWorldCoffeeBAExtension ba_ext;
+//    bayes_adaptive::domain_extensions::GridWorldCoffeeFBAExtension fba_ext;
+//
+//    _domain_size         = ba_ext.domainSize();
+//    _domain_feature_size = fba_ext.domainFeatureSize();
+//
+//    _indexing_steps = {indexing::stepSize(_domain_feature_size._S),
+//                       indexing::stepSize(_domain_feature_size._O)};
+//
+//    _correct_struct_prior = {&_domain_size, &_domain_feature_size, &_indexing_steps};
+//
+////    if (_noise < 0 || _noise > (1 - GridWorldCoffee::slow_move_prob))
+////    {
+////        throw "Gridworld expects noise in between 0 and "
+////              + std::to_string(1 - GridWorldCoffee::slow_move_prob) + " (received " + std::to_string(_noise)
+////              + ")";
+////    }
+//
+//    if (!c.structure_prior.empty() && c.structure_prior != "match-uniform"
+//        && c.structure_prior != "match-counts")
 //    {
-//        throw "Gridworld expects noise in between 0 and "
-//              + std::to_string(1 - GridWorldCoffee::slow_move_prob) + " (received " + std::to_string(_noise)
-//              + ")";
+//        throw "Please enter a valid structure noise option for the GridWorldCoffee problem ('match-uniform' or 'match-counts')";
 //    }
-
-    if (!c.structure_prior.empty() && c.structure_prior != "match-uniform"
-        && c.structure_prior != "match-counts")
-    {
-        throw "Please enter a valid structure noise option for the GridWorldCoffee problem ('match-uniform' or 'match-counts')";
-    }
-
-    preComputePrior();
-}
-
-// TODO how do I want to mutate this
-bayes_adaptive::factored::BABNModel::Structure
-GridWorldCoffeeFactBAPrior::mutate(bayes_adaptive::factored::BABNModel::Structure structure) const
-{
-
-    auto const random_action  = rnd::slowRandomInt(0, _domain_size._A);
-    auto const random_feature = rnd::slowRandomInt(0, 2); // x or y feature
-
-    auto edges = &structure.T[random_action][random_feature];
-
-    assert(edges->size() >= 2); // assuming we always have x,y dependence
-
-    if (edges->size() == 2)
-    {
-
-        edges->push_back(_goal_feature);
-
-    } else // assumes we now have 3 edges (meaning we remove the parent)
-    {
-
-        assert(edges->size() == 3);
-        assert(edges->at(2) == _goal_feature);
-        edges->pop_back();
-    }
-
-    return structure;
-}
-
-// TODO ?
-bayes_adaptive::factored::BABNModel GridWorldCoffeeFactBAPrior::computePriorModel(
-    bayes_adaptive::factored::BABNModel::Structure const& structure) const
-{
-    auto prior = _correct_struct_prior;
-
-    auto const real_parents = std::vector<int>({_agent_x_feature, _agent_y_feature});
-
-    for (auto a = 0; a < _domain_size._A; ++a)
-    {
-        IndexAction const action(a);
-
-        auto const& agent_x_parents = structure.T[a][_agent_x_feature];
-        auto const& agent_y_parents = structure.T[a][_agent_y_feature];
-
-        if (agent_x_parents != real_parents)
-        {
-            setNoisyTransitionNode(
-                &prior, action, _agent_x_feature, structure.T[a][_agent_x_feature]);
-        }
-
-        if (agent_y_parents != real_parents)
-        {
-            setNoisyTransitionNode(
-                &prior, action, _agent_y_feature, structure.T[a][_agent_y_feature]);
-        }
-    }
-
-    return prior;
-}
-
-void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
-    bayes_adaptive::factored::BABNModel* model,
-    Action const& action,
-    int feature,
-    std::vector<int> const& parents) const
-{
-    assert(parents.size() == 3);
-
-    model->resetTransitionNode(&action, feature, parents);
-
-    for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x)
-    {
-        for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y)
-        {
-
-            auto const loc = (feature == _agent_x_feature) ? x : y;
-
-            auto const new_loc =
-                (feature == _agent_x_feature)
-                ? _domain
-                    .applyMove(
-                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
-                    .x
-                : _domain
-                    .applyMove(
-                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
-                    .y;
-
-            float const trans_prob = (_domain.agentOnSlowLocation({static_cast<unsigned int>(x),
-                                                                   static_cast<unsigned int>(y)}))
-                                     ? GridWorldCoffee::slow_move_prob
-                                     : GridWorldCoffee::move_prob;
-
-            for (auto g = 0; g < _domain_feature_size._S[_goal_feature]; ++g)
-            {
-
-                // fail move
-                model->transitionNode(&action, feature).count({x, y, g}, loc) +=
-                    (1 - trans_prob) * _unknown_counts_total;
-
-                // success move
-                model->transitionNode(&action, feature).count({x, y, g}, new_loc) +=
-                    (trans_prob)*_unknown_counts_total;
-            }
-        }
-    }
-}
-
-FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFullyConnectedState(State const* /*domain_state*/) const
-{
-    throw "GridWorldFactBAPrior::sampleFullyConnectedState nyi";
-}
-
-FBAPOMDPState const* GridWorldCoffeeFactBAPrior::sampleCorrectGraphState(State const* domain_state) const
-{
-    return new FBAPOMDPState(domain_state, _correct_struct_prior);
-}
-
-// constructs the correct model?
-void GridWorldCoffeeFactBAPrior::preComputePrior()
-{
-    for (auto a = 0; a < _domain_size._A; ++a)
-    {
-        IndexAction const action(a);
-
-        /*** O (known) ***/
-        // TODO do I want it to be known?
-
-        // observe agent location depends on the state feature and observation probabilities
-        for (auto f = 0; f < 2; ++f)
-        {
-            _correct_struct_prior.resetObservationNode(&action, f, {f});
-
-            for (auto agent_loc = 0; agent_loc < _domain_feature_size._S[f]; ++agent_loc)
-            {
-
-                for (auto observed_loc = 0; observed_loc < _domain_feature_size._S[f];
-                     ++observed_loc)
-                {
-                    _correct_struct_prior.observationNode(&action, f)
-                        .count({agent_loc}, observed_loc) =
-                        _domain.obsDisplProb(agent_loc, observed_loc) * _static_total_count;
-                }
-            }
-        }
-
-        // observe the goal deterministically
-        _correct_struct_prior.resetObservationNode(&action, _goal_feature, {_goal_feature});
-
-        for (auto v = 0; v < _domain_feature_size._O[_goal_feature]; ++v)
-        {
-            _correct_struct_prior.observationNode(&action, _goal_feature).count({v}, v) =
-                _static_total_count;
-        }
-
-        /**** T ****/
-
-        // new location: depends on noise,
-        // whether on a slow or regular cell
-        // and on the transition probabilities
-        // goal depends on all
-        _correct_struct_prior.resetTransitionNode(
-            &action, _agent_x_feature, {_agent_x_feature, _agent_y_feature});
-        _correct_struct_prior.resetTransitionNode(
-            &action, _agent_y_feature, {_agent_x_feature, _agent_y_feature});
-        _correct_struct_prior.resetTransitionNode(
-            &action, _goal_feature, {_agent_x_feature, _agent_y_feature, _goal_feature});
-
-        for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x)
-        {
-            for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y)
-            {
-
-                float const trans_prob =
-                    (_domain.agentOnSlowLocation(
-                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}))
-                    ? GridWorldCoffee::slow_move_prob + _noise
-                    : GridWorldCoffee::move_prob;
-
-                // fail move
-                _correct_struct_prior.transitionNode(&action, _agent_x_feature).count({x, y}, x) +=
-                    (1 - trans_prob) * _unknown_counts_total;
-                _correct_struct_prior.transitionNode(&action, _agent_y_feature).count({x, y}, y) +=
-                    (1 - trans_prob) * _unknown_counts_total;
-
-                // success move
-                auto const new_pos = _domain.applyMove(
-                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action);
-                _correct_struct_prior.transitionNode(&action, _agent_x_feature)
-                    .count({x, y}, new_pos.x) += (trans_prob)*_unknown_counts_total;
-                _correct_struct_prior.transitionNode(&action, _agent_y_feature)
-                    .count({x, y}, new_pos.y) += (trans_prob)*_unknown_counts_total;
-
-                for (auto g = 0; g < _domain_feature_size._S[_goal_feature]; ++g)
-                {
-
-                    auto const goal_pos = _domain.goalLocation(g);
-
-                    // not on goal
-                    if (goal_pos->x != static_cast<unsigned int>(x)
-                        || goal_pos->y != static_cast<unsigned int>(y))
-                    {
-                        _correct_struct_prior.transitionNode(&action, _goal_feature)
-                            .count({x, y, g}, g) = _static_total_count;
-                    } else // on goal: set new one
-                    {
-                        for (auto new_g = 0; new_g < _domain_feature_size._S[_goal_feature];
-                             ++new_g)
-                        {
-                            _correct_struct_prior.transitionNode(&action, _goal_feature)
-                                .count({x, y, g}, new_g) = _static_total_count;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* domain_state) const
-{
-
-    // base case: just return correct prior
-//    if (!_only_know_loc_matters)
+//
+//    preComputePrior();
+//}
+//
+//// TODO how do I want to mutate this
+//bayes_adaptive::factored::BABNModel::Structure
+//GridWorldCoffeeFactBAPrior::mutate(bayes_adaptive::factored::BABNModel::Structure structure) const
+//{
+//
+//    auto const random_action  = rnd::slowRandomInt(0, _domain_size._A);
+//    auto const random_feature = rnd::slowRandomInt(0, 2); // x or y feature
+//
+//    auto edges = &structure.T[random_action][random_feature];
+//
+//    assert(edges->size() >= 2); // assuming we always have x,y dependence
+//
+//    if (edges->size() == 2)
 //    {
-//        return new FBAPOMDPState(domain_state, _correct_struct_prior);
+//
+//        edges->push_back(_goal_feature);
+//
+//    } else // assumes we now have 3 edges (meaning we remove the parent)
+//    {
+//
+//        assert(edges->size() == 3);
+//        assert(edges->at(2) == _goal_feature);
+//        edges->pop_back();
 //    }
-
-    /*** noisy struct prior, but we know that agent location matters ****/
-    auto structure = _correct_struct_prior.structure();
-
-    // randomly add goal location to parents for each action
-    for (auto a = 0; a < _domain_size._A; ++a)
-    {
-        if (rnd::boolean())
-        {
-            structure.T[a][_agent_x_feature].emplace_back(_goal_feature);
-        }
-        if (rnd::boolean())
-        {
-            structure.T[a][_agent_y_feature].emplace_back(_goal_feature);
-        }
-    }
-
-    return new FBAPOMDPState(domain_state, computePriorModel(structure));
-}
+//
+//    return structure;
+//}
+//
+//// TODO ?
+//bayes_adaptive::factored::BABNModel GridWorldCoffeeFactBAPrior::computePriorModel(
+//    bayes_adaptive::factored::BABNModel::Structure const& structure) const
+//{
+//    auto prior = _correct_struct_prior;
+//
+//    auto const real_parents = std::vector<int>({_agent_x_feature, _agent_y_feature});
+//
+//    for (auto a = 0; a < _domain_size._A; ++a)
+//    {
+//        IndexAction const action(a);
+//
+//        auto const& agent_x_parents = structure.T[a][_agent_x_feature];
+//        auto const& agent_y_parents = structure.T[a][_agent_y_feature];
+//
+//        if (agent_x_parents != real_parents)
+//        {
+//            setNoisyTransitionNode(
+//                &prior, action, _agent_x_feature, structure.T[a][_agent_x_feature]);
+//        }
+//
+//        if (agent_y_parents != real_parents)
+//        {
+//            setNoisyTransitionNode(
+//                &prior, action, _agent_y_feature, structure.T[a][_agent_y_feature]);
+//        }
+//    }
+//
+//    return prior;
+//}
+//
+//void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
+//    bayes_adaptive::factored::BABNModel* model,
+//    Action const& action,
+//    int feature,
+//    std::vector<int> const& parents) const
+//{
+//    assert(parents.size() == 3);
+//
+//    model->resetTransitionNode(&action, feature, parents);
+//
+//    for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x)
+//    {
+//        for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y)
+//        {
+//
+//            auto const loc = (feature == _agent_x_feature) ? x : y;
+//
+//            auto const new_loc =
+//                (feature == _agent_x_feature)
+//                ? _domain
+//                    .applyMove(
+//                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+//                    .x
+//                : _domain
+//                    .applyMove(
+//                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+//                    .y;
+//
+//            float const trans_prob = (_domain.agentOnSlowLocation({static_cast<unsigned int>(x),
+//                                                                   static_cast<unsigned int>(y)}))
+//                                     ? GridWorldCoffee::slow_move_prob
+//                                     : GridWorldCoffee::move_prob;
+//
+//            for (auto g = 0; g < _domain_feature_size._S[_goal_feature]; ++g)
+//            {
+//
+//                // fail move
+//                model->transitionNode(&action, feature).count({x, y, g}, loc) +=
+//                    (1 - trans_prob) * _unknown_counts_total;
+//
+//                // success move
+//                model->transitionNode(&action, feature).count({x, y, g}, new_loc) +=
+//                    (trans_prob)*_unknown_counts_total;
+//            }
+//        }
+//    }
+//}
+//
+//FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFullyConnectedState(State const* /*domain_state*/) const
+//{
+//    throw "GridWorldFactBAPrior::sampleFullyConnectedState nyi";
+//}
+//
+//FBAPOMDPState const* GridWorldCoffeeFactBAPrior::sampleCorrectGraphState(State const* domain_state) const
+//{
+//    return new FBAPOMDPState(domain_state, _correct_struct_prior);
+//}
+//
+//// constructs the correct model?
+//void GridWorldCoffeeFactBAPrior::preComputePrior()
+//{
+//    for (auto a = 0; a < _domain_size._A; ++a)
+//    {
+//        IndexAction const action(a);
+//
+//        /*** O (known) ***/
+//        // TODO do I want it to be known?
+//
+//        // observe agent location depends on the state feature and observation probabilities
+//        for (auto f = 0; f < 2; ++f)
+//        {
+//            _correct_struct_prior.resetObservationNode(&action, f, {f});
+//
+//            for (auto agent_loc = 0; agent_loc < _domain_feature_size._S[f]; ++agent_loc)
+//            {
+//
+//                for (auto observed_loc = 0; observed_loc < _domain_feature_size._S[f];
+//                     ++observed_loc)
+//                {
+//                    _correct_struct_prior.observationNode(&action, f)
+//                        .count({agent_loc}, observed_loc) =
+//                        _domain.obsDisplProb(agent_loc, observed_loc) * _static_total_count;
+//                }
+//            }
+//        }
+//
+//        // observe the goal deterministically
+//        _correct_struct_prior.resetObservationNode(&action, _goal_feature, {_goal_feature});
+//
+//        for (auto v = 0; v < _domain_feature_size._O[_goal_feature]; ++v)
+//        {
+//            _correct_struct_prior.observationNode(&action, _goal_feature).count({v}, v) =
+//                _static_total_count;
+//        }
+//
+//        /**** T ****/
+//
+//        // new location: depends on noise,
+//        // whether on a slow or regular cell
+//        // and on the transition probabilities
+//        // goal depends on all
+//        _correct_struct_prior.resetTransitionNode(
+//            &action, _agent_x_feature, {_agent_x_feature, _agent_y_feature});
+//        _correct_struct_prior.resetTransitionNode(
+//            &action, _agent_y_feature, {_agent_x_feature, _agent_y_feature});
+//        _correct_struct_prior.resetTransitionNode(
+//            &action, _goal_feature, {_agent_x_feature, _agent_y_feature, _goal_feature});
+//
+//        for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x)
+//        {
+//            for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y)
+//            {
+//
+//                float const trans_prob =
+//                    (_domain.agentOnSlowLocation(
+//                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}))
+//                    ? GridWorldCoffee::slow_move_prob + _noise
+//                    : GridWorldCoffee::move_prob;
+//
+//                // fail move
+//                _correct_struct_prior.transitionNode(&action, _agent_x_feature).count({x, y}, x) +=
+//                    (1 - trans_prob) * _unknown_counts_total;
+//                _correct_struct_prior.transitionNode(&action, _agent_y_feature).count({x, y}, y) +=
+//                    (1 - trans_prob) * _unknown_counts_total;
+//
+//                // success move
+//                auto const new_pos = _domain.applyMove(
+//                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action);
+//                _correct_struct_prior.transitionNode(&action, _agent_x_feature)
+//                    .count({x, y}, new_pos.x) += (trans_prob)*_unknown_counts_total;
+//                _correct_struct_prior.transitionNode(&action, _agent_y_feature)
+//                    .count({x, y}, new_pos.y) += (trans_prob)*_unknown_counts_total;
+//
+//                for (auto g = 0; g < _domain_feature_size._S[_goal_feature]; ++g)
+//                {
+//
+//                    auto const goal_pos = _domain.goalLocation(g);
+//
+//                    // not on goal
+//                    if (goal_pos->x != static_cast<unsigned int>(x)
+//                        || goal_pos->y != static_cast<unsigned int>(y))
+//                    {
+//                        _correct_struct_prior.transitionNode(&action, _goal_feature)
+//                            .count({x, y, g}, g) = _static_total_count;
+//                    } else // on goal: set new one
+//                    {
+//                        for (auto new_g = 0; new_g < _domain_feature_size._S[_goal_feature];
+//                             ++new_g)
+//                        {
+//                            _correct_struct_prior.transitionNode(&action, _goal_feature)
+//                                .count({x, y, g}, new_g) = _static_total_count;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* domain_state) const
+//{
+//
+//    // base case: just return correct prior
+////    if (!_only_know_loc_matters)
+////    {
+////        return new FBAPOMDPState(domain_state, _correct_struct_prior);
+////    }
+//
+//    /*** noisy struct prior, but we know that agent location matters ****/
+//    auto structure = _correct_struct_prior.structure();
+//
+//    // randomly add goal location to parents for each action
+//    for (auto a = 0; a < _domain_size._A; ++a)
+//    {
+//        if (rnd::boolean())
+//        {
+//            structure.T[a][_agent_x_feature].emplace_back(_goal_feature);
+//        }
+//        if (rnd::boolean())
+//        {
+//            structure.T[a][_agent_y_feature].emplace_back(_goal_feature);
+//        }
+//    }
+//
+//    return new FBAPOMDPState(domain_state, computePriorModel(structure));
+//}
 
 } // namespace priors
