@@ -173,6 +173,8 @@ std::vector<std::vector<std::vector<float>>> BABNModel::flattenO() const
     return O;
 }
 
+// TODO Sammie, this is also used as initiation of a node?
+// Initializes transition node, for a state feature and its parents given the action.
 void BABNModel::resetTransitionNode(Action const* a, int state_feature, std::vector<int> parents)
 {
     assertLegalStateFeature(state_feature);
@@ -183,6 +185,8 @@ void BABNModel::resetTransitionNode(Action const* a, int state_feature, std::vec
         &_domain_feature_size->_S, std::move(parents), _domain_feature_size->_S[state_feature]);
 }
 
+// TODO Sammie, this is also used as initiation of a node?
+// Initializes observation node, for an observation feature and its parents given the action.
 void BABNModel::resetObservationNode(
     Action const* a,
     int observation_feature,

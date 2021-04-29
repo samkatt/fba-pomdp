@@ -198,11 +198,13 @@ int DBNNode::cptIndex(std::vector<int> const& node_input, int node_output) const
     }
 
     // option 2: if input != parents, then we should be dealing with the
-    // whole graph input (which is atleast bigger than our parents at this point)
+    // whole graph input (which is at least bigger than our parents at this point)
     parentValues(node_input, &_parent_value_holder);
     return indexing::project(_parent_value_holder, _parent_sizes) * _output_size + node_output;
 }
 
+// TODO Sammie, what does this function do?
+// It populates the parent values. Node input is the DBN input
 void DBNNode::parentValues(std::vector<int> const& node_input, std::vector<int>* parent_values)
     const
 {

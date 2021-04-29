@@ -63,6 +63,15 @@ public:
         }
     };
 
+    static unsigned int carpet_func(pos agent_pos) {
+        // carpet states, rectangular area
+        if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
+        {
+            return 1; // Carpet
+        }
+        return 0; // No carpet
+    }
+
     constexpr static pos const goal_location = {0,4};
 
 
@@ -75,20 +84,20 @@ public:
     public:
 
 
-        GridWorldCoffeeState(pos agent_pos, unsigned int rain, unsigned int velocity, int i) :
+        GridWorldCoffeeState(pos agent_pos, unsigned int rain, int i) :
             _agent_position(agent_pos),
-            _velocity(velocity),
             _rain(rain),
-            _carpet(0), // initiated below
+            _carpet(&carpet_func), // initiated below
             _index(i)
         {
-            // carpet states, rectangular area
-            if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
-            {
-                _carpet = 1;
-            } else {
-                _carpet = 0;
-            }
+//            _carpet = &carpet_func;
+//            // carpet states, rectangular area
+//            if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
+//            {
+//                _carpet = 1;
+//            } else {
+//                _carpet = 0;
+//            }
         }
 
         /***** state implementation *****/
@@ -100,9 +109,9 @@ public:
         }
 
         pos const _agent_position;
-        unsigned int _velocity;
+//        unsigned int _velocity;
         unsigned int _rain;
-        unsigned int _carpet;
+        unsigned int (*_carpet)(pos);
 
     private:
         int const _index;
@@ -119,16 +128,16 @@ public:
             int i) :
             _agent_pos(agent_pos),
             _rain(rain),
-            _carpet(0), // initiated below
+            _carpet(&carpet_func), // initiated below
             _index(i)
         {
-            // carpet states
-            if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
-            {
-                _carpet = 1;
-            } else {
-                _carpet = 0;
-            }
+//            // carpet states
+//            if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
+//            {
+//                _carpet = 1;
+//            } else {
+//                _carpet = 0;
+//            }
         }
 
         /**** observation interface ***/
@@ -138,7 +147,7 @@ public:
 
         pos const _agent_pos;
         unsigned int _rain;
-        unsigned int _carpet;
+        unsigned int (*_carpet)(pos);
 
     private:
         int const _index;
@@ -166,17 +175,18 @@ public:
 
     explicit GridWorldCoffee();
 
-    constexpr static pos const start_location = {0,0};
+    static pos const start_location; // = {0,0};
 
     /***** getters of parameters and settings of the domain ****/
     size_t size() const;
     double goalReward() const;
     State const* sampleRandomState() const;
+    bool agentOnSlowLocation(pos const& agent_pos) const;
 
     static bool foundGoal(GridWorldCoffeeState const* s) ;
 
     GridWorldCoffeeState const*
-    getState(pos const& agent_pos, unsigned int const& rain, unsigned int const& velocity) const;
+    getState(pos const& agent_pos, unsigned int const& rain) const; // TODO need carpet func?
     GridWorldCoffeeObservation const* getObservation(
         pos const& agent_pos,
         unsigned int const& rain) const;
@@ -217,7 +227,7 @@ private:
     std::vector<GridWorldCoffeeObservation> _O = {};
 
     // constants in the problem
-    int const _goal_feature = 2;
+//    int const _goal_feature = 2;
 
     /**
      * @brief returns an observation from position agent_pos and rain
@@ -226,7 +236,7 @@ private:
         pos const& agent_pos,
         unsigned int const& rain) const;
 
-    int positionsToIndex(pos const& agent_pos, unsigned int const& rain, unsigned int const& velocity)
+    int positionsToIndex(pos const& agent_pos, unsigned int const& rain)
     const;
     int positionsToObservationIndex(pos const& agent_pos, unsigned int const& rain)
     const;

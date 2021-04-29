@@ -52,14 +52,15 @@ void FBAConf::validate() const
         "random-collision-avoidance",
         "centered-collision-avoidance",
         "gridworld",
+        "gridworldcoffee"
     };
 
     if (std::find(fpomdps.begin(), fpomdps.end(), domain_conf.domain) == fpomdps.end())
     {
         throw error(
             "please enter a factored domain if you wish to use factored representations: "
-            "factored-dummy, a (factored) tiger domain, independent/linear-sysadmin, or "
-            "random/centered-collision-avoidance, you provided: "
+            "factored-dummy, a (factored) tiger domain, independent/linear-sysadmin, "
+            " gridworldcoffee or random/centered-collision-avoidance, you provided: "
             + domain_conf.domain);
     }
 

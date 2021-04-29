@@ -99,7 +99,6 @@ set(BA_SRC
     "src/domains/gridworld-coffee-trap/GridWorldCoffeeBAExtension.cpp"
     "src/domains/gridworld-coffee-trap/GridWorldCoffeeBAPriors.cpp"
     "src/domains/gridworld-coffee-trap/GridWorldCoffeeFBAExtension.cpp"
-    "src/domains/gridworld-coffee-trap/GridWorldCoffeeFBAPriors.cpp"
     "src/domains/sysadmin/SysAdminBAExtension.cpp"
     "src/domains/sysadmin/SysAdminFBAExtension.cpp"
     "src/domains/sysadmin/SysAdminFactoredPrior.cpp"

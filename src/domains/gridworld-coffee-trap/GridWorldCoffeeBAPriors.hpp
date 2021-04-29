@@ -89,8 +89,8 @@ private:
     int const _agent_x_feature = 0;
     int const _agent_y_feature = 1;
     int const _rain_feature    = 2;
-    int const _velocity_feature    = 3;
-//    int const _carpet_feature    = 4;
+//    int const _velocity_feature    = 3;
+    int const _carpet_feature    = 3; // carpet = beforehand we know on which tiles there is carpet
     int const _num_features = 4;
 
     Domain_Size _domain_size;

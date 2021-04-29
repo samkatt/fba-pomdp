@@ -36,7 +36,7 @@ GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
 {
 
     _domain_size           = Domain_Size(
-        static_cast<int>(_size * _size * 2 * 4),
+        static_cast<int>(_size * _size * 2), // * 4),
         4,
         static_cast<int>(_size * _size * 2));
 
@@ -50,13 +50,13 @@ GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
             domains::GridWorldCoffee::pos const agent_pos{x_agent, y_agent};
             for (unsigned int rain = 0; rain < 2; ++rain)
             {
-                for (unsigned int velocity = 0; velocity < 4; ++velocity)
-                {
-                    assert(static_cast<unsigned int>(i) == _states.size());
+//                for (unsigned int velocity = 0; velocity < 4; ++velocity)
+//                {
+                assert(static_cast<unsigned int>(i) == _states.size());
 
-                    _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, velocity, i));
-                    i++;
-                }
+                _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, i)); //, velocity, i));
+                i++;
+//                }
             }
         }
     }

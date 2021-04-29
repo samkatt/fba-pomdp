@@ -22,15 +22,18 @@ std::vector<std::string> const GridWorldCoffee::GridWorldCoffeeAction::action_de
 
 GridWorldCoffee::pos const GridWorldCoffee::goal_location;
 
+GridWorldCoffee::pos const GridWorldCoffee::start_location = {0, 0};
+
 GridWorldCoffee::GridWorldCoffee() :
     _S_size(0), // initiated below
     _O_size(0) // initiated below
 {
-    // Number of states, 5x5 grid, rain/no rain, velocity (4). Carpet is fixed given x and y, and observable by the agent.
+    // Number of states, 5x5 grid, rain/no rain, carpet (is a function, returning 1 or 0). Carpet is fixed given x and y, and observable by the agent.
+    // TODO: "velocity" beliefs should be in the prior? velocity now gone. Need Carpet somewhere?
     // There are only two types of velocity (normal and trap state) but the agent believes there are 4 (the 4 combinations of rain/no rain + carpet / no carpet)
-    _S_size = _size * _size * 2 * 4, _S.reserve(_S_size);
+    _S_size = _size * _size * 2, _S.reserve(_S_size);
     _O_size = _size * _size * 2;
-    _O.reserve(_O_size); // same number of observations, just doesn't include the velocity
+    _O.reserve(_O_size); // same number of observations, just doesn't include the velocity (now velocity is gone)
 
     // generate state space
     for (unsigned int x_agent = 0; x_agent < _size; ++x_agent)
@@ -40,14 +43,14 @@ GridWorldCoffee::GridWorldCoffee() :
             GridWorldCoffee::pos const agent_pos{x_agent, y_agent};
             for (unsigned int rain = 0; rain < 2; ++rain)
             {
-                for (unsigned int velocity = 0; velocity < 4; ++velocity)
-                {
-                    auto const i = positionsToIndex(agent_pos, rain, velocity);
-                    assert(static_cast<unsigned int>(i) == _S.size());
+//                for (unsigned int velocity = 0; velocity < 4; ++velocity)
+//                {
+                auto const i = positionsToIndex(agent_pos, rain);
+                assert(static_cast<unsigned int>(i) == _S.size());
 
-                    _S.emplace_back(GridWorldCoffeeState(agent_pos, rain, velocity, i));
-                }
-                auto const i = positionsToObservationIndex(agent_pos, rain);
+                _S.emplace_back(GridWorldCoffeeState(agent_pos, rain, i));
+//                }
+//                auto const i = positionsToObservationIndex(agent_pos, rain);
                 assert(static_cast<unsigned int>(i) == _O.size());
                 _O.emplace_back(GridWorldCoffeeObservation(agent_pos, rain, i));
             }
@@ -72,16 +75,16 @@ State const* GridWorldCoffee::sampleRandomState() const
     return getState(
         {static_cast<unsigned int>(rnd::slowRandomInt(0, _size)),
          static_cast<unsigned int>(rnd::slowRandomInt(0, _size))},
-        static_cast<unsigned int>(rnd::slowRandomInt(0, 1)),
-        static_cast<unsigned int>(rnd::slowRandomInt(0, 3)));
+        static_cast<unsigned int>(rnd::slowRandomInt(0, 1)));
+//        static_cast<unsigned int>(rnd::slowRandomInt(0, 3)));
 }
 
 GridWorldCoffee::GridWorldCoffeeState const* GridWorldCoffee::getState(
     GridWorldCoffee::pos const& agent_pos,
-    unsigned int const& rain,
-    unsigned int const& velocity) const
+    unsigned int const& rain) const
+//    unsigned int const& velocity) const
 {
-    return &_S[positionsToIndex(agent_pos, rain, velocity)];
+    return &_S[positionsToIndex(agent_pos, rain)]; //, velocity)];
 }
 
 GridWorldCoffee::GridWorldCoffeeObservation const* GridWorldCoffee::getObservation(
@@ -139,7 +142,17 @@ State const* GridWorldCoffee::sampleStartState() const
     // sample random agent position (there should be only 1, (0,0), no rain)
     auto const agent_pos = start_location; //s[rnd::slowRandomInt(0, start_locations.size())];
 
-    return &_S[positionsToIndex(agent_pos, 0, 1)];
+    return &_S[positionsToIndex(agent_pos, 0)]; //, 1)];
+}
+
+bool GridWorldCoffee::agentOnSlowLocation(pos const& agent_pos) const
+{
+    // On trap state
+    if ((agent_pos.x == 0 && agent_pos.y == 1) || (agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 2 && agent_pos.y == 2))
+    {
+        return true;
+    }
+    return false;
 }
 
 bool GridWorldCoffee::foundGoal(GridWorldCoffeeState const* s)
@@ -161,7 +174,6 @@ Terminal GridWorldCoffee::step(State const** s, Action const* a, Observation con
     // if it's rains, 0.7 that it keeps raining
     // if it's dry, 0.7 that it stays dry
     bool const same_weather = rnd::uniform_rand01() < same_weather_prob;
-
     auto const new_rain = (same_weather) ? grid_state->_rain : (1 - grid_state->_rain);
 
     // calculate whether move succeeds based on whether it is
@@ -169,14 +181,22 @@ Terminal GridWorldCoffee::step(State const** s, Action const* a, Observation con
     // no carpet: rain: 0.8, no rain: 0.95
     // carpet: rain: 0.05, no rain: 0.15
     bool move_succeeds = false;
-    if (grid_state->_velocity == 0) {
+//    if (grid_state->_velocity == 0) {
+//        move_succeeds = rnd::uniform_rand01() < slow_move_prob;
+//    } else if (grid_state->_velocity == 1) {
+//        move_succeeds = rnd::uniform_rand01() < move_prob;
+//    } else if (grid_state->_velocity == 2) {
+//        move_succeeds = rnd::uniform_rand01() < 0.05;
+//    } else if (grid_state->_velocity == 3) {
+//        move_succeeds = rnd::uniform_rand01() < 0.8;
+//    }
+    // trap states TODO: make a property of the domain
+    // On trap state
+    if ((agent_pos.x == 0 && agent_pos.y == 1) || (agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 2 && agent_pos.y == 2))
+    {
         move_succeeds = rnd::uniform_rand01() < slow_move_prob;
-    } else if (grid_state->_velocity == 1) {
+    } else {
         move_succeeds = rnd::uniform_rand01() < move_prob;
-    } else if (grid_state->_velocity == 2) {
-        move_succeeds = rnd::uniform_rand01() < 0.05;
-    } else if (grid_state->_velocity == 3) {
-        move_succeeds = rnd::uniform_rand01() < 0.8;
     }
 
     auto const new_agent_pos = (move_succeeds) ? applyMove(agent_pos, a) : agent_pos;
@@ -184,13 +204,8 @@ Terminal GridWorldCoffee::step(State const** s, Action const* a, Observation con
 
     auto const found_goal = foundGoal(grid_state);
 
-    // trap states TODO: make a property of the domain
-    unsigned int new_velocity = 1;
-    if ((new_agent_pos.x == 0 && new_agent_pos.y == 1) || (new_agent_pos.x == 0 && new_agent_pos.y == 3) || (new_agent_pos.x == 2 && new_agent_pos.y == 2))
-    {
-       new_velocity = 0;
-    }
-    auto const new_index = positionsToIndex(new_agent_pos, new_rain, new_velocity);
+
+    auto const new_index = positionsToIndex(new_agent_pos, new_rain); //, new_velocity);
     *s                   = &_S[new_index];
 
     /*** R & O ***/
@@ -225,11 +240,13 @@ State const* GridWorldCoffee::copyState(State const* s) const
 
 int GridWorldCoffee::positionsToIndex(
     GridWorldCoffee::pos const& agent_pos,
-    unsigned int const& rain, unsigned int const& velocity) const
+    unsigned int const& rain) const // , unsigned int const& velocity) const
 {
     // indexing: from 3 elements projecting to 1 dimension
     // x*size*2 + y*2 + rain
-    return agent_pos.x * _size * 2 * 4 + agent_pos.y * 2 * 4 + rain * 4 + velocity;
+//    return agent_pos.x * _size * 2 * 4 + agent_pos.y * 2 * 4 + rain * 4; // + velocity;
+    return agent_pos.x * _size * 2 + agent_pos.y * 2 + rain; // + velocity;
+
 }
 
 int GridWorldCoffee::positionsToObservationIndex(
@@ -286,7 +303,8 @@ void GridWorldCoffee::assertLegal(Observation const* o) const
     assert(o->index() >= 0 && o->index() < _O_size);
     assertLegal(static_cast<GridWorldCoffeeObservation const*>(o)->_agent_pos);
     assert((static_cast<GridWorldCoffeeObservation const*>(o)->_rain == 0) || (static_cast<GridWorldCoffeeObservation const*>(o)->_rain == 1));
-    assert((static_cast<GridWorldCoffeeObservation const*>(o)->_carpet == 0) || (static_cast<GridWorldCoffeeObservation const*>(o)->_carpet == 1));
+    assert((static_cast<GridWorldCoffeeObservation const*>(o)->_carpet(static_cast<GridWorldCoffeeObservation const*>(o)->_agent_pos) == 0)
+    || (static_cast<GridWorldCoffeeObservation const*>(o)->_carpet(static_cast<GridWorldCoffeeObservation const*>(o)->_agent_pos) == 1));
 }
 
 void GridWorldCoffee::assertLegal(State const* s) const
@@ -295,9 +313,10 @@ void GridWorldCoffee::assertLegal(State const* s) const
     assert(s->index() >= 0 && s->index() < _S_size);
     assertLegal(static_cast<GridWorldCoffeeState const*>(s)->_agent_position);
     assert((static_cast<GridWorldCoffeeState const*>(s)->_rain == 0) || (static_cast<GridWorldCoffeeState const*>(s)->_rain == 1));
-    assert((static_cast<GridWorldCoffeeState const*>(s)->_carpet == 0) || (static_cast<GridWorldCoffeeState const*>(s)->_carpet == 1));
-    assert((static_cast<GridWorldCoffeeState const*>(s)->_velocity == 0) || (static_cast<GridWorldCoffeeState const*>(s)->_velocity == 1)
-           || (static_cast<GridWorldCoffeeState const*>(s)->_velocity == 2) || (static_cast<GridWorldCoffeeState const*>(s)->_velocity == 3));
+    assert((static_cast<GridWorldCoffeeState const*>(s)->_carpet(static_cast<GridWorldCoffeeState const*>(s)->_agent_position) == 0)
+    || (static_cast<GridWorldCoffeeState const*>(s)->_carpet(static_cast<GridWorldCoffeeState const*>(s)->_agent_position) == 1));
+//    assert((static_cast<GridWorldCoffeeState const*>(s)->_velocity == 0) || (static_cast<GridWorldCoffeeState const*>(s)->_velocity == 1)
+//           || (static_cast<GridWorldCoffeeState const*>(s)->_velocity == 2) || (static_cast<GridWorldCoffeeState const*>(s)->_velocity == 3));
 }
 
 void GridWorldCoffee::assertLegal(GridWorldCoffee::pos const& position) const

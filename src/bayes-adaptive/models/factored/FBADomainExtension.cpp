@@ -6,6 +6,7 @@
 #include "domains/gridworld/GridWorldFBAExtension.hpp"
 #include "domains/sysadmin/SysAdminFBAExtension.hpp"
 #include "domains/tiger/FactoredTigerFBAExtension.hpp"
+#include "domains/gridworld-coffee-trap/GridWorldCoffeeFBAExtension.hpp"
 
 namespace factory {
 std::unique_ptr<FBADomainExtension> makeFBADomainExtension(configurations::FBAConf const& c)
@@ -30,6 +31,10 @@ std::unique_ptr<FBADomainExtension> makeFBADomainExtension(configurations::FBACo
         return std::unique_ptr<FBADomainExtension>(
             new ext::GridWorldFBAExtension(c.domain_conf.size));
 
+    if (d == "gridworldcoffee")
+        return std::unique_ptr<FBADomainExtension>(
+                new ext::GridWorldCoffeeFBAExtension());
+
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
     {
         if (d == "random-collision-avoidance")
@@ -45,7 +50,7 @@ std::unique_ptr<FBADomainExtension> makeFBADomainExtension(configurations::FBACo
                 c.domain_conf.size,
                 domains::CollisionAvoidance::VERSION::INITIALIZE_CENTRE));
     }
-
+    // TODO Sammie, shouldn't the message be that it is not supported as a factored BA-POMDP?
     throw "incorrect domain provided, " + d + " is not supported as tabular BA-POMDP";
 }
 
