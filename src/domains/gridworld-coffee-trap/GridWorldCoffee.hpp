@@ -45,6 +45,7 @@ public:
     constexpr static double const same_weather_prob = .7;
     constexpr static double const move_prob      = .9;
     constexpr static double const slow_move_prob = .15;
+    constexpr static unsigned int const carpet_configurations = 2;
     /**
          * @brief A position in the gridworld
          * x and y are the agent's location, v the "velocity", r the rain, c the carpet
@@ -84,10 +85,10 @@ public:
     public:
 
 
-        GridWorldCoffeeState(pos agent_pos, unsigned int rain, int i) :
+        GridWorldCoffeeState(pos agent_pos, unsigned int rain, int i, const int carpet_config) :
             _agent_position(agent_pos),
             _rain(rain),
-            _carpet(&carpet_func), // initiated below
+            _carpet_config(carpet_config),
             _index(i)
         {
 //            _carpet = &carpet_func;
@@ -111,7 +112,7 @@ public:
         pos const _agent_position;
 //        unsigned int _velocity;
         unsigned int _rain;
-        unsigned int (*_carpet)(pos);
+        unsigned int _carpet_config;
 
     private:
         int const _index;
@@ -123,12 +124,10 @@ public:
     class GridWorldCoffeeObservation : public Observation
     {
     public:
-        GridWorldCoffeeObservation(
-            pos agent_pos, unsigned int rain,
-            int i) :
+        GridWorldCoffeeObservation(pos agent_pos, unsigned int rain, const int carpet_config, int i) :
             _agent_pos(agent_pos),
             _rain(rain),
-            _carpet(&carpet_func), // initiated below
+            _carpet_config(carpet_config), // initiated below
             _index(i)
         {
 //            // carpet states
@@ -147,7 +146,7 @@ public:
 
         pos const _agent_pos;
         unsigned int _rain;
-        unsigned int (*_carpet)(pos);
+        unsigned int _carpet_config;
 
     private:
         int const _index;
@@ -186,7 +185,7 @@ public:
     static bool foundGoal(GridWorldCoffeeState const* s) ;
 
     GridWorldCoffeeState const*
-    getState(pos const& agent_pos, unsigned int const& rain) const; // TODO need carpet func?
+    getState(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const; // TODO need carpet func?
     GridWorldCoffeeObservation const* getObservation(
         pos const& agent_pos,
         unsigned int const& rain) const;
@@ -236,7 +235,7 @@ private:
         pos const& agent_pos,
         unsigned int const& rain) const;
 
-    int positionsToIndex(pos const& agent_pos, unsigned int const& rain)
+    int positionsToIndex(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
     const;
     int positionsToObservationIndex(pos const& agent_pos, unsigned int const& rain)
     const;

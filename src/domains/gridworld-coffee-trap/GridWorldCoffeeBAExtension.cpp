@@ -54,7 +54,7 @@ GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
 //                {
                 assert(static_cast<unsigned int>(i) == _states.size());
 
-                _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, i)); //, velocity, i));
+                _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, i, 0)); //, velocity, i));
                 i++;
 //                }
             }
