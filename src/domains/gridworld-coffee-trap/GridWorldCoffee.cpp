@@ -33,8 +33,8 @@ GridWorldCoffee::GridWorldCoffee() :
     // There are only two types of velocity (normal and trap state) but the agent believes there are 4 (the 4 combinations of rain/no rain + carpet / no carpet)
 //    const unsigned int carpet_configurations = 2; // just give 2 as the total number of possible configurations?
     //  pow(2, _size*_size);
-    _S_size = carpet_configurations * _size * _size * 2, _S.reserve(_S_size);
-    _O_size = carpet_configurations * _size * _size * 2;
+    _S_size = _size * _size * 2 * carpet_configurations, _S.reserve(_S_size);
+    _O_size = _size * _size * 2 * carpet_configurations;
     _O.reserve(_O_size); // same number of observations, just doesn't include the velocity (now velocity is gone)
 
     // generate state space
@@ -92,9 +92,10 @@ GridWorldCoffee::GridWorldCoffeeState const* GridWorldCoffee::getState(
 
 GridWorldCoffee::GridWorldCoffeeObservation const* GridWorldCoffee::getObservation(
     GridWorldCoffee::pos const& agent_pos,
-    unsigned int const& rain) const
+    unsigned int const& rain,
+    unsigned int const& carpet_config) const
 {
-    return &_O[positionsToObservationIndex(agent_pos, rain)];
+    return &_O[positionsToObservationIndex(agent_pos, rain, carpet_config)];
 }
 
 Action const* GridWorldCoffee::generateRandomAction(State const* s) const
@@ -207,13 +208,14 @@ Terminal GridWorldCoffee::step(State const** s, Action const* a, Observation con
 
     auto const found_goal = foundGoal(grid_state);
 
+    auto const new_carpet_config = grid_state->_carpet_config;
 
-    auto const new_index = positionsToIndex(new_agent_pos, new_rain, 0); //, new_velocity);
+    auto const new_index = positionsToIndex(new_agent_pos, new_rain, new_carpet_config); //, new_velocity);
     *s                   = &_S[new_index];
 
     /*** R & O ***/
     r->set(found_goal ? goal_reward : step_reward);
-    *o = generateObservation(new_agent_pos, new_rain);
+    *o = generateObservation(new_agent_pos, new_rain, new_carpet_config);
 
     return Terminal(found_goal);
 }
@@ -254,11 +256,12 @@ int GridWorldCoffee::positionsToIndex(
 
 int GridWorldCoffee::positionsToObservationIndex(
     GridWorldCoffee::pos const& agent_pos,
-    unsigned int const& rain) const
+    unsigned int const& rain,
+    unsigned int const& carpet_config) const
 {
     // indexing: from 3 elements projecting to 1 dimension
     // x*size*2 + y*2 + rain
-    return agent_pos.x * _size * 2 + agent_pos.y * 2 + rain;
+    return agent_pos.x * _size * 2 * carpet_configurations + agent_pos.y * 2 * carpet_configurations + rain * carpet_configurations + carpet_config;
 }
 
 
@@ -288,10 +291,11 @@ GridWorldCoffee::applyMove(GridWorldCoffee::pos const& old_pos, Action const* a)
 
 Observation const* GridWorldCoffee::generateObservation(
     GridWorldCoffee::pos const& agent_pos,
-    unsigned int const& rain) const
+    unsigned int const& rain,
+    unsigned int const& carpet_config) const
 {
     // return corresponding indexed observation
-    return &_O[positionsToObservationIndex(agent_pos, rain)];
+    return &_O[positionsToObservationIndex(agent_pos, rain, carpet_config)];
 }
 
 void GridWorldCoffee::assertLegal(Action const* a) const

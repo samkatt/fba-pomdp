@@ -106,7 +106,7 @@ public:
         int index() const final { return _index; }
         std::string toString() const final
         {
-            return "agent" + _agent_position.toString() + " rain " + std::to_string(_rain);
+            return "agent" + _agent_position.toString() + " rain " + std::to_string(_rain) + " carpet configuration " + std::to_string(_carpet_config);
         }
 
         pos const _agent_position;
@@ -188,7 +188,7 @@ public:
     getState(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const; // TODO need carpet func?
     GridWorldCoffeeObservation const* getObservation(
         pos const& agent_pos,
-        unsigned int const& rain) const;
+        unsigned int const& rain, unsigned int const& carpet_config) const;
 
     /**
      * @brief applies a move a on the old_pos to get a new pos
@@ -233,11 +233,12 @@ private:
      **/
     Observation const* generateObservation(
         pos const& agent_pos,
-        unsigned int const& rain) const;
+        unsigned int const& rain,
+        unsigned int const& carpet_config) const;
 
     int positionsToIndex(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
     const;
-    int positionsToObservationIndex(pos const& agent_pos, unsigned int const& rain)
+    int positionsToObservationIndex(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
     const;
 
 
