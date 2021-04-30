@@ -45,7 +45,6 @@ public:
     constexpr static double const same_weather_prob = .7;
     constexpr static double const move_prob      = .9;
     constexpr static double const slow_move_prob = .15;
-    constexpr static unsigned int const carpet_configurations = 2;
     /**
          * @brief A position in the gridworld
          * x and y are the agent's location, v the "velocity", r the rain, c the carpet
@@ -85,7 +84,7 @@ public:
     public:
 
 
-        GridWorldCoffeeState(pos agent_pos, unsigned int rain, int i, const int carpet_config) :
+        GridWorldCoffeeState(pos agent_pos, unsigned int rain, unsigned int carpet_config, int i) :
             _agent_position(agent_pos),
             _rain(rain),
             _carpet_config(carpet_config),
@@ -214,6 +213,7 @@ public:
 private:
     // problem settings
     size_t const _size = 5;
+    size_t const _carpet_configurations = 2;
 
     // initiated in constructor
 //    std::vector<GridWorldCoffeeState::pos> _goal_locations;

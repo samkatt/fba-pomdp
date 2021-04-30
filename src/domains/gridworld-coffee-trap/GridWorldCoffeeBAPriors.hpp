@@ -32,6 +32,7 @@ public:
 
 private:
     size_t const _size;
+    size_t const _carpet_configurations;
     const std::vector<unsigned int> rain_values = {0,1};
 
     float const _noise;

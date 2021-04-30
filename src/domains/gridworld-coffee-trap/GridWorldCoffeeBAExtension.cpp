@@ -31,14 +31,15 @@ void assertLegalCoffee(Action const* a, size_t action_space_size)
 
 GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
     _size(5),
+    _carpet_configurations(2),
     _states(), // initiated below
     _domain_size(0, 0, 0) // initiated below
 {
 
     _domain_size           = Domain_Size(
-        static_cast<int>(_size * _size * 2), // * 4),
+        static_cast<int>(_size * _size * 2 * _carpet_configurations), // * 4),
         4,
-        static_cast<int>(_size * _size * 2));
+        static_cast<int>(_size * _size * 2 * _carpet_configurations));
 
     // generate state space
     _states.reserve(_domain_size._S);
@@ -50,13 +51,13 @@ GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
             domains::GridWorldCoffee::pos const agent_pos{x_agent, y_agent};
             for (unsigned int rain = 0; rain < 2; ++rain)
             {
-//                for (unsigned int velocity = 0; velocity < 4; ++velocity)
-//                {
+                for (unsigned int carpet_config = 0; carpet_config < _carpet_configurations; ++carpet_config)
+                {
                 assert(static_cast<unsigned int>(i) == _states.size());
 
-                _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, i, 0)); //, velocity, i));
+                _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, carpet_config, i)); //, velocity, i));
                 i++;
-//                }
+                }
             }
         }
     }

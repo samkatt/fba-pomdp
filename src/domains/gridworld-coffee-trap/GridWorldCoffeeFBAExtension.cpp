@@ -22,7 +22,7 @@ GridWorldCoffeeFBAExtension::GridWorldCoffeeFBAExtension() :
     // TODO correct?
     _state_prior = utils::categoricalDistr(static_cast<int>(_size * _size * 2 * 1));
 
-    auto const* s = domain.getState(domains::GridWorldCoffee::start_location, 0);
+    auto const* s = domain.getState(domains::GridWorldCoffee::start_location, 0, 0);
     _state_prior.setRawValue(s->index(), 1);
 
     domain.releaseState(s);

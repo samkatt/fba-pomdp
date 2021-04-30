@@ -35,6 +35,7 @@ public:
 
 private:
     size_t const _size;
+    size_t const _carpet_configurations;
     std::vector<domains::GridWorldCoffee::GridWorldCoffeeState> _states; // initialized in the constructor
     Domain_Size _domain_size;
 };

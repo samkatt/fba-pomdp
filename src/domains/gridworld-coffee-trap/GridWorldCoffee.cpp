@@ -33,8 +33,8 @@ GridWorldCoffee::GridWorldCoffee() :
     // There are only two types of velocity (normal and trap state) but the agent believes there are 4 (the 4 combinations of rain/no rain + carpet / no carpet)
 //    const unsigned int carpet_configurations = 2; // just give 2 as the total number of possible configurations?
     //  pow(2, _size*_size);
-    _S_size = _size * _size * 2 * carpet_configurations, _S.reserve(_S_size);
-    _O_size = _size * _size * 2 * carpet_configurations;
+    _S_size = _size * _size * 2 * _carpet_configurations, _S.reserve(_S_size);
+    _O_size = _size * _size * 2 * _carpet_configurations;
     _O.reserve(_O_size); // same number of observations, just doesn't include the velocity (now velocity is gone)
 
     // generate state space
@@ -45,7 +45,7 @@ GridWorldCoffee::GridWorldCoffee() :
             GridWorldCoffee::pos const agent_pos{x_agent, y_agent};
             for (unsigned int rain = 0; rain < 2; ++rain)
             {
-                for (unsigned int carpet_config = 0; carpet_config < carpet_configurations; ++carpet_config)
+                for (unsigned int carpet_config = 0; carpet_config < 2; ++carpet_config)
                 {
                     auto const i = positionsToIndex(agent_pos, rain, carpet_config);
                     assert(static_cast<unsigned int>(i) == _S.size());
@@ -67,6 +67,11 @@ size_t GridWorldCoffee::size() const
     return _size;
 }
 
+//size_t GridWorldCoffee::carpet_configurations() const
+//{
+//    return _carpet_configurations;
+//}
+
 double GridWorldCoffee::goalReward() const
 {
     return goal_reward;
@@ -77,8 +82,8 @@ State const* GridWorldCoffee::sampleRandomState() const
     return getState(
         {static_cast<unsigned int>(rnd::slowRandomInt(0, _size)),
          static_cast<unsigned int>(rnd::slowRandomInt(0, _size))},
-        static_cast<unsigned int>(rnd::slowRandomInt(0, 1)),
-        static_cast<unsigned int>(rnd::slowRandomInt(0, carpet_configurations)));
+        static_cast<unsigned int>(rnd::slowRandomInt(0, 2)),
+        static_cast<unsigned int>(rnd::slowRandomInt(0, 2)));
         //static_cast<unsigned int>(rnd::slowRandomInt(0, 3)));
 }
 
@@ -250,7 +255,7 @@ int GridWorldCoffee::positionsToIndex(
     // indexing: from 3 elements projecting to 1 dimension
     // x*size*2 + y*2 + rain
 //    return agent_pos.x * _size * 2 * 4 + agent_pos.y * 2 * 4 + rain * 4; // + velocity;
-    return agent_pos.x * _size * 2 * carpet_configurations + agent_pos.y * 2 * carpet_configurations + rain * carpet_configurations + carpet_config; // + velocity;
+    return agent_pos.x * _size * 2 * _carpet_configurations + agent_pos.y * 2 * _carpet_configurations + rain * _carpet_configurations + carpet_config; // + velocity;
 
 }
 
@@ -261,7 +266,7 @@ int GridWorldCoffee::positionsToObservationIndex(
 {
     // indexing: from 3 elements projecting to 1 dimension
     // x*size*2 + y*2 + rain
-    return agent_pos.x * _size * 2 * carpet_configurations + agent_pos.y * 2 * carpet_configurations + rain * carpet_configurations + carpet_config;
+    return agent_pos.x * _size * 2 * _carpet_configurations + agent_pos.y * 2 * _carpet_configurations + rain * _carpet_configurations + carpet_config;
 }
 
 
@@ -310,7 +315,7 @@ void GridWorldCoffee::assertLegal(Observation const* o) const
     assert(o->index() >= 0 && o->index() < _O_size);
     assertLegal(static_cast<GridWorldCoffeeObservation const*>(o)->_agent_pos);
     assert((static_cast<GridWorldCoffeeObservation const*>(o)->_rain == 0) || (static_cast<GridWorldCoffeeObservation const*>(o)->_rain == 1));
-    assert((static_cast<GridWorldCoffeeObservation const*>(o)->_carpet_config < carpet_configurations));
+    assert((static_cast<GridWorldCoffeeObservation const*>(o)->_carpet_config < _carpet_configurations));
 }
 
 void GridWorldCoffee::assertLegal(State const* s) const
@@ -319,7 +324,7 @@ void GridWorldCoffee::assertLegal(State const* s) const
     assert(s->index() >= 0 && s->index() < _S_size);
     assertLegal(static_cast<GridWorldCoffeeState const*>(s)->_agent_position);
     assert((static_cast<GridWorldCoffeeState const*>(s)->_rain == 0) || (static_cast<GridWorldCoffeeState const*>(s)->_rain == 1));
-    assert((static_cast<GridWorldCoffeeState const*>(s)->_carpet_config < carpet_configurations));
+    assert((static_cast<GridWorldCoffeeState const*>(s)->_carpet_config < _carpet_configurations));
 }
 
 void GridWorldCoffee::assertLegal(GridWorldCoffee::pos const& position) const
