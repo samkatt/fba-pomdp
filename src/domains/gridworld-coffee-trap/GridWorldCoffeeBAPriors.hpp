@@ -79,6 +79,7 @@ public:
 
 private:
     size_t const _size;
+    size_t const _carpet_configurations;
 
     float const _noise;
     float const _unknown_counts_total;

@@ -26,7 +26,7 @@ public:
     utils::categoricalDistr const* statePrior() const final; // final
 
 private:
-    size_t _size;
+    size_t _size, _carpet_configurations;
     utils::categoricalDistr _state_prior;
 };
 

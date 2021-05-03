@@ -231,6 +231,7 @@ GridWorldCoffeeFactBAPrior::GridWorldCoffeeFactBAPrior(
     configurations::FBAConf const& c) :
     FBAPOMDPPrior(c),
     _size(domain.size()),
+    _carpet_configurations(2),
     _noise(c.noise),
     _unknown_counts_total(c.counts_total),
 //    _only_know_loc_matters(c.structure_prior == "match-uniform"),
@@ -268,6 +269,11 @@ GridWorldCoffeeFactBAPrior::GridWorldCoffeeFactBAPrior(
     preComputePrior();
 }
 
+//std::vector<int> *addToOrderedFeatureVector(std::vector<int> edges, int featureToInclude) {
+//    std::vector<int> toReturn;
+//}
+
+
 // TODO how do I want to mutate this
 bayes_adaptive::factored::BABNModel::Structure
 GridWorldCoffeeFactBAPrior::mutate(bayes_adaptive::factored::BABNModel::Structure structure) const
@@ -280,42 +286,60 @@ GridWorldCoffeeFactBAPrior::mutate(bayes_adaptive::factored::BABNModel::Structur
 
     assert(edges->size() >= 1); // assuming we always have at least x->x or y->y dependence
 
-    if (edges->size() == 1)
-    {
-        // push x/y, rain or carpet
-        switch(rnd::slowRandomInt(0, 3)) {
-            case 0:
-                edges->push_back(1 - random_feature); // x = 0, y = 1, pushes the other one
-                break;
-            case 1:
-                edges->push_back(_rain_feature);
-                break;
-            case 2:
-                edges->push_back(_carpet_feature);
-                break;
-        }
-    } else if (edges->size() == 4) // maximum number of edges
-    {
-        assert(edges->at(1) == random_feature); // TODO not sure if this is correct
-        auto const to_remove = rnd::slowRandomInt(1, 4); // x or y feature
-        edges->erase(edges->begin()+to_remove);
-    } else // randomly remove 1 or add 1 TODO does this work?
-    {
-        auto edge_to_flip = rnd::slowRandomInt(1, 4);
-        if (edge_to_flip == 1)
-        {
-            edge_to_flip = 1 - random_feature;
-        }
-        auto lower_bound  = std::lower_bound(edges->begin(), edges->end(), edge_to_flip);
+    // just need to add or remove a random one?
 
-        if (lower_bound != edges->end() && *lower_bound == edge_to_flip) // found the edge, remove
-        {
-            edges->erase(lower_bound);
-        } else // edge was not there, add!
-        {
-            edges->insert(lower_bound, edge_to_flip);
-        }
+    auto edge_to_flip = rnd::slowRandomInt(1, _num_features);
+    if (random_feature == edge_to_flip) { // this only happens if both are "1", in which case we want to use feature 0
+        edge_to_flip = random_feature - 1;
     }
+
+    // stealing code from flip_random_edge, since there is one edge we don't want to flip
+    auto lower_bound  = std::lower_bound(edges->begin(), edges->end(), edge_to_flip); // TODO lower bound helps make sure things are in order?
+
+    if (lower_bound != edges->end() && *lower_bound == edge_to_flip) // found the edge, remove
+    {
+        edges->erase(lower_bound);
+    } else // edge was not there, add!
+    {
+       edges->insert(lower_bound, edge_to_flip);
+    }
+
+//    if (edges->size() == 1)
+//    {
+//        // push x/y, rain or carpet
+//        switch(rnd::slowRandomInt(0, 3)) {
+//            case 0:
+//                edges->push_back(1 - random_feature); // x = 0, y = 1, pushes the other one
+//                break;
+//            case 1:
+//                edges->push_back(_rain_feature);
+//                break;
+//            case 2:
+//                edges->push_back(_carpet_feature);
+//                break;
+//        }
+//    } else if (edges->size() == 4) // maximum number of edges
+//    {
+//        assert(edges->at(1) == random_feature); // TODO not sure if this is correct
+//        auto const to_remove = rnd::slowRandomInt(1, 4); // x or y feature
+//        edges->erase(edges->begin()+to_remove);
+//    } else // randomly remove 1 or add 1 TODO does this work?
+//    {
+//        auto edge_to_flip = rnd::slowRandomInt(1, 4);
+//        if (edge_to_flip == 1)
+//        {
+//            edge_to_flip = 1 - random_feature;
+//        }
+//        auto lower_bound  = std::lower_bound(edges->begin(), edges->end(), edge_to_flip);
+//
+//        if (lower_bound != edges->end() && *lower_bound == edge_to_flip) // found the edge, remove
+//        {
+//            edges->erase(lower_bound);
+//        } else // edge was not there, add!
+//        {
+//            edges->insert(lower_bound, edge_to_flip);
+//        }
+//    }
 
 
     return structure;
@@ -329,6 +353,7 @@ bayes_adaptive::factored::BABNModel GridWorldCoffeeFactBAPrior::computePriorMode
     auto prior = _correct_struct_prior;
 
     auto const real_parents = std::vector<int>({_agent_x_feature, _agent_y_feature});
+    auto const real_parents2 = std::vector<int>({_agent_y_feature, _agent_x_feature});
 
     for (auto a = 0; a < _domain_size._A; ++a)
     {
@@ -337,13 +362,13 @@ bayes_adaptive::factored::BABNModel GridWorldCoffeeFactBAPrior::computePriorMode
         auto const& agent_x_parents = structure.T[a][_agent_x_feature];
         auto const& agent_y_parents = structure.T[a][_agent_y_feature];
 
-        if (agent_x_parents != real_parents) // TODO does the order of x and y in real_parents matter here?
+        if (agent_x_parents != real_parents && agent_x_parents != real_parents2) // TODO does the order of x and y in real_parents matter here?
         {
             setNoisyTransitionNode(
                 &prior, action, _agent_x_feature, structure.T[a][_agent_x_feature]);
         }
 
-        if (agent_y_parents != real_parents)
+        if (agent_y_parents != real_parents && agent_y_parents != real_parents2)
         {
             setNoisyTransitionNode(
                 &prior, action, _agent_y_feature, structure.T[a][_agent_y_feature]);
@@ -362,38 +387,299 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
 {
     // don't think it's necessarily 3
 //    assert(parents.size() == 3);
+    // so here we need to distinguish between quite a few cases.
+    bool rain_location = false;
+    bool carpet_location = false;
+    bool xy_location = false;
 
+    auto lower_bound_rain  = std::lower_bound(parents.begin(), parents.end(), _rain_feature);
+    if (lower_bound_rain != parents.end() && *lower_bound_rain == _rain_feature) // found the edge
+    {
+        rain_location = true;
+    }
+    auto lower_bound_carpet  = std::lower_bound(parents.begin(), parents.end(), _carpet_feature);
+    if (lower_bound_carpet != parents.end() && *lower_bound_carpet == _carpet_feature) // found the edge
+    {
+        carpet_location = true;
+    }
+    auto lower_bound_xy = std::lower_bound(parents.begin(), parents.end(), (1-feature));
+    if (lower_bound_xy != parents.end() && *lower_bound_xy == (1-feature)) // found the edge
+    {
+        xy_location = true;
+    }
+    std::vector<int> parent_values = std::vector<int>(parents.size(), 0);
+
+    // rest
     model->resetTransitionNode(&action, feature, parents);
 
-    for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x)
-    {
-        for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+        if (xy_location) {
+            if (rain_location) {
+                if (carpet_location) { // xy, rain and carpet
+                    for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x) {
+                        for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
 
-            auto const loc = (feature == _agent_x_feature) ? x : y;
+                            auto const loc = (feature == _agent_x_feature) ? x : y;
 
-            auto const new_loc =
-                    (feature == _agent_x_feature)
-                    ? _domain
-                            .applyMove(
-                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
-                            .x
-                    : _domain
-                            .applyMove(
-                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
-                            .y;
+                            auto const new_loc =
+                                    (feature == _agent_x_feature)
+                                    ? _domain
+                                            .applyMove(
+                                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                            .x
+                                    : _domain
+                                            .applyMove(
+                                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                            .y;
 
-            float const trans_prob = (_domain.agentOnSlowLocation({static_cast<unsigned int>(x),
-                                                                   static_cast<unsigned int>(y)}))
-                                     ? GridWorldCoffee::slow_move_prob
-                                     : GridWorldCoffee::move_prob;
+                            for (auto rain = 0; rain < _domain_feature_size._S[_rain_feature]; ++rain){
+                                for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
+                                    // no carpet: rain: 0.8, no rain: 0.95
+                                    // carpet: rain: 0.05, no rain: 0.15
+                                    float const success_prob = (GridWorldCoffee::carpet_func({(unsigned int) x,(unsigned int) y}))
+                                                               ? (rain? 0.05 : 0.15)
+                                                               : (rain ? 0.8 : 0.95);
 
-            // fail move
-            model->transitionNode(&action, feature).count({x,y}, loc) +=
-                (1 - trans_prob) * _unknown_counts_total;
+                                    // fail move
+                                    model->transitionNode(&action, feature).count({x, y, rain, carpet_config}, loc) +=
+                                            (1 - success_prob) * _unknown_counts_total;
 
-            // success move
-            model->transitionNode(&action, feature).count({x,y}, new_loc) +=
-                    (trans_prob)*_unknown_counts_total;
+                                    // success move
+                                    model->transitionNode(&action, feature).count({x, y, rain, carpet_config}, new_loc) +=
+                                            (success_prob) * _unknown_counts_total;
+                                }
+                            }
+                        }
+                    }
+                } else { // xy and rain
+                    for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x) {
+                        for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+
+                            auto const loc = (feature == _agent_x_feature) ? x : y;
+
+                            auto const new_loc =
+                                    (feature == _agent_x_feature)
+                                    ? _domain
+                                            .applyMove(
+                                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                            .x
+                                    : _domain
+                                            .applyMove(
+                                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                            .y;
+
+                            for (auto rain = 0; rain < _domain_feature_size._S[_rain_feature]; ++rain){
+                                // no carpet: rain: 0.8, no rain: 0.95
+                                float const success_prob = rain ? 0.8 : 0.95;
+
+                                // fail move
+                                model->transitionNode(&action, feature).count({x, y, rain}, loc) +=
+                                        (1 - success_prob) * _unknown_counts_total;
+
+                                // success move
+                                model->transitionNode(&action, feature).count({x, y, rain}, new_loc) +=
+                                        (success_prob) * _unknown_counts_total;
+                            }
+                        }
+                    }
+                }
+            } else if (carpet_location) { // xy and carpet
+                for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x) {
+                    for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+
+                        auto const loc = (feature == _agent_x_feature) ? x : y;
+
+                        auto const new_loc =
+                                (feature == _agent_x_feature)
+                                ? _domain
+                                        .applyMove(
+                                                {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                        .x
+                                : _domain
+                                        .applyMove(
+                                                {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                        .y;
+
+                        for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
+                            // carpet: 0.15, no carpet: 0.95
+                            float const success_prob = (GridWorldCoffee::carpet_func({(unsigned int) x,(unsigned int) y}))
+                                                       ? 0.15 : 0.95;
+
+                            // fail move
+                            model->transitionNode(&action, feature).count({x, y, carpet_config}, loc) +=
+                                    (1 - success_prob) * _unknown_counts_total;
+
+                            // success move
+                            model->transitionNode(&action, feature).count({x, y, carpet_config}, new_loc) +=
+                                    (success_prob) * _unknown_counts_total;
+                        }
+                    }
+                }
+            } else { // xy
+                throw "this shouldn't be happening";
+            }
+        } else if(rain_location) {
+            if (carpet_location) { // rain and carpet
+                for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x) {
+                    for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+
+                        auto const loc = (feature == _agent_x_feature) ? x : y;
+
+                        auto const new_loc =
+                                (feature == _agent_x_feature)
+                                ? _domain
+                                        .applyMove(
+                                                {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                        .x
+                                : _domain
+                                        .applyMove(
+                                                {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                        .y;
+
+                        for (auto rain = 0; rain < _domain_feature_size._S[_rain_feature]; ++rain){
+                            for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
+                                // no carpet: rain: 0.8, no rain: 0.95
+                                // carpet: rain: 0.05, no rain: 0.15
+                                float const success_prob = (GridWorldCoffee::carpet_func({(unsigned int) x,(unsigned int) y}))
+                                                           ? (rain? 0.05 : 0.15)
+                                                           : (rain ? 0.8 : 0.95);
+
+                                // fail move
+                                model->transitionNode(&action, feature).count({loc, rain, carpet_config}, loc) +=
+                                        (1 - success_prob) * _unknown_counts_total;
+
+                                // success move
+                                model->transitionNode(&action, feature).count({loc, rain, carpet_config}, new_loc) +=
+                                        (success_prob) * _unknown_counts_total;
+                            }
+                        }
+                    }
+                }
+            } else { // rain
+                for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x) {
+                    for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+
+                        auto const loc = (feature == _agent_x_feature) ? x : y;
+
+                        auto const new_loc =
+                                (feature == _agent_x_feature)
+                                ? _domain
+                                        .applyMove(
+                                                {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                        .x
+                                : _domain
+                                        .applyMove(
+                                                {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                        .y;
+
+                        for (auto rain = 0; rain < _domain_feature_size._S[_rain_feature]; ++rain){
+                            // no carpet: rain: 0.8, no rain: 0.95
+                            // carpet: rain: 0.05, no rain: 0.15
+                            float const success_prob = rain? 0.8 : 0.95;
+
+                            // fail move
+                            model->transitionNode(&action, feature).count({loc, rain}, loc) +=
+                                    (1 - success_prob) * _unknown_counts_total;
+
+                            // success move
+                            model->transitionNode(&action, feature).count({loc, rain}, new_loc) +=
+                                    (success_prob) * _unknown_counts_total;
+                        }
+                    }
+                }
+            }
+        } else if (carpet_location) { // carpet
+            for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x) {
+                for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+
+                    auto const loc = (feature == _agent_x_feature) ? x : y;
+
+                    auto const new_loc =
+                            (feature == _agent_x_feature)
+                            ? _domain
+                                    .applyMove(
+                                            {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                    .x
+                            : _domain
+                                    .applyMove(
+                                            {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                    .y;
+
+                    for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
+                        // no carpet: rain: 0.8, no rain: 0.95
+                        // carpet: rain: 0.05, no rain: 0.15
+                        float const success_prob = (GridWorldCoffee::carpet_func({(unsigned int) x,(unsigned int) y}))
+                                                   ? 0.15 : 0.95;
+
+                        // fail move
+                        model->transitionNode(&action, feature).count({loc, carpet_config}, loc) +=
+                                (1 - success_prob) * _unknown_counts_total;
+
+                        // success move
+                        model->transitionNode(&action, feature).count({loc, carpet_config}, new_loc) +=
+                                (success_prob) * _unknown_counts_total;
+                    }
+                }
+            }
+        } else { // feature (x or y) only has itself as parent
+            for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x) {
+                for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+
+                    auto const loc = (feature == _agent_x_feature) ? x : y;
+
+                    auto const new_loc =
+                            (feature == _agent_x_feature)
+                            ? _domain
+                                    .applyMove(
+                                            {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                    .x
+                            : _domain
+                                    .applyMove(
+                                            {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+                                    .y;
+
+                    float const trans_prob = GridWorldCoffee::move_prob;
+
+                    // fail move
+                    model->transitionNode(&action, feature).count({loc}, loc) +=
+                            (1 - trans_prob) * _unknown_counts_total;
+
+                    // success move
+                    model->transitionNode(&action, feature).count({loc}, new_loc) +=
+                            (trans_prob) * _unknown_counts_total;
+                }
+            }
+        }
+
+//    for (auto x = 0; x < _domain_feature_size._S[_agent_x_feature]; ++x)
+//    {
+//        for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
+//
+//            auto const loc = (feature == _agent_x_feature) ? x : y;
+//
+//            auto const new_loc =
+//                    (feature == _agent_x_feature)
+//                    ? _domain
+//                            .applyMove(
+//                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+//                            .x
+//                    : _domain
+//                            .applyMove(
+//                                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
+//                            .y;
+//
+//            float const trans_prob = GridWorldCoffee::move_prob;
+//                    (_domain.agentOnSlowLocation({static_cast<unsigned int>(x),
+//                                                                   static_cast<unsigned int>(y)}))
+//                                     ? GridWorldCoffee::slow_move_prob
+//                                     : GridWorldCoffee::move_prob;
+//
+//            // fail move
+//            model->transitionNode(&action, feature).count({x,y}, loc) +=
+//                (1 - trans_prob) * _unknown_counts_total;
+//
+//            // success move
+//            model->transitionNode(&action, feature).count({x,y}, new_loc) +=
+//                    (trans_prob)*_unknown_counts_total;
 
 //            if (std::find(parents.begin(), parents.end(), _rain_feature) != parents.end()) {
 //                if (std::find(parents.begin(), parents.end(), _carpet_feature) != parents.end()) {
@@ -419,8 +705,8 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
 //                model->transitionNode(&action, feature).count({x, y, g}, new_loc) +=
 //                    (trans_prob)*_unknown_counts_total;
 //            }
-        }
-    }
+//        }
+//    }
 }
 
 FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFullyConnectedState(State const* /*domain_state*/) const
@@ -434,7 +720,7 @@ FBAPOMDPState const* GridWorldCoffeeFactBAPrior::sampleCorrectGraphState(State c
 }
 
 // TODO constructs the correct model? or the model that the agent beliefs is correct?
-// currently doing the correct one
+// changed to do the second one (the model the agent beliefs is correct, so no knowledge about slow locations)
 void GridWorldCoffeeFactBAPrior::preComputePrior()
 {
     for (auto a = 0; a < _domain_size._A; ++a)
@@ -463,7 +749,7 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
         _correct_struct_prior.resetTransitionNode(
             &action, _agent_x_feature, {_agent_x_feature, _agent_y_feature});
         _correct_struct_prior.resetTransitionNode(
-            &action, _agent_y_feature, {_agent_y_feature, _agent_x_feature});
+            &action, _agent_y_feature, {_agent_x_feature, _agent_y_feature});
         _correct_struct_prior.resetTransitionNode(
                 &action, _rain_feature, {_rain_feature});
         _correct_struct_prior.resetTransitionNode(
@@ -471,8 +757,15 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
 
         // carpet doesn't change TODO is this workign well?
 //        unsigned int (*_carpet)(GridWorldCoffee::pos) = static_cast<GridWorldCoffee::GridWorldCoffeeState const*>(_domain.sampleStartState())->_carpet;
-        _correct_struct_prior.transitionNode(&action, _carpet_feature).count({0}, 0) +=
-                _static_total_count;
+        // agent is sure about the carpet
+        for (auto c = 0; c < _domain_feature_size._S[_carpet_feature]; c++){
+            _correct_struct_prior.transitionNode(&action, _carpet_feature).count({c}, c) +=
+                    _static_total_count;
+//            _correct_struct_prior.transitionNode(&action, _carpet_feature).count({c}, (1-c)) +=
+//                    0;
+// TODO are things that are not filled in automatically set to 0?
+        }
+
 
         // rain
         for (auto r = 0; r < _domain_feature_size._S[_rain_feature]; ++r)
@@ -489,11 +782,11 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
             for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y)
             {
 
-                float const trans_prob =
-                    (_domain.agentOnSlowLocation(
-                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}))
-                    ? GridWorldCoffee::slow_move_prob
-                    : GridWorldCoffee::move_prob;
+                float const trans_prob = GridWorldCoffee::move_prob;
+//                    (_domain.agentOnSlowLocation(
+//                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}))
+//                    ? GridWorldCoffee::slow_move_prob
+//                    : GridWorldCoffee::move_prob;
 
                 // fail move
                 _correct_struct_prior.transitionNode(&action, _agent_x_feature).count({x, y}, x) +=
@@ -566,15 +859,19 @@ FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* doma
         {
             structure.T[a][_agent_y_feature].emplace_back(_carpet_feature);
         }
-        if (rnd::boolean())
+        if (rnd::boolean()) // TODO not sure if below 2 can go wrong. where/when is this called?
         {
-            assert(structure.T[a][_agent_x_feature].at(1) == _agent_y_feature);
-            structure.T[a][_agent_x_feature].pop_back();
+//            assert(structure.T[a][_agent_x_feature].at(1) == _agent_y_feature);
+            auto lower_bound  = std::lower_bound(structure.T[a][_agent_x_feature].begin(), structure.T[a][_agent_x_feature].end(), _agent_y_feature);
+            structure.T[a][_agent_x_feature].erase(lower_bound);
+//            structure.T[a][_agent_x_feature].pop_back();
         }
         if (rnd::boolean())
         {
-            assert(structure.T[a][_agent_y_feature].at(1) == _agent_x_feature);
-            structure.T[a][_agent_y_feature].pop_back();
+//            assert(structure.T[a][_agent_y_feature].at(1) == _agent_x_feature);
+//            structure.T[a][_agent_y_feature].pop_back();
+            auto lower_bound  = std::lower_bound(structure.T[a][_agent_y_feature].begin(), structure.T[a][_agent_y_feature].end(), _agent_x_feature);
+            structure.T[a][_agent_y_feature].erase(lower_bound);
         }
     }
 
