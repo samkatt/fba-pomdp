@@ -293,7 +293,9 @@ int BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Di
 
     auto parent_values = stateFeatureValues(s);
 
+    //create a vector for the next-stage variables - XXX: this is a memory allocation... expensive!?
     auto feature_values = std::vector<int>(_domain_feature_size->_S.size());
+    //fill the vector by sampling next stage feature 1 by 1
     for (auto n = 0; n < (int)_domain_feature_size->_S.size(); ++n)
     { feature_values[n] = transitionNode(a, n).sample(parent_values, m); }
 
