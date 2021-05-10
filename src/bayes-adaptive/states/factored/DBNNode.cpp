@@ -157,12 +157,19 @@ std::vector<int> const* DBNNode::parents() const
 int DBNNode::sample(std::vector<int> const& node_input, rnd::sample::Dir::sampleMethod m) const
 {
     // sample from dirichlet starting from joint index for _ouput_size counts
+    // XXX FAO let me see if I git this right:
+    //     - output_size = the number of values that this node can take
+    //     - cptIndex(node_input, 0) = the index (within _cpts) of the probability table for parent values=node_input
+    //     - 0 here means the first entry in this table
+    //     - and this table is of _output_size 
+    // E.g.,  to find the index of  P( X | <y1=2, y2=42> ), we ask where P( X=0 | <y1=2, y2=42> ) lies and then take the next _output_size entries
     return m(&_cpts[cptIndex(node_input, 0)], _output_size);
 }
 
 std::vector<float> DBNNode::sampleMultinominal(
-    std::vector<int> const& node_input,
-    rnd::sample::Dir::sampleMultinominal sampleMethod) const
+    std::vector<int> const& node_input, //e.g. parent values
+    rnd::sample::Dir::sampleMultinominal sampleMethod //e.g. sample from expected model - cf random.cpp
+    ) const
 {
     return sampleMethod(&_cpts[cptIndex(node_input, 0)], _output_size);
 }

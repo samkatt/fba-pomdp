@@ -54,6 +54,8 @@ public:
 
     /**
      * @brief returns the expected probabilities conditioned on node_input
+     *
+     * XXX - FAO: I guess that 'node_input' are for instance the 'parent values'. I.e., when sampling a node in a DBN, we typically sample conditioned on the values of parent nodes. These values are inputted in this way?
      **/
     std::vector<float> expectation(std::vector<int> const& node_input) const;
 
@@ -114,6 +116,7 @@ private:
 
     /**
      * @brief the actual counts that reprents the dirichlet distributions governing the cpts
+     * XXX: FAO this actaully seems to be a single CPT, right? the vector stores the etries??
      **/
     std::vector<float> _cpts = {};
 
@@ -135,6 +138,11 @@ private:
 
     /**
      * @brief returns the index into the cpt given parent values and desired output
+     *
+     * XXX: E.g., we want to get P(x=2 | <y1=2, y2=42> ) then 
+     *      node_output = 2
+     *      node_input = <y1=2, y2=42> 
+     *  right?
      **/
     int cptIndex(std::vector<int> const& node_input, int node_output) const;
 
