@@ -78,7 +78,7 @@ void Conf::validate() const
         throw error("please enter a number between 0 and 1 for the discount");
     }
 
-    if (planner != "random" && planner != "ts" && planner != "po-uct")
+    if (planner != "random" && planner != "ts" && planner != "po-uct" && planner != "po-uct-abstraction")
     {
         throw error("Please enter a legit planner: random, ts or po-uct");
     }

@@ -72,6 +72,7 @@ set(BA_SRC
     "src/bayes-adaptive/states/factored/BABNModel.cpp"
     "src/bayes-adaptive/states/factored/DBNNode.cpp"
     "src/bayes-adaptive/states/factored/FBAPOMDPState.cpp"
+    "src/bayes-adaptive/states/factored/AbstractFBAPOMDPState.cpp"
     "src/bayes-adaptive/states/table/BAFlatModel.cpp"
     "src/bayes-adaptive/states/table/BAPOMDPState.cpp"
     "src/beliefs/bayes-adaptive/BABelief.cpp"
@@ -112,6 +113,7 @@ set(BA_SRC
     "src/planners/bayes-adaptive/BAPlanner.cpp"
     "src/planners/bayes-adaptive/BATSPlanner.cpp"
     "src/planners/bayes-adaptive/RBAPOUCT.cpp"
+    "src/planners/bayes-adaptive/RBAPOUCT_abstraction.cpp"
     )
 
 set(TEST_SRC

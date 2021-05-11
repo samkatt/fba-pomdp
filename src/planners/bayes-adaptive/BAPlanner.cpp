@@ -4,6 +4,7 @@
 
 #include "planners/bayes-adaptive/BATSPlanner.hpp"
 #include "planners/bayes-adaptive/RBAPOUCT.hpp"
+#include "planners/bayes-adaptive/RBAPOUCT_abstraction.hpp"
 #include "planners/random/RandomPlanner.hpp"
 
 namespace factory {
@@ -16,6 +17,8 @@ std::unique_ptr<Planner> makeBAPlanner(configurations::Conf const& c)
         return std::unique_ptr<Planner>(new planners::BATSPlanner(c));
     if (c.planner == "po-uct")
         return std::unique_ptr<Planner>(new planners::RBAPOUCT(c));
+    if (c.planner == "po-uct-abstraction")
+        return std::unique_ptr<Planner>(new planners::RBAPOUCT_abstraction(c));
 
     throw "incorrect planner provided";
 }

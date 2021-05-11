@@ -13,7 +13,8 @@
 #include "domains/gridworld-coffee-trap/GridWorldCoffee.hpp"
 #include "utils/index.hpp"
 class BAPOMDPState;
-class FBAPOMDPState;
+//class FBAPOMDPState;
+class AbstractFBAPOMDPState;
 class State;
 namespace configurations {
 struct BAConf;
