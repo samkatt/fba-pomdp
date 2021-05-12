@@ -103,10 +103,10 @@ Action const* RBAPOUCT_abstraction::selectAction(
 //        BAState const* particle = belief.sample();
         if (const_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction()->size() == 0) {
             static_cast<AbstractFBAPOMDPState*>(particle)->setAbstraction({0,1});
-            if (VLOG_IS_ON(1))
-            {
-                VLOG(1) << "HELLO HELLO HELLO";
-            }
+//            if (VLOG_IS_ON(1))
+//            {
+//                VLOG(1) << "HELLO HELLO HELLO";
+//            }
         }
 
         // but safe old state, so that we can reset the particle (counts are not modified)

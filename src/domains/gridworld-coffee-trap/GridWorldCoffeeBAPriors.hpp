@@ -78,6 +78,9 @@ public:
     bayes_adaptive::factored::BABNModel::Structure
     mutate(bayes_adaptive::factored::BABNModel::Structure structure) const final;
 
+    // Extra
+    Domain_Feature_Size* getDomainFeatureSize();
+
 private:
     size_t const _size;
     size_t const _carpet_configurations;

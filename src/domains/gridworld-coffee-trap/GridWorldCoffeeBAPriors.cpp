@@ -408,7 +408,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
     {
         xy_location = true;
     }
-    std::vector<int> parent_values = std::vector<int>(parents.size(), 0);
+//    std::vector<int> parent_values = std::vector<int>(parents.size(), 0);
 
     // rest
     model->resetTransitionNode(&action, feature, parents);
@@ -878,5 +878,9 @@ FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* doma
 
     return new AbstractFBAPOMDPState(domain_state, computePriorModel(structure));
 }
+
+    Domain_Feature_Size *GridWorldCoffeeFactBAPrior::getDomainFeatureSize() {
+        return &_domain_feature_size;
+    }
 
 } // namespace priors

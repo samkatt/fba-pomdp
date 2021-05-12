@@ -1,3 +1,4 @@
+#include <unordered_set>
 #include "BABNModel.hpp"
 
 #include "easylogging++.h"
@@ -226,6 +227,47 @@ BABNModel BABNModel::marginalizeOut(Structure new_structure) const
 
     return BABNModel(
         _domain_size, _domain_feature_size, _step_sizes, T_marginalized, O_marginalized);
+}
+
+
+void remove_parents(std::vector<int>& a, std::vector<int>& b){
+    std::unordered_multiset<int> st;
+//    st.insert(a.begin(), a.end());
+    st.insert(b.begin(), b.end());
+    auto predicate = [&st](const int& k){ return st.count(k) < 1; };
+    a.erase(std::remove_if(a.begin(), a.end(), predicate), a.end());
+//    b.erase(std::remove_if(b.begin(), b.end(), predicate), b.end());
+}
+
+BABNModel BABNModel::abstract(std::vector<int> abstraction, Structure structure) const {
+    auto new_structure = structure;
+
+//    auto action = IndexAction(0);
+
+    for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
+    {
+//        action.index(a);
+        for (auto f = 0; f < static_cast<int>(abstraction.size()); f++) {
+            remove_parents(new_structure.T[a][abstraction[f]], abstraction);
+        }
+//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); f++) {
+//            remove_intersection(new_structure.T[a][f], abstraction);
+//        }
+
+    }
+
+
+//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
+//        {
+//        }
+//
+//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)
+//        {
+//            O_marginalized.emplace_back(
+//                    observationNode(&action, f).marginalizeOut(std::move(new_structure.O[a][f])));
+//        }
+
+    return marginalizeOut(new_structure);
 }
 
 DBNNode& BABNModel::transitionNode(Action const* a, int feature)
@@ -463,4 +505,8 @@ double BABNModel::LogBDScore(BABNModel const& prior) const
     return bd_score;
 }
 
-}} // namespace bayes_adaptive::factored
+    Domain_Feature_Size const *BABNModel::domainFeatureSize() {
+        return _domain_feature_size;
+    }
+
+    }} // namespace bayes_adaptive::factored

@@ -78,6 +78,8 @@ public:
         State const* new_s,
         rnd::sample::Dir::sampleMethod m) const;
 
+    Domain_Feature_Size const* domainFeatureSize();
+
     /**
      * @brief returns a table of probabilities [s][a][new_s]
      **/
@@ -110,6 +112,11 @@ public:
      * @brief takes a structure with fewer connections and returns a marginalized-out model
      **/
     BABNModel marginalizeOut(Structure new_structure) const;
+
+    /**
+     * @brief takes a abstraction with fewer features and returns a marginalized-out model
+     **/
+    BABNModel abstract(std::vector<int> abstraction, Structure structure) const;
 
     /**
      * @brief returns the structure of its nodes

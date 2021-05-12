@@ -58,13 +58,8 @@ public:
     /*** State interface ***/
     std::string toString() const override;
 
-//    std::vector<unsigned int>* getAbstraction();
-//    void setAbstraction(std::vector<unsigned int>);
-//    std::vector<unsigned int> abstraction = {};
-
 private:
     bayes_adaptive::factored::BABNModel _model;
-//    std::vector<unsigned int> _abstraction;
 };
 
 #endif // FBAPOMDPSTATE_HPP

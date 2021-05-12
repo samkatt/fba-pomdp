@@ -3,7 +3,7 @@
 
 #include "bayes-adaptive/states/BAState.hpp"
 
-#include "bayes-adaptive/states/factored/BABNModel.hpp"
+//#include "bayes-adaptive/states/factored/BABNModel.hpp"
 
 #include "utils/random.hpp"
 #include "FBAPOMDPState.hpp"
@@ -26,8 +26,6 @@ public:
      **/
     AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model);
 
-//    bayes_adaptive::factored::BABNModel* model() { return &_model; };
-//    bayes_adaptive::factored::BABNModel const* model() const { return &_model; };
 
     /*** BAState interface ***/
     BAState* copy(State const* domain_state) const final;
@@ -55,15 +53,17 @@ public:
      **/
     void logCounts() const final;
 
-    std::vector<unsigned int>* getAbstraction();
-    void setAbstraction(std::vector<unsigned int>);
+    std::vector<int>* getAbstraction();
+    void setAbstraction(std::vector<int>);
 
     /*** State interface ***/
     std::string toString() const override;
 
 private:
 //    bayes_adaptive::factored::BABNModel _model;
-    std::vector<unsigned int> _abstraction;
+    std::vector<int> _abstraction; // Vector with the features that are included in the abstract model
+    bayes_adaptive::factored::BABNModel _abstract_model;  // Abstract model that only uses the feature in _abstraction
+    bayes_adaptive::factored::BABNModel construct_abstract_model(bayes_adaptive::factored::BABNModel model);
 };
 
 #endif // ABSTRACTFBAPOMDPSTATE_HPP
