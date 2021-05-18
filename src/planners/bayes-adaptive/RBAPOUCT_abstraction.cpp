@@ -91,7 +91,6 @@ Action const* RBAPOUCT_abstraction::selectAction(
 //        VLOG(1) << "HELLO HELLO HELLO";
 //    }
 
-    // TODO add abstraction!
     // perform simulations
     for (auto i = 0; i < _n; ++i)
     {
@@ -101,12 +100,10 @@ Action const* RBAPOUCT_abstraction::selectAction(
 //        auto particle = static_cast<BAState const*>(belief.sample());
 
 //        BAState const* particle = belief.sample();
+        // Adding abstraction, if it's not there yet.
+        // Maybe do it once per episode?
         if (const_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction()->size() == 0) {
             static_cast<AbstractFBAPOMDPState*>(particle)->setAbstraction({0,1});
-//            if (VLOG_IS_ON(1))
-//            {
-//                VLOG(1) << "HELLO HELLO HELLO";
-//            }
         }
 
         // but safe old state, so that we can reset the particle (counts are not modified)
@@ -126,6 +123,7 @@ Action const* RBAPOUCT_abstraction::selectAction(
         simulator.releaseDomainState(particle->_domain_state);
 //        const_cast<BAState*>(particle)->_domain_state = old_domain_state;
         particle->_domain_state = old_domain_state;
+        // TODO remove abstraction (or maybe not)
     }
 
     simulator.mode(old_mode);

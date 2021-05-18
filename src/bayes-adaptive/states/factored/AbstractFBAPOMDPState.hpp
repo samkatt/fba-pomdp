@@ -31,6 +31,7 @@ public:
     BAState* copy(State const* domain_state) const final;
     int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
         const final;
+    int sampleStateIndexAbstract(const State *s, const Action *a, rnd::sample::Dir::sampleMethod m) const;
     int sampleObservationIndex(
         Action const* a,
         State const* new_s,

@@ -59,12 +59,20 @@ DBNNode DBNNode::marginalizeOut(std::vector<int> new_parents) const
     // loop over all our distributions and add them to our new node
     size_t cpt_start   = 0;
     auto parent_values = std::vector<int>(_parent_nodes.size());
+    auto new_parent_values = std::vector<int>(new_node._parent_nodes.size());
     do
     {
 
         // add our dirichlet counts to the new node
         // the new node transforms our parent values into
-        auto new_cpt_start = new_node.cptIndex(parent_values, 0);
+
+        // Construct a vector with the values of the parents of the new node
+        for (int i = 0; i < (int) new_node._parent_nodes.size(); ++i) {
+            auto it = std::find(_parent_nodes.begin(), _parent_nodes.end(), new_node._parent_nodes[i]);
+            int index = std::distance(_parent_nodes.begin(), it);
+            new_parent_values[i] = parent_values[index];
+        }
+        auto new_cpt_start = new_node.cptIndex(new_parent_values, 0);
         std::transform(
             &new_node._cpts[new_cpt_start],
             &new_node._cpts[new_cpt_start + _output_size],
@@ -203,14 +211,16 @@ int DBNNode::cptIndex(std::vector<int> const& node_input, int node_output) const
     {
         return indexing::project(node_input, _parent_sizes) * _output_size + node_output;
     }
-
     // option 2: if input != parents, then we should be dealing with the
     // whole graph input (which is at least bigger than our parents at this point)
+    // TODO This was going wrong, not sure if this can go wrong somewhere else as well.
+    //  What happened was that when marginalizing out, we call this function with the "previous" parents,
+    //  which was not always equal to the whole graph input.
+    assert(node_input.size() == _graph_range->size());
     parentValues(node_input, &_parent_value_holder);
     return indexing::project(_parent_value_holder, _parent_sizes) * _output_size + node_output;
 }
 
-// TODO Sammie, what does this function do?
 // It populates the parent values. Node input is the DBN input
 void DBNNode::parentValues(std::vector<int> const& node_input, std::vector<int>* parent_values)
     const

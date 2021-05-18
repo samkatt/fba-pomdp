@@ -242,31 +242,13 @@ void remove_parents(std::vector<int>& a, std::vector<int>& b){
 BABNModel BABNModel::abstract(std::vector<int> abstraction, Structure structure) const {
     auto new_structure = structure;
 
-//    auto action = IndexAction(0);
-
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
 //        action.index(a);
-        for (auto f = 0; f < static_cast<int>(abstraction.size()); f++) {
+        for (auto f = 0; f < static_cast<int>(abstraction.size()); ++f) {
             remove_parents(new_structure.T[a][abstraction[f]], abstraction);
         }
-//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); f++) {
-//            remove_intersection(new_structure.T[a][f], abstraction);
-//        }
-
     }
-
-
-//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
-//        {
-//        }
-//
-//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)
-//        {
-//            O_marginalized.emplace_back(
-//                    observationNode(&action, f).marginalizeOut(std::move(new_structure.O[a][f])));
-//        }
-
     return marginalizeOut(new_structure);
 }
 

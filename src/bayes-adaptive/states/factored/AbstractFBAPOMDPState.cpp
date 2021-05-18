@@ -19,8 +19,9 @@
 AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model) :
         FBAPOMDPState(domain_state, model),
         _abstraction({}), // Empty initialization.
-        _abstract_model() // Initialized later, when abstraction is added
+        _abstract_model(model) // Initialized later, when abstraction is added
 {
+    assert(model.domainFeatureSize());
 }
 
 BAState* AbstractFBAPOMDPState::copy(State const* domain_state) const
@@ -35,10 +36,20 @@ int AbstractFBAPOMDPState::sampleStateIndex(
     Action const* a,
     rnd::sample::Dir::sampleMethod m) const
 {
-    if (_abstraction.size() > 0) {
-        return _abstract_model.sampleStateIndex(s,a,m); // TODO check if abstraction exists maybe?
-    }
-    return FBAPOMDPState::model()->sampleStateIndex(s, a, m); // _model
+//    if (_abstraction.size() > 0) {
+    return _abstract_model.sampleStateIndex(s,a,m);
+//    }
+//    return model()->sampleStateIndex(s,a,m);
+}
+
+// TODO do I need this?
+// this samples a new state
+int AbstractFBAPOMDPState::sampleStateIndexAbstract(
+        State const* s,
+        Action const* a,
+        rnd::sample::Dir::sampleMethod m) const
+{
+        return _abstract_model.sampleStateIndex(s,a,m);
 }
 
 // TODO change for abstraction
@@ -47,8 +58,11 @@ int AbstractFBAPOMDPState::sampleObservationIndex(
     State const* new_s,
     rnd::sample::Dir::sampleMethod m) const
 {
-//    return FBAPOMDPState::model()->sampleObservationIndex(a, new_s, m); // _model
-    return _abstract_model.sampleObservationIndex(a, new_s, m); // TODO check if abstraction exists maybe?
+//    if (_abstraction.size() > 0) {
+//        return _abstract_model.sampleObservationIndex(a, new_s, m);
+//    }
+    // TODO do I need to do something with abstraction?
+    return model()->sampleObservationIndex(a, new_s, m); // _model
 }
 
 // only called at initialization?
@@ -83,33 +97,7 @@ void AbstractFBAPOMDPState::setAbstraction(std::vector<int> new_abstraction){
 
 // Construct abstract model from the model given the features to keep in the abstraction
 bayes_adaptive::factored::BABNModel AbstractFBAPOMDPState::construct_abstract_model(bayes_adaptive::factored::BABNModel model) {
-    bayes_adaptive::factored::BABNModel abstract_model = model; // TODO this is a copy? expensive
-//    int abstraction_size = _abstraction.size();
-//    const Domain_Feature_Size* domainFeatureSize = _abstract_model.domainFeatureSize(); // maybe no need?
-//    for (int i : _abstraction) {
-////         TODO HELP what is this? "Member access into incomplete type 'const Domain_Feature_Size'"
-//        for (auto x = 0; x < domainFeatureSize->_S[i]; ++x) {
-//
-//        }
-//    }
-    // Hardcoding since I can't figure out how to use domainFeatureSize
-//    auto old_structure = abstract_model.structure();
-//    bayes_adaptive::factored::BABNModel::Structure new_structure = old_structure;
-//    for (int it = new_structure.T.begin(); it != new_structure.T.end(); it++) {
-//
-//    }
-//    for (DBNNode node : abstract_model._observation_nodes) {
-//
-//    }
-//    for (int i = 0; i < 2; i++){
-//        abstract_model.marginalizeOut()
-//        abstract_model.resetTransitionNode(&action, i, parents);
-//        model.transitionNode(&action, feature).count({x, y, rain, carpet_config}, loc) +=
-//                (1 - success_prob) * _unknown_counts_total;
-//    }
-
-    abstract_model = abstract_model.abstract(_abstraction, abstract_model.structure());
-    return abstract_model;
+    return model.abstract(_abstraction, model.structure());
 }
 
 void AbstractFBAPOMDPState::logCounts() const

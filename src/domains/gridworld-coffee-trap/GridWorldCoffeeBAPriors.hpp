@@ -110,14 +110,14 @@ private:
     void preComputePrior();
 
     void setNoisyTransitionNode(
-        bayes_adaptive::factored::BABNModel* model,
-        Action const& action,
-        int feature,
-        std::vector<int> const& parents) const;
+    bayes_adaptive::factored::BABNModel* model,
+    Action const& action,
+    int feature,
+    std::vector<int> const& parents) const;
 
     /*** FBAPrior interface **/
     FBAPOMDPState* sampleFBAPOMDPState(State const* domain_state) const final;
-};
+    };
 
 } // namespace priors
 
