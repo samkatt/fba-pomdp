@@ -36,7 +36,6 @@ private:
     size_t const _carpet_configurations;
     const std::vector<unsigned int> rain_values = {0,1};
 
-    float const _noise;
     float const _unknown_counts_total;
     float const _static_total_count = 100000;
 
@@ -85,7 +84,7 @@ private:
     size_t const _size;
     size_t const _carpet_configurations;
 
-    float const _noise;
+//    float const _noise;
     float const _unknown_counts_total;
     float const _static_total_count = 100000;
 

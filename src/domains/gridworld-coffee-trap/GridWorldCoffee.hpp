@@ -43,37 +43,8 @@ public:
     constexpr static double const goal_reward    = 1;
     constexpr static double const step_reward    = 0;
     constexpr static double const same_weather_prob = .7;
-    constexpr static double const move_prob      = .9;
+    constexpr static double const move_prob      = .95;
     constexpr static double const slow_move_prob = .15;
-    /**
-         * @brief A position in the gridworld
-         * x and y are the agent's location, v the "velocity", r the rain, c the carpet
-         **/
-
-    struct pos
-    {
-        unsigned int const x, y;
-
-        bool operator==(pos const& other) const { return x == other.x && y == other.y; }
-        bool operator!=(pos const& other) const { return !(*this == other); }
-
-        std::string toString() const
-        {
-            return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
-        }
-    };
-
-    static unsigned int carpet_func(pos agent_pos) {
-        // carpet states, rectangular area
-        if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
-        {
-            return 1; // Carpet
-        }
-        return 0; // No carpet
-    }
-
-    constexpr static pos const goal_location = {0,4};
-
 
     /**
      * @brief A state in the grid world problem
@@ -82,7 +53,31 @@ public:
     {
 
     public:
+        /**
+     * @brief A position in the gridworld
+     * x and y are the agent's location, v the "velocity", r the rain, c the carpet
+     **/
+        struct pos
+        {
+            unsigned int const x, y;
 
+            bool operator==(pos const& other) const { return x == other.x && y == other.y; }
+            bool operator!=(pos const& other) const { return !(*this == other); }
+
+            std::string toString() const
+            {
+                return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
+            }
+        };
+
+        static unsigned int carpet_func(pos agent_pos) {
+            // carpet states, rectangular area
+            if (agent_pos.x < 3 && agent_pos.y > 0 && agent_pos.y < 4)
+            {
+                return 1; // Carpet
+            }
+            return 0; // No carpet
+        }
 
         GridWorldCoffeeState(pos agent_pos, unsigned int rain, unsigned int carpet_config, int i) :
             _agent_position(agent_pos),
@@ -90,18 +85,10 @@ public:
             _carpet_config(carpet_config),
             _index(i)
         {
-//            _carpet = &carpet_func;
-//            // carpet states, rectangular area
-//            if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
-//            {
-//                _carpet = 1;
-//            } else {
-//                _carpet = 0;
-//            }
         }
 
         /***** state implementation *****/
-        void index(int) final { throw "do not change gridworld states"; };
+        void index(int) final { throw "do not change gridworldcoffee states"; };
         int index() const final { return _index; }
         std::string toString() const final
         {
@@ -109,9 +96,8 @@ public:
         }
 
         pos const _agent_position;
-//        unsigned int _velocity;
-        unsigned int _rain;
-        unsigned int _carpet_config;
+        unsigned int const _rain;
+        unsigned int const _carpet_config;
 
     private:
         int const _index;
@@ -123,19 +109,12 @@ public:
     class GridWorldCoffeeObservation : public Observation
     {
     public:
-        GridWorldCoffeeObservation(pos agent_pos, unsigned int rain, const int carpet_config, int i) :
+        GridWorldCoffeeObservation(GridWorldCoffeeState::pos agent_pos, unsigned int rain, int carpet_config, int i) :
             _agent_pos(agent_pos),
             _rain(rain),
             _carpet_config(carpet_config), // initiated below
             _index(i)
         {
-//            // carpet states
-//            if (agent_pos.x < 4 && agent_pos.y > 0 && agent_pos.y < 4)
-//            {
-//                _carpet = 1;
-//            } else {
-//                _carpet = 0;
-//            }
         }
 
         /**** observation interface ***/
@@ -143,9 +122,9 @@ public:
         int index() const final { return _index; };
         std::string toString() const final { return _agent_pos.toString(); }
 
-        pos const _agent_pos;
-        unsigned int _rain;
-        unsigned int _carpet_config;
+        GridWorldCoffeeState::pos const _agent_pos;
+        unsigned int const _rain;
+        unsigned int const _carpet_config;
 
     private:
         int const _index;
@@ -173,26 +152,27 @@ public:
 
     explicit GridWorldCoffee();
 
-    static pos const start_location; // = {0,0};
+    static GridWorldCoffeeState::pos const start_location; // = {0,0};
+    static GridWorldCoffeeState::pos const goal_location;
 
     /***** getters of parameters and settings of the domain ****/
     size_t size() const;
-    double goalReward() const;
+    static double goalReward() ;
     State const* sampleRandomState() const;
-    bool agentOnSlowLocation(pos const& agent_pos) const;
+    bool agentOnSlowLocation(GridWorldCoffeeState::pos const& agent_pos) const;
 
-    static bool foundGoal(GridWorldCoffeeState const* s) ;
+    bool foundGoal(GridWorldCoffeeState const* s) const;
 
     GridWorldCoffeeState const*
-    getState(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const; // TODO need carpet func?
+    getState(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const;
     GridWorldCoffeeObservation const* getObservation(
-        pos const& agent_pos,
+            GridWorldCoffeeState::pos const& agent_pos,
         unsigned int const& rain, unsigned int const& carpet_config) const;
 
     /**
      * @brief applies a move a on the old_pos to get a new pos
      **/
-    pos applyMove(pos const& old_pos, Action const* a) const;
+    GridWorldCoffeeState::pos applyMove(GridWorldCoffeeState::pos const& old_pos, Action const* a) const;
 
     /**** POMDP interface ****/
     Action const* generateRandomAction(State const* s) const final;
@@ -225,20 +205,17 @@ private:
     std::vector<GridWorldCoffeeState> _S       = {};
     std::vector<GridWorldCoffeeObservation> _O = {};
 
-    // constants in the problem
-//    int const _goal_feature = 2;
-
     /**
      * @brief returns an observation from position agent_pos and rain
      **/
     Observation const* generateObservation(
-        pos const& agent_pos,
+        GridWorldCoffeeState::pos const& agent_pos,
         unsigned int const& rain,
         unsigned int const& carpet_config) const;
 
-    int positionsToIndex(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
+    int positionsToIndex(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
     const;
-    int positionsToObservationIndex(pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
+    int positionsToObservationIndex(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
     const;
 
 
@@ -246,7 +223,7 @@ private:
     void assertLegal(Action const* a) const;
     void assertLegal(Observation const* o) const;
     void assertLegal(State const* s) const;
-    void assertLegal(pos const& position) const;
+    void assertLegal(GridWorldCoffeeState::pos const& position) const;
 //    void assertLegal(int const& x_position) const;
 //    void assertLegalGoal(pos const& position) const;
 };

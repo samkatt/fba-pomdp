@@ -1,12 +1,11 @@
 #include "GridWorldCoffeeBAPriors.hpp"
 
-#include "domains/gridworld-coffee-trap/GridWorldCoffeeFBAExtension.hpp"
-//#include "bayes-adaptive/states/factored/FBAPOMDPState.hpp"
 #include "bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp"
 #include "bayes-adaptive/states/table/BAPOMDPState.hpp"
 #include "configurations/BAConf.hpp"
 #include "configurations/FBAConf.hpp"
 #include "domains/gridworld-coffee-trap/GridWorldCoffeeBAExtension.hpp"
+#include "domains/gridworld-coffee-trap/GridWorldCoffeeFBAExtension.hpp"
 #include "environment/Action.hpp"
 #include "environment/Observation.hpp"
 #include "environment/State.hpp"
@@ -25,7 +24,7 @@ GridWorldCoffeeFlatBAPrior::GridWorldCoffeeFlatBAPrior(
 //    _size(c.domain_conf.size)
         _size(5),
         _carpet_configurations(2),
-    _noise(c.noise),
+//    _noise(c.noise),
     _unknown_counts_total(c.counts_total),
     _domain_size(0, 0, 0), // initialized below
 //    _goal_locations(GridWorldCoffee::goalLocations(_size)),
@@ -36,13 +35,6 @@ GridWorldCoffeeFlatBAPrior::GridWorldCoffeeFlatBAPrior(
 
     _domain_size = ba_ext.domainSize();
     _prior_model = bayes_adaptive::table::BAFlatModel(&_domain_size);
-
-//    if (_noise < 0 || _noise > (1 - GridWorldCoffee::slow_move_prob))
-//    {
-//        throw "Gridworld expects noise in between 0 and "
-//              + std::to_string(1 - GridWorldCoffee::slow_move_prob) + " (received " + std::to_string(_noise)
-//              + ")";
-//    }
 
     // initiate the prior model
     for (auto a = 0; a < _domain_size._A; ++a)
@@ -74,31 +66,37 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
 
     // no carpet: rain: 0.8, no rain: 0.95
     // carpet: rain: 0.05, no rain: 0.15
-    float const success_prob = (GridWorldCoffee::carpet_func(s->_agent_position))
+    float const success_prob = (GridWorldCoffee::GridWorldCoffeeState::carpet_func(s->_agent_position))
                                ? ((s->_rain) ? 0.05 : 0.15)
-                               : ((s->_rain) ? 0.8 : 0.95);
+                               : ((s->_rain) ? 0.9 : 0.95);
 
 //    auto const goal_prob = 1;
 
     /*** fail move ***/
     if (GridWorldCoffee::goal_location == s->_agent_position)
     {
-        auto const prob = (1 - success_prob); // * goal_prob;
+        auto const prob = (1 - success_prob);
         for (auto const& rain : rain_values)
         {
             // rain - rain = 0.7
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-                auto new_s = domain.getState(s->_agent_position, rain, carpet_c); //, believed_velocity);
-                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config); //, believed_velocity);
+            _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total; //
+            acc_prob += prob * rain_prob;
 
-                _prior_model.count(s, a, new_s) += carpet_c_prop * prob * rain_prob * _unknown_counts_total; //
-                acc_prob += carpet_c_prop * prob * rain_prob;
+            domain.releaseState(new_s);
 
-                domain.releaseState(new_s);
-            }
+//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
+//                auto new_s = domain.getState(s->_agent_position, rain, carpet_c); //, believed_velocity);
+//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+//
+//                _prior_model.count(s, a, new_s) += carpet_c_prop * prob * rain_prob * _unknown_counts_total; //
+//                acc_prob += carpet_c_prop * prob * rain_prob;
+//
+//                domain.releaseState(new_s);
+//            }
         }
     } else // not on top of goal
     {
@@ -109,15 +107,21 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-                auto new_s = domain.getState(s->_agent_position, rain, carpet_c); //, believed_velocity);
-                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config); //, believed_velocity);
+            _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total; //
+            acc_prob += prob * rain_prob;
 
-                _prior_model.count(s, a, new_s) += carpet_c_prop * prob * rain_prob * _unknown_counts_total; //
-                acc_prob += carpet_c_prop * prob * rain_prob;
+            domain.releaseState(new_s);
 
-                domain.releaseState(new_s);
-            }
+//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
+//                auto new_s = domain.getState(s->_agent_position, rain, carpet_c); //, believed_velocity);
+//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+//
+//                _prior_model.count(s, a, new_s) += carpet_c_prop * prob * rain_prob * _unknown_counts_total; //
+//                acc_prob += carpet_c_prop * prob * rain_prob;
+//
+//                domain.releaseState(new_s);
+//            }
         }
     }
 
@@ -132,15 +136,21 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-                auto new_s = domain.getState(new_agent_pos, rain, carpet_c); //, believed_velocity);
-                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config); //, believed_velocity);
+            _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total; //
+            acc_prob += success_prob * rain_prob;
 
-                _prior_model.count(s, a, new_s) += carpet_c_prop * success_prob * rain_prob * _unknown_counts_total; //
-                acc_prob += carpet_c_prop * success_prob * rain_prob;
+            domain.releaseState(new_s);
 
-                domain.releaseState(new_s);
-            }
+//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
+//                auto new_s = domain.getState(new_agent_pos, rain, carpet_c); //, believed_velocity);
+//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+//
+//                _prior_model.count(s, a, new_s) += carpet_c_prop * success_prob * rain_prob * _unknown_counts_total; //
+//                acc_prob += carpet_c_prop * success_prob * rain_prob;
+//
+//                domain.releaseState(new_s);
+//            }
         }
 
     } else // not on top of goal
@@ -151,15 +161,21 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-                auto new_s = domain.getState(new_agent_pos, rain, carpet_c); //, believed_velocity);
-                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config); //, believed_velocity);
+            _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total; //
+            acc_prob += success_prob * rain_prob;
 
-                _prior_model.count(s, a, new_s) += carpet_c_prop * success_prob * rain_prob * _unknown_counts_total; //
-                acc_prob += carpet_c_prop * success_prob * rain_prob;
+            domain.releaseState(new_s);
 
-                domain.releaseState(new_s);
-            }
+//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
+//                auto new_s = domain.getState(new_agent_pos, rain, carpet_c); //, believed_velocity);
+//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
+//
+//                _prior_model.count(s, a, new_s) += carpet_c_prop * success_prob * rain_prob * _unknown_counts_total; //
+//                acc_prob += carpet_c_prop * success_prob * rain_prob;
+//
+//                domain.releaseState(new_s);
+//            }
         }
     }
 
@@ -207,7 +223,7 @@ GridWorldCoffeeFactBAPrior::GridWorldCoffeeFactBAPrior(
     FBAPOMDPPrior(c),
     _size(domain.size()),
     _carpet_configurations(2),
-    _noise(c.noise),
+//    _noise(c.noise),
     _unknown_counts_total(c.counts_total),
 //    _only_know_loc_matters(c.structure_prior == "match-uniform"),
     _domain_size(0, 0, 0), // initialized below
@@ -364,7 +380,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
                                 for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
                                     // no carpet: rain: 0.8, no rain: 0.95
                                     // carpet: rain: 0.05, no rain: 0.15
-                                    float const success_prob = (GridWorldCoffee::carpet_func({(unsigned int) x,(unsigned int) y}))
+                                    float const success_prob = (GridWorldCoffee::GridWorldCoffeeState::carpet_func({(unsigned int) x,(unsigned int) y}))
                                                                ? (rain? 0.05 : 0.15)
                                                                : (rain ? 0.8 : 0.95);
 
@@ -430,7 +446,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
 
                         for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
                             // carpet: 0.15, no carpet: 0.95
-                            float const success_prob = (GridWorldCoffee::carpet_func({(unsigned int) x,(unsigned int) y}))
+                            float const success_prob = (GridWorldCoffee::GridWorldCoffeeState::carpet_func({(unsigned int) x,(unsigned int) y}))
                                                        ? 0.15 : 0.95;
 
                             // fail move
