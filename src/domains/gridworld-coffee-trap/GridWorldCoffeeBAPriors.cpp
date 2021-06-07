@@ -21,14 +21,11 @@ namespace priors {
 GridWorldCoffeeFlatBAPrior::GridWorldCoffeeFlatBAPrior(
     GridWorldCoffee const& domain,
     configurations::BAConf const& c) :
-//    _size(c.domain_conf.size)
         _size(5),
         _carpet_configurations(2),
-//    _noise(c.noise),
-    _unknown_counts_total(c.counts_total),
-    _domain_size(0, 0, 0), // initialized below
-//    _goal_locations(GridWorldCoffee::goalLocations(_size)),
-    _prior_model()
+        _unknown_counts_total(c.counts_total),
+        _domain_size(0, 0, 0), // initialized below
+        _prior_model()
 {
 
     bayes_adaptive::domain_extensions::GridWorldCoffeeBAExtension ba_ext;
@@ -70,8 +67,6 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
                                ? ((s->_rain) ? 0.05 : 0.15)
                                : ((s->_rain) ? 0.9 : 0.95);
 
-//    auto const goal_prob = 1;
-
     /*** fail move ***/
     if (GridWorldCoffee::goal_location == s->_agent_position)
     {
@@ -82,8 +77,9 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config); //, believed_velocity);
-            _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total; //
+            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config);
+
+            _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total;
             acc_prob += prob * rain_prob;
 
             domain.releaseState(new_s);
@@ -97,8 +93,9 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config); //, believed_velocity);
-            _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total; //
+            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config);
+
+            _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total;
             acc_prob += prob * rain_prob;
 
             domain.releaseState(new_s);
@@ -116,8 +113,9 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config); //, believed_velocity);
-            _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total; //
+            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config);
+
+            _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total;
             acc_prob += success_prob * rain_prob;
 
             domain.releaseState(new_s);
@@ -131,8 +129,9 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             // rain - no rain = 0.3
             auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
 
-            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config); //, believed_velocity);
-            _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total; //
+            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config);
+
+            _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total;
             acc_prob += success_prob * rain_prob;
 
             domain.releaseState(new_s);
@@ -154,14 +153,12 @@ void GridWorldCoffeeFlatBAPrior::setPriorObservationProbabilities(
     {
         for (unsigned int y = 0; y < _size; ++y)
         {
-
             auto const o = domain.getObservation({x, y}, new_s->_rain, new_s->_carpet_config);
 
             auto const prob = domain.computeObservationProbability(o, a, new_s);
             acc_prob += prob;
 
             _prior_model.count(a, new_s, o) = prob * _static_total_count;
-
         }
     }
 

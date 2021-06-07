@@ -9,7 +9,7 @@
 
 namespace bayes_adaptive { namespace domain_extensions {
 
-void assertLegal(domains::GridWorldCoffee::GridWorldCoffeeState::pos const& position, size_t grid_size)
+void assertLegalCoffee(domains::GridWorldCoffee::GridWorldCoffeeState::pos const& position, size_t grid_size)
 {
     assert(position.x < grid_size);
     assert(position.y < grid_size);
@@ -19,8 +19,10 @@ void assertLegalCoffee(State const* s, size_t grid_size, size_t state_space_size
 {
     assert(s != nullptr);
     assert(s->index() >= 0 && s->index() < static_cast<int>(state_space_size));
-    assertLegal(
-        dynamic_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s)->_agent_position, grid_size);
+    assert(static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s)->_carpet_config < 2);
+    assert(static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s)->_rain < 2 );
+    assertLegalCoffee(
+        static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s)->_agent_position, grid_size);
 }
 
 void assertLegalCoffee(Action const* a, size_t action_space_size)
@@ -80,7 +82,7 @@ Terminal GridWorldCoffeeBAExtension::terminal(State const* s, Action const* a, S
     assertLegalCoffee(a, _domain_size._A);
     assertLegalCoffee(new_s, _size, _domain_size._S);
 
-    auto const gw_state = dynamic_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s);
+    auto const gw_state = static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s);
 
     return Terminal(domains::GridWorldCoffee::goal_location == gw_state->_agent_position);
 }
@@ -91,7 +93,7 @@ Reward GridWorldCoffeeBAExtension::reward(State const* s, Action const* a, State
     assertLegalCoffee(a, _domain_size._A);
     assertLegalCoffee(new_s, _size, _domain_size._S);
 
-    auto const gw_state = dynamic_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s);
+    auto const gw_state = static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s);
 
     if (domains::GridWorldCoffee::goal_location == gw_state->_agent_position) // found goal
     {
