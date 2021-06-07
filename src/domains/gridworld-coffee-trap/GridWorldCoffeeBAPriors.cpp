@@ -66,7 +66,7 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
 
     // no carpet: rain: 0.8, no rain: 0.95
     // carpet: rain: 0.05, no rain: 0.15
-    float const success_prob = (GridWorldCoffee::GridWorldCoffeeState::carpet_func(s->_agent_position))
+    float const success_prob = (domain.agentOnCarpet(s->_agent_position))
                                ? ((s->_rain) ? 0.05 : 0.15)
                                : ((s->_rain) ? 0.9 : 0.95);
 
@@ -87,16 +87,6 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             acc_prob += prob * rain_prob;
 
             domain.releaseState(new_s);
-
-//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-//                auto new_s = domain.getState(s->_agent_position, rain, carpet_c); //, believed_velocity);
-//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
-//
-//                _prior_model.count(s, a, new_s) += carpet_c_prop * prob * rain_prob * _unknown_counts_total; //
-//                acc_prob += carpet_c_prop * prob * rain_prob;
-//
-//                domain.releaseState(new_s);
-//            }
         }
     } else // not on top of goal
     {
@@ -112,16 +102,6 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             acc_prob += prob * rain_prob;
 
             domain.releaseState(new_s);
-
-//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-//                auto new_s = domain.getState(s->_agent_position, rain, carpet_c); //, believed_velocity);
-//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
-//
-//                _prior_model.count(s, a, new_s) += carpet_c_prop * prob * rain_prob * _unknown_counts_total; //
-//                acc_prob += carpet_c_prop * prob * rain_prob;
-//
-//                domain.releaseState(new_s);
-//            }
         }
     }
 
@@ -141,16 +121,6 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             acc_prob += success_prob * rain_prob;
 
             domain.releaseState(new_s);
-
-//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-//                auto new_s = domain.getState(new_agent_pos, rain, carpet_c); //, believed_velocity);
-//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
-//
-//                _prior_model.count(s, a, new_s) += carpet_c_prop * success_prob * rain_prob * _unknown_counts_total; //
-//                acc_prob += carpet_c_prop * success_prob * rain_prob;
-//
-//                domain.releaseState(new_s);
-//            }
         }
 
     } else // not on top of goal
@@ -166,16 +136,6 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
             acc_prob += success_prob * rain_prob;
 
             domain.releaseState(new_s);
-
-//            for (unsigned int carpet_c = 0; carpet_c < _carpet_configurations; ++carpet_c){
-//                auto new_s = domain.getState(new_agent_pos, rain, carpet_c); //, believed_velocity);
-//                auto const carpet_c_prop = (carpet_c == s->_carpet_config) ? 1.0 : 0.0;
-//
-//                _prior_model.count(s, a, new_s) += carpet_c_prop * success_prob * rain_prob * _unknown_counts_total; //
-//                acc_prob += carpet_c_prop * success_prob * rain_prob;
-//
-//                domain.releaseState(new_s);
-//            }
         }
     }
 
@@ -380,7 +340,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
                                 for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
                                     // no carpet: rain: 0.8, no rain: 0.95
                                     // carpet: rain: 0.05, no rain: 0.15
-                                    float const success_prob = (GridWorldCoffee::GridWorldCoffeeState::carpet_func({(unsigned int) x,(unsigned int) y}))
+                                    float const success_prob = (_domain.agentOnCarpet({(unsigned int) x,(unsigned int) y}))
                                                                ? (rain? 0.05 : 0.15)
                                                                : (rain ? 0.8 : 0.95);
 
@@ -446,7 +406,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
 
                         for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
                             // carpet: 0.15, no carpet: 0.95
-                            float const success_prob = (GridWorldCoffee::GridWorldCoffeeState::carpet_func({(unsigned int) x,(unsigned int) y}))
+                            float const success_prob = (_domain.agentOnCarpet({(unsigned int) x,(unsigned int) y}))
                                                        ? 0.15 : 0.95;
 
                             // fail move

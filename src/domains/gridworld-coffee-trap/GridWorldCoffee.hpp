@@ -70,15 +70,6 @@ public:
             }
         };
 
-        static unsigned int carpet_func(pos agent_pos) {
-            // carpet states, rectangular area
-            if (agent_pos.x < 3 && agent_pos.y > 0 && agent_pos.y < 4)
-            {
-                return 1; // Carpet
-            }
-            return 0; // No carpet
-        }
-
         GridWorldCoffeeState(pos agent_pos, unsigned int rain, unsigned int carpet_config, int i) :
             _agent_position(agent_pos),
             _rain(rain),
@@ -109,7 +100,11 @@ public:
     class GridWorldCoffeeObservation : public Observation
     {
     public:
-        GridWorldCoffeeObservation(GridWorldCoffeeState::pos agent_pos, unsigned int rain, int carpet_config, int i) :
+        GridWorldCoffeeObservation(
+            ::domains::GridWorldCoffee::GridWorldCoffeeState::pos agent_pos,
+            unsigned int rain,
+            int carpet_config,
+            int i) :
             _agent_pos(agent_pos),
             _rain(rain),
             _carpet_config(carpet_config), // initiated below
@@ -122,7 +117,7 @@ public:
         int index() const final { return _index; };
         std::string toString() const final { return _agent_pos.toString(); }
 
-        GridWorldCoffeeState::pos const _agent_pos;
+        ::domains::GridWorldCoffee::GridWorldCoffeeState::pos const _agent_pos;
         unsigned int const _rain;
         unsigned int const _carpet_config;
 
@@ -157,16 +152,17 @@ public:
 
     /***** getters of parameters and settings of the domain ****/
     size_t size() const;
-    static double goalReward() ;
+    double goalReward() const;
     State const* sampleRandomState() const;
     bool agentOnSlowLocation(GridWorldCoffeeState::pos const& agent_pos) const;
+    bool agentOnCarpet(GridWorldCoffeeState::pos const& agent_pos) const;
 
     bool foundGoal(GridWorldCoffeeState const* s) const;
 
     GridWorldCoffeeState const*
-    getState(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const;
+        getState(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const;
     GridWorldCoffeeObservation const* getObservation(
-            GridWorldCoffeeState::pos const& agent_pos,
+        GridWorldCoffeeState::pos const& agent_pos,
         unsigned int const& rain, unsigned int const& carpet_config) const;
 
     /**
@@ -177,8 +173,7 @@ public:
     /**** POMDP interface ****/
     Action const* generateRandomAction(State const* s) const final;
     void addLegalActions(State const* s, std::vector<Action const*>* actions) const final;
-    double computeObservationProbability(Observation const* o, Action const* a, State const* new_s)
-    const final;
+    double computeObservationProbability(Observation const* o, Action const* a, State const* new_s) const final;
     void releaseAction(Action const* a) const final;
     Action const* copyAction(Action const* a) const final;
 
@@ -214,9 +209,9 @@ private:
         unsigned int const& carpet_config) const;
 
     int positionsToIndex(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
-    const;
+        const;
     int positionsToObservationIndex(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
-    const;
+        const;
 
 
     /** some functions to check input from system **/
@@ -224,16 +219,9 @@ private:
     void assertLegal(Observation const* o) const;
     void assertLegal(State const* s) const;
     void assertLegal(GridWorldCoffeeState::pos const& position) const;
-//    void assertLegal(int const& x_position) const;
-//    void assertLegalGoal(pos const& position) const;
 };
 
 } // namespace domains
 
 
 #endif // GRIDWORLDCOFFEE_HPP
-
-
-
-
-

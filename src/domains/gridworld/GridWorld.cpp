@@ -315,7 +315,6 @@ void GridWorld::releaseState(State const* s) const
 
 Observation const* GridWorld::copyObservation(Observation const* o) const
 {
-
     assertLegal(o);
     return o;
 }
