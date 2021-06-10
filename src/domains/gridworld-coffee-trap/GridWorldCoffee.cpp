@@ -1,7 +1,3 @@
-//
-// Created by rolf on 28-09-20.
-//
-
 #include "GridWorldCoffee.hpp"
 
 #include <algorithm> // Why?
@@ -28,14 +24,9 @@ GridWorldCoffee::GridWorldCoffee() :
     _S_size(0), // initiated below
     _O_size(0) // initiated below
 {
-    // Number of states, 5x5 grid, rain/no rain, carpet (is a function, returning 1 or 0). Carpet is fixed given x and y, and observable by the agent.
-    // TODO: "velocity" beliefs should be in the prior? velocity now gone. Need Carpet somewhere?
-    // There are only two types of velocity (normal and trap state) but the agent believes there are 4 (the 4 combinations of rain/no rain + carpet / no carpet)
-//    const unsigned int carpet_configurations = 2; // just give 2 as the total number of possible configurations?
-    //  pow(2, _size*_size);
+    // Number of states, 5x5 grid, rain/no rain, carpet configuration (0 or 1).
     _S_size = _size * _size * 2 * _carpet_configurations, _S.reserve(_S_size);
-    _O_size = _size * _size * 2 * _carpet_configurations;
-    _O.reserve(_O_size); // same number of observations, just doesn't include the velocity (now velocity is gone)
+    _O_size = _size * _size * 2 * _carpet_configurations, _O.reserve(_O_size); // same number of observations
 
     // generate state space
     for (unsigned int x_agent = 0; x_agent < _size; ++x_agent)
@@ -79,17 +70,6 @@ double GridWorldCoffee::goalReward() const
     return goal_reward;
 }
 
-bool GridWorldCoffee::agentOnSlowLocation(GridWorldCoffeeState::pos const& agent_pos) const
-{
-    // On trap state
-    if ((agent_pos.x == 0 && agent_pos.y == 2) || (agent_pos.x == 1 && agent_pos.y == 3)
-        || (agent_pos.x == 2 && agent_pos.y == 1) || (agent_pos.x == 3 && agent_pos.y == 2))
-    {
-        return true;
-    }
-    return false;
-}
-
 bool GridWorldCoffee::agentOnCarpet(GridWorldCoffeeState::pos const& agent_pos) const {
     // carpet states, rectangular area
     if (agent_pos.x < 3 && agent_pos.y > 0 && agent_pos.y < 4)
@@ -97,6 +77,17 @@ bool GridWorldCoffee::agentOnCarpet(GridWorldCoffeeState::pos const& agent_pos) 
         return true; // Carpet
     }
     return false; // No carpet
+}
+
+bool GridWorldCoffee::agentOnSlowLocation(GridWorldCoffeeState::pos const& agent_pos) const
+{
+    // On trap state
+    if ((agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 1 && agent_pos.y == 3)
+        || (agent_pos.x == 2 && agent_pos.y == 1)) // || (agent_pos.x == 3 && agent_pos.y == 2))
+    {
+        return true;
+    }
+    return false;
 }
 
 bool GridWorldCoffee::foundGoal(GridWorldCoffeeState const* s) const
@@ -164,7 +155,9 @@ double GridWorldCoffee::computeObservationProbability(
 void GridWorldCoffee::releaseAction(Action const* a) const
 {
     assertLegal(a);
-    delete static_cast<GridWorldCoffeeAction*>(const_cast<Action*>(a));
+    if (a != nullptr) {
+        delete static_cast<GridWorldCoffeeAction*>(const_cast<Action*>(a));
+    }
 }
 
 Action const* GridWorldCoffee::copyAction(Action const* a) const
@@ -250,9 +243,7 @@ int GridWorldCoffee::positionsToIndex(
 {
     // indexing: from 3 elements projecting to 1 dimension
     // x*size*2 + y*2 + rain
-//    return agent_pos.x * _size * 2 * 4 + agent_pos.y * 2 * 4 + rain * 4; // + velocity;
     return agent_pos.x * _size * 2 * _carpet_configurations + agent_pos.y * 2 * _carpet_configurations + rain * _carpet_configurations + carpet_config; // + velocity;
-
 }
 
 int GridWorldCoffee::positionsToObservationIndex(

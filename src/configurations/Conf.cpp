@@ -80,7 +80,7 @@ void Conf::validate() const
 
     if (planner != "random" && planner != "ts" && planner != "po-uct" && planner != "po-uct-abstraction")
     {
-        throw error("Please enter a legit planner: random, ts or po-uct");
+        throw error("Please enter a legit planner: random, ts, po-uct or po-uct-abstraction");
     }
 
     std::vector<std::string> valid_belief = {"point_estimate",

@@ -22,6 +22,7 @@ AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_ad
         _abstract_model(model) // Initialized later, when abstraction is added
 {
     assert(model.domainFeatureSize());
+//    setAbstraction({0,1});
 }
 
 BAState* AbstractFBAPOMDPState::copy(State const* domain_state) const
@@ -91,7 +92,8 @@ std::vector<int>* AbstractFBAPOMDPState::getAbstraction(){
 }
 
 void AbstractFBAPOMDPState::setAbstraction(std::vector<int> new_abstraction){
-    _abstraction = new_abstraction;
+//    _abstraction.resize(new_abstraction.size());
+    _abstraction = std::move(new_abstraction);
     _abstract_model = construct_abstract_model(FBAPOMDPState::model_real());
 }
 

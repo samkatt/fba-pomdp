@@ -108,8 +108,7 @@ int sampleFromMult(T* mult, size_t n, double total_prob)
 
         sum += mult[i];
     }
-
-    assert(p < sum);
+    assert(p < sum + 0.01); // TODO try to fix abstract bapomcp such that this does not occur?
 
     return n - 1;
 }

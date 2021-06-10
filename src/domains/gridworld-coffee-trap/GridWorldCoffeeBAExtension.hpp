@@ -1,7 +1,3 @@
-//
-// Created by rolf on 21-01-21.
-//
-
 #ifndef GRIDWORLDCOFFEEBAEXTENSION_HPP
 #define GRIDWORLDCOFFEEBAEXTENSION_HPP
 

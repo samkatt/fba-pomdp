@@ -1,7 +1,3 @@
-//
-// Created by rolf on 28-09-20.
-//
-
 #ifndef GRIDWORLDCOFFEE_HPP
 #define GRIDWORLDCOFFEE_HPP
 
@@ -44,7 +40,7 @@ public:
     constexpr static double const step_reward    = 0;
     constexpr static double const same_weather_prob = .7;
     constexpr static double const move_prob      = .95;
-    constexpr static double const slow_move_prob = .15;
+    constexpr static double const slow_move_prob = .1;
 
     /**
      * @brief A state in the grid world problem
@@ -153,9 +149,9 @@ public:
     /***** getters of parameters and settings of the domain ****/
     size_t size() const;
     double goalReward() const;
-    State const* sampleRandomState() const;
     bool agentOnSlowLocation(GridWorldCoffeeState::pos const& agent_pos) const;
     bool agentOnCarpet(GridWorldCoffeeState::pos const& agent_pos) const;
+    State const* sampleRandomState() const;
 
     bool foundGoal(GridWorldCoffeeState const* s) const;
 
@@ -191,8 +187,6 @@ private:
     size_t const _carpet_configurations = 2;
 
     // initiated in constructor
-//    std::vector<GridWorldCoffeeState::pos> _goal_locations;
-
     int _A_size = 4;
     int _S_size;
     int _O_size;

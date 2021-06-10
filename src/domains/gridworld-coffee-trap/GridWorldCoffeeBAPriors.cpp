@@ -16,13 +16,18 @@ using GridWorldCoffeeAction      = GridWorldCoffee::GridWorldCoffeeAction;
 using GridWorldCoffeeObservation = GridWorldCoffee::GridWorldCoffeeObservation;
 using GridWorldCoffeeState       = GridWorldCoffee::GridWorldCoffeeState;
 
+// constexpr static double const move_prob      = .95;
+// constexpr static double const slow_move_prob = .1;
+// ((agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 1 && agent_pos.y == 3) || (agent_pos.x == 2 && agent_pos.y == 1))
+bool correctPrior = false ;
+
 namespace priors {
 
 GridWorldCoffeeFlatBAPrior::GridWorldCoffeeFlatBAPrior(
     GridWorldCoffee const& domain,
     configurations::BAConf const& c) :
         _size(5),
-        _carpet_configurations(2),
+//        _carpet_configurations(2),
         _unknown_counts_total(c.counts_total),
         _domain_size(0, 0, 0), // initialized below
         _prior_model()
@@ -61,11 +66,25 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
 
     double acc_prob = 0;
 
+    float success_prob;
     // no carpet: rain: 0.8, no rain: 0.95
     // carpet: rain: 0.05, no rain: 0.15
-    float const success_prob = (domain.agentOnCarpet(s->_agent_position))
-                               ? ((s->_rain) ? 0.05 : 0.15)
-                               : ((s->_rain) ? 0.9 : 0.95);
+    if (correctPrior) {
+        if ((s->_agent_position.x == 0 && s->_agent_position.y == 3) || (s->_agent_position.x == 1 && s->_agent_position.y == 3)
+        || (s->_agent_position.x == 2 && s->_agent_position.y == 1)) {
+            success_prob = 0.1;
+        }
+        else {
+            success_prob = 0.95;
+        }
+    }
+    else {
+        success_prob = (domain.agentOnCarpet(s->_agent_position))
+                                   ? ((s->_rain) ? 0.05 : 0.1)
+                                   : ((s->_rain) ? 0.9 : 0.95);
+    }
+
+
 
     /*** fail move ***/
     if (GridWorldCoffee::goal_location == s->_agent_position)
@@ -73,9 +92,7 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
         auto const prob = (1 - success_prob);
         for (auto const& rain : rain_values)
         {
-            // rain - rain = 0.7
-            // rain - no rain = 0.3
-            auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
+            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffee::same_weather_prob : 1 - GridWorldCoffee::same_weather_prob;
 
             auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config);
 
@@ -89,9 +106,7 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
         auto const prob = 1 - success_prob;
         for (auto const& rain : rain_values)
         {
-            // rain - rain = 0.7
-            // rain - no rain = 0.3
-            auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
+            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffee::same_weather_prob : 1 - GridWorldCoffee::same_weather_prob;
 
             auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config);
 
@@ -104,14 +119,11 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
 
     /*** move succeeds ***/
     auto const new_agent_pos = domain.applyMove(s->_agent_position, a);
-
     if (GridWorldCoffee::goal_location == s->_agent_position)
     {
         for (auto const& rain : rain_values)
         {
-            // rain - rain = 0.7
-            // rain - no rain = 0.3
-            auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
+            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffee::same_weather_prob : 1 - GridWorldCoffee::same_weather_prob;
 
             auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config);
 
@@ -120,14 +132,11 @@ void GridWorldCoffeeFlatBAPrior::setPriorTransitionProbabilities(
 
             domain.releaseState(new_s);
         }
-
     } else // not on top of goal
     {
         for (auto const& rain : rain_values)
         {
-            // rain - rain = 0.7
-            // rain - no rain = 0.3
-            auto const rain_prob = (s->_rain == rain) ? 0.7 : 0.3;
+            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffee::same_weather_prob : 1 - GridWorldCoffee::same_weather_prob;
 
             auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config);
 
@@ -231,13 +240,13 @@ GridWorldCoffeeFactBAPrior::mutate(bayes_adaptive::factored::BABNModel::Structur
 
     auto edges = &structure.T[random_action][random_feature];
 
-    assert(edges->size() >= 1); // assuming we always have at least x->x or y->y dependence
+    assert(edges->size() >= 2); // assuming we always have x-y dependence (used to be: at least x->x or y->y dependence)
 
     // just need to add or remove a random one
-    auto edge_to_flip = rnd::slowRandomInt(1, _num_features);
-    if (random_feature == edge_to_flip) { // this only happens if both are "1", in which case we want to use feature 0
-        edge_to_flip = random_feature - 1;
-    }
+    auto edge_to_flip = rnd::slowRandomInt(2, _num_features);
+//    if (random_feature == edge_to_flip) { // this only happens if both are "1", in which case we want to use feature 0
+//        edge_to_flip = random_feature - 1;
+//    }
 
     // stealing code from flip_random_edge, since there is one edge we don't want to flip
     auto lower_bound  = std::lower_bound(edges->begin(), edges->end(), edge_to_flip);
@@ -310,7 +319,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
     {
         xy_location = true;
     }
-
+    assert(xy_location == true); // with recent change, this should always be true
     // rest
     model->resetTransitionNode(&action, feature, parents);
     // TODO improve code?
@@ -338,8 +347,8 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
                                     // no carpet: rain: 0.8, no rain: 0.95
                                     // carpet: rain: 0.05, no rain: 0.15
                                     float const success_prob = (_domain.agentOnCarpet({(unsigned int) x,(unsigned int) y}))
-                                                               ? (rain? 0.05 : 0.15)
-                                                               : (rain ? 0.8 : 0.95);
+                                                               ? (rain? 0.05 : 0.1)
+                                                               : (rain ? 0.9 : 0.95);
 
                                     // fail move
                                     model->transitionNode(&action, feature).count({x, y, rain, carpet_config}, loc) +=
@@ -371,7 +380,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
 
                             for (auto rain = 0; rain < _domain_feature_size._S[_rain_feature]; ++rain){
                                 // no carpet: rain: 0.8, no rain: 0.95
-                                float const success_prob = rain ? 0.8 : 0.95;
+                                float const success_prob = rain ? 0.9 : 0.95;
 
                                 // fail move
                                 model->transitionNode(&action, feature).count({x, y, rain}, loc) +=
@@ -404,7 +413,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
                         for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
                             // carpet: 0.15, no carpet: 0.95
                             float const success_prob = (_domain.agentOnCarpet({(unsigned int) x,(unsigned int) y}))
-                                                       ? 0.15 : 0.95;
+                                                       ? 0.1 : 0.95;
 
                             // fail move
                             model->transitionNode(&action, feature).count({x, y, carpet_config}, loc) +=
@@ -422,10 +431,6 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
         } else if(rain_location) {
             if (carpet_location) { // rain and carpet
                 for (auto loc = 0; loc < _domain_feature_size._S[feature]; ++loc) {
-//                    for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y) {
-
-//                        auto const loc = (feature == _agent_x_feature) ? x : y;
-
                         auto const new_loc =
                                 (feature == _agent_x_feature)
                                 ? _domain
@@ -441,7 +446,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
                             for (auto carpet_config = 0; carpet_config < _domain_feature_size._S[_carpet_feature]; ++carpet_config){
                                 // no carpet: rain: 0.8, no rain: 0.95
                                 // carpet: rain: 0.05, no rain: 0.15
-                                float const success_prob = rain ? 0.8 : 0.95;
+                                float const success_prob = rain ? 0.9 : 0.95;
                                 // can't really tell if you are on carpet if you do not take the other (x/y) into account
 //                                        (GridWorldCoffee::carpet_func({(unsigned int) x,(unsigned int) y}))
 //                                                           ? (rain? 0.05 : 0.15)
@@ -478,7 +483,7 @@ void GridWorldCoffeeFactBAPrior::setNoisyTransitionNode(
                         for (auto rain = 0; rain < _domain_feature_size._S[_rain_feature]; ++rain){
                             // no carpet: rain: 0.8, no rain: 0.95
                             // carpet: rain: 0.05, no rain: 0.15
-                            float const success_prob = rain? 0.8 : 0.95;
+                            float const success_prob = rain? 0.9 : 0.95;
 
                             // fail move
                             model->transitionNode(&action, feature).count({loc, rain}, loc) +=
@@ -622,8 +627,14 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
         {
             for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y)
             {
+                float trans_prob = GridWorldCoffee::move_prob;
+                if (correctPrior) {
+                    if ((x == 0 && y == 3) || (x == 1 && y == 3)
+                        || (x == 2 && y == 1)) {
+                        trans_prob = 0.1;
+                    }
+                }
 
-                float const trans_prob = GridWorldCoffee::move_prob;
 //                    (_domain.agentOnSlowLocation(
 //                        {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}))
 //                    ? GridWorldCoffee::slow_move_prob
@@ -655,6 +666,9 @@ FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* doma
 //    {
 //        return new AbstractFBAPOMDPSTATE(domain_state, _correct_struct_prior);
 //    }
+    if (correctPrior) {
+        return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
+    }
 
     /*** noisy struct prior ****/
     auto structure = _correct_struct_prior.structure();
@@ -665,16 +679,16 @@ FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* doma
     // randomly add features to parents of x and y for each action
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        if (rnd::boolean()) // randomly remove y from parents of x for each action
-        {
-            auto lower_bound  = std::lower_bound(structure.T[a][_agent_x_feature].begin(), structure.T[a][_agent_x_feature].end(), _agent_y_feature);
-            structure.T[a][_agent_x_feature].erase(lower_bound);
-        }
-        if (rnd::boolean()) // randomly remove x from parents of y for each action
-        {
-            auto lower_bound  = std::lower_bound(structure.T[a][_agent_y_feature].begin(), structure.T[a][_agent_y_feature].end(), _agent_x_feature);
-            structure.T[a][_agent_y_feature].erase(lower_bound);
-        }
+//        if (rnd::boolean()) // randomly remove y from parents of x for each action
+//        {
+//            auto lower_bound  = std::lower_bound(structure.T[a][_agent_x_feature].begin(), structure.T[a][_agent_x_feature].end(), _agent_y_feature);
+//            structure.T[a][_agent_x_feature].erase(lower_bound);
+//        }
+//        if (rnd::boolean()) // randomly remove x from parents of y for each action
+//        {
+//            auto lower_bound  = std::lower_bound(structure.T[a][_agent_y_feature].begin(), structure.T[a][_agent_y_feature].end(), _agent_x_feature);
+//            structure.T[a][_agent_y_feature].erase(lower_bound);
+//        }
         if (rnd::boolean()) // randomly add rain to parents of x
         {
             structure.T[a][_agent_x_feature].emplace_back(_rain_feature);

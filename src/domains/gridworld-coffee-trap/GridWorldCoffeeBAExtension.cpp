@@ -1,7 +1,3 @@
-//
-// Created by rolf on 21-01-21.
-//
-
 #include "GridWorldCoffeeBAExtension.hpp"
 
 #include "environment/Action.hpp"
@@ -38,8 +34,8 @@ GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
     _domain_size(0, 0, 0) // initiated below
 {
 
-    _domain_size           = Domain_Size(
-        static_cast<int>(_size * _size * 2 * _carpet_configurations), // * 4),
+    _domain_size = Domain_Size(
+        static_cast<int>(_size * _size * 2 * _carpet_configurations),
         4,
         static_cast<int>(_size * _size * 2 * _carpet_configurations));
 
@@ -57,7 +53,7 @@ GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
                     domains::GridWorldCoffee::GridWorldCoffeeState::pos const agent_pos{x_agent, y_agent};
                     assert(static_cast<unsigned int>(i) == _states.size());
 
-                    _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, carpet_config, i)); //, velocity, i));
+                    _states.emplace_back(domains::GridWorldCoffee::GridWorldCoffeeState(agent_pos, rain, carpet_config, i));
                     i++;
                 }
             }
@@ -103,6 +99,5 @@ Reward GridWorldCoffeeBAExtension::reward(State const* s, Action const* a, State
         return Reward(domains::GridWorldCoffee::step_reward);
     }
 }
-
 
 }} // namespace bayes_adaptive::domain_extensions

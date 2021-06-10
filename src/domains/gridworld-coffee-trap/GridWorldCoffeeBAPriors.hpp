@@ -33,7 +33,7 @@ public:
 
 private:
     size_t const _size;
-    size_t const _carpet_configurations;
+//    size_t const _carpet_configurations;
     std::vector<unsigned int> const rain_values = {0,1};
 
     float const _unknown_counts_total;

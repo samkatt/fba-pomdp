@@ -86,23 +86,16 @@ Action const* RBAPOUCT_abstraction::selectAction(
     auto const old_mode = simulator.mode();
     simulator.mode(BAPOMDP::StepType::KeepCounts);
 
-//    if (VLOG_IS_ON(1))
-//    {
-//        VLOG(1) << "HELLO HELLO HELLO";
-//    }
-
     // perform simulations
     for (auto i = 0; i < _n; ++i)
     {
         // hier particle aanpassen?
         // do not copy!!
         auto particle = (AbstractFBAPOMDPState *) static_cast<BAState const *>(belief.sample());
-//        auto particle = static_cast<BAState const*>(belief.sample());
 
-//        BAState const* particle = belief.sample();
         // Adding abstraction, if it's not there yet.
         // Maybe do it once per episode?
-        if (const_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction()->size() == 0) {
+        if (static_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction()->size() == 0) {
             static_cast<AbstractFBAPOMDPState*>(particle)->setAbstraction({0,1});
         }
 
