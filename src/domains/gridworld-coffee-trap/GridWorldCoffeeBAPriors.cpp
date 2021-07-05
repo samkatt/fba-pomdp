@@ -21,7 +21,7 @@ using GridWorldCoffeeState       = GridWorldCoffee::GridWorldCoffeeState;
 // constexpr static double const slow_move_prob = .1;
 // ((agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 1 && agent_pos.y == 3) || (agent_pos.x == 2 && agent_pos.y == 1))
 bool correctPrior = false;
-bool useAbstraction = true;
+bool useAbstraction = false;
 
 namespace priors {
 
@@ -163,7 +163,7 @@ void GridWorldCoffeeFlatBAPrior::setPriorObservationProbabilities(
     {
         for (unsigned int y = 0; y < _size; ++y)
         {
-            auto const o = domain.getObservation({x, y}, new_s->_rain, new_s->_carpet_config);
+            auto const o = domain.getObservation({x, y}); //, new_s->_rain, new_s->_carpet_config);
 
             auto const prob = domain.computeObservationProbability(o, a, new_s);
             acc_prob += prob;
@@ -602,16 +602,16 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
         }
 
         // observe rain and carpet function deterministically
-        for (auto f = 2; f < (int) _domain_feature_size._O.size(); ++f)
-        {
-            _correct_struct_prior.resetObservationNode(&action, f, {f});
-
-            for (auto v = 0; v < _domain_feature_size._S[f]; ++v)
-            {
-                _correct_struct_prior.observationNode(&action, f).count({v}, v) =
-                        _static_total_count;
-            }
-        }
+//        for (auto f = 2; f < (int) _domain_feature_size._O.size(); ++f)
+//        {
+//            _correct_struct_prior.resetObservationNode(&action, f, {f});
+//
+//            for (auto v = 0; v < _domain_feature_size._S[f]; ++v)
+//            {
+//                _correct_struct_prior.observationNode(&action, f).count({v}, v) =
+//                        _static_total_count;
+//            }
+//        }
 
         /**** T ****/
 

@@ -34,7 +34,7 @@ Domain_Feature_Size GridWorldCoffeeFBAExtension::domainFeatureSize() const
     // For states, x, y, rain, velocity, carpet
     // For observation, x, y, rain, carpet
     return {{static_cast<int>(_size), static_cast<int>(_size), static_cast<int>(2), static_cast<int>(_carpet_configurations)},
-            {static_cast<int>(_size), static_cast<int>(_size), static_cast<int>(2), static_cast<int>(_carpet_configurations)}};
+            {static_cast<int>(_size), static_cast<int>(_size)}};
 }
 
 utils::categoricalDistr const* GridWorldCoffeeFBAExtension::statePrior() const

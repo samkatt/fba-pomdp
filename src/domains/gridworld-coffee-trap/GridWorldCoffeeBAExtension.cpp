@@ -37,7 +37,7 @@ GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
     _domain_size = Domain_Size(
         static_cast<int>(_size * _size * 2 * _carpet_configurations),
         4,
-        static_cast<int>(_size * _size * 2 * _carpet_configurations));
+        static_cast<int>(_size * _size)); // * 2 * _carpet_configurations));
 
     // generate state space
     _states.reserve(_domain_size._S);

@@ -240,8 +240,8 @@ void remove_parents(std::vector<int>& a, std::vector<int>& b){
 }
 
 BABNModel BABNModel::abstract(int abstraction, Structure structure) const {
-    auto new_structure = structure;
-
+    auto new_structure = std::move(structure);
+    // TODO this should maybe be part of the environment
     // if abstraction = 0: keep only x and y
     // if abstraction = 1: keep x and y, and rain/carpet if they influence x and/or y
     // if abstraction = 2: keep x and y, and rain/carpet if they influence x and/or y,

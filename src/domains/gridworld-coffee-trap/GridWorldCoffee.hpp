@@ -99,12 +99,12 @@ public:
     public:
         GridWorldCoffeeObservation(
             ::domains::GridWorldCoffee::GridWorldCoffeeState::pos agent_pos,
-            unsigned int rain,
-            int carpet_config,
+//            unsigned int rain,
+//            int carpet_config,
             int i) :
             _agent_pos(agent_pos),
-            _rain(rain),
-            _carpet_config(carpet_config), // initiated below
+//            _rain(rain),
+//            _carpet_config(carpet_config), // initiated below
             _index(i)
         {
         }
@@ -115,8 +115,8 @@ public:
         std::string toString() const final { return _agent_pos.toString(); }
 
         ::domains::GridWorldCoffee::GridWorldCoffeeState::pos const _agent_pos;
-        unsigned int const _rain;
-        unsigned int const _carpet_config;
+//        unsigned int const _rain;
+//        unsigned int const _carpet_config;
 
     private:
         int const _index;
@@ -164,8 +164,9 @@ public:
     GridWorldCoffeeState const*
         getState(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const;
     GridWorldCoffeeObservation const* getObservation(
-        GridWorldCoffeeState::pos const& agent_pos,
-        unsigned int const& rain, unsigned int const& carpet_config) const;
+        GridWorldCoffeeState::pos const& agent_pos
+        // , unsigned int const& rain, unsigned int const& carpet_config
+        ) const;
 
     /**
      * @brief applies a move a on the old_pos to get a new pos
@@ -207,14 +208,14 @@ private:
      * @brief returns an observation from position agent_pos and rain
      **/
     Observation const* generateObservation(
-        GridWorldCoffeeState::pos const& agent_pos,
-        unsigned int const& rain,
-        unsigned int const& carpet_config) const;
+        GridWorldCoffeeState::pos const& agent_pos
+//        , unsigned int const& rain, unsigned int const& carpet_config
+        ) const;
 
     int positionsToIndex(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
         const;
-    int positionsToObservationIndex(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
-        const;
+    int positionsToObservationIndex(GridWorldCoffeeState::pos const& agent_pos) const;
+    //, unsigned int const& rain, unsigned int const& carpet_config) const;
 
 
     /** some functions to check input from system **/
