@@ -45,7 +45,7 @@ double update(WeightedFilter<T>& belief, Action const* a, Observation const* o, 
         d.step(&s, a, &tmp_observation, &r);
         p->w *= d.computeObservationProbability(o, a, p->particle);
 
-        VLOG(4) << " sample " << i << " has now index " << p->particle->index()
+        VLOG(4) << " sample " << i << " now has index " << p->particle->index()
                 << " and was assigned weight " << p->w;
 
         total_weight += p->w;

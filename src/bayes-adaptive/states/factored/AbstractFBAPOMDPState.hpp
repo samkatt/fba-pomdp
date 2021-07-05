@@ -54,15 +54,15 @@ public:
      **/
     void logCounts() const final;
 
-    std::vector<int>* getAbstraction();
-    void setAbstraction(std::vector<int>);
+    int* getAbstraction();
+    void setAbstraction(int);
 
     /*** State interface ***/
     std::string toString() const override;
 
 private:
 //    bayes_adaptive::factored::BABNModel _model;
-    std::vector<int> _abstraction; // Vector with the features that are included in the abstract model
+    int _abstraction; // Vector with the features that are included in the abstract model
     bayes_adaptive::factored::BABNModel _abstract_model;  // Abstract model that only uses the feature in _abstraction
     bayes_adaptive::factored::BABNModel construct_abstract_model(bayes_adaptive::factored::BABNModel model);
 };

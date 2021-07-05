@@ -239,14 +239,26 @@ void remove_parents(std::vector<int>& a, std::vector<int>& b){
 //    b.erase(std::remove_if(b.begin(), b.end(), predicate), b.end());
 }
 
-BABNModel BABNModel::abstract(std::vector<int> abstraction, Structure structure) const {
+BABNModel BABNModel::abstract(int abstraction, Structure structure) const {
     auto new_structure = structure;
+
+    // if abstraction = 0: keep only x and y
+    // if abstraction = 1: keep x and y, and rain/carpet if they influence x and/or y
+    // if abstraction = 2: keep x and y, and rain/carpet if they influence x and/or y,
+    // and rain/carpet if they influence rain/carpet (if it influences x and/or y
+    std::vector<int> abstraction_set = {};
+    if (abstraction == 0) {
+        abstraction_set = {0,1};
+    } else if (abstraction == 1) {
+        abstraction_set = {0, 1, 2, 3};
+    }
 
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
-//        action.index(a);
-        for (auto f = 0; f < static_cast<int>(abstraction.size()); ++f) {
-            remove_parents(new_structure.T[a][abstraction[f]], abstraction);
+        // if abstraction == 2 we should keep variables if they indirectly influence x and y.
+        // currently sort of happens because we only remove parents from x and y
+        for (auto f = 0; f < 2; ++f) {
+            remove_parents(new_structure.T[a][abstraction_set[f]], abstraction_set);
         }
     }
     return marginalizeOut(new_structure);

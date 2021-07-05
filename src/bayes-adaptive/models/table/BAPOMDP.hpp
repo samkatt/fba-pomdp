@@ -31,6 +31,7 @@ class BAPOMDP : public POMDP
 {
 public:
     enum StepType { UpdateCounts, KeepCounts };
+    enum SampleType { Abstract, Normal};
 
     BAPOMDP(
         std::unique_ptr<POMDP> domain,
@@ -82,7 +83,15 @@ public:
      * its last parameter
      **/
     Terminal
+        step(State const** s, Action const* a, Observation const** o, Reward* r, StepType step_type, SampleType sample_type)
+            const;
+
+    Terminal
         step(State const** s, Action const* a, Observation const** o, Reward* r, StepType step_type)
+            const;
+
+    Terminal
+        step(State const** s, Action const* a, Observation const** o, Reward* r, SampleType sample_type)
             const;
 
     /**** POMDP interface *****/
@@ -120,6 +129,8 @@ protected:
 private:
     // whether we're updating counts during steps
     mutable StepType _mode = UpdateCounts;
+
+    mutable SampleType _sample = Normal;
 
     // store observations locally for performance boost
     utils::DiscreteSpace<IndexObservation> _observations;

@@ -51,6 +51,40 @@ GridWorldCoffee::GridWorldCoffee() :
             }
         }
     }
+
+    /** observation function **/
+    _obs_displacement_probs.emplace_back(1 - wrong_obs_prob);
+
+    // TODO pas aan
+    // probability of generating location further and further away with diminishing return
+//    auto prob = wrong_obs_prob;
+//    auto prob_sum = .0;
+//    for (size_t i = 1; i < _size - 2; ++i) // i < _size -3?
+//    {
+//        prob *= .55;
+//        prob_sum += prob;
+//        _obs_displacement_probs.emplace_back(prob);
+//    }
+
+    // fill up all probability of the end to ensure it sums up to 1
+    auto prob = wrong_obs_prob;
+    _obs_displacement_probs.emplace_back(prob);
+//    _obs_displacement_probs.emplace_back(wrong_obs_prob - prob_sum);
+    _obs_displacement_probs.emplace_back(0);
+    _obs_displacement_probs.emplace_back(0);
+    _obs_displacement_probs.emplace_back(0);
+
+    // probability of generating location further and further away with diminishing return
+//    auto prob = wrong_obs_prob;
+//    for (size_t i = 1; i < _size - 1; ++i)
+//    {
+//        prob *= .5;
+//        _obs_displacement_probs.emplace_back(prob);
+//    }
+//
+//    // fill up all probability of the end to ensure it sums up to 1
+//    _obs_displacement_probs.emplace_back(prob);
+
     VLOG(1) << "initiated gridworld-coffee";
 }
 
@@ -68,6 +102,27 @@ size_t GridWorldCoffee::size() const
 double GridWorldCoffee::goalReward() const
 {
     return goal_reward;
+}
+
+float GridWorldCoffee::obsDisplProb(unsigned int loc, unsigned int observed_loc) const
+{
+
+    // compute displacement
+    auto const displacement = std::abs(static_cast<int>(loc - observed_loc));
+
+    // to be returned
+    float res = (displacement == 0) ? 1 - wrong_obs_prob // special case: no displacement
+                                    : _obs_displacement_probs[displacement] * .5; // per direction
+
+    // special cases: if observed location is on the edge, then
+    // the probability includes the accumulation of observing 'beyond' the edge
+    if (observed_loc == _size - 1 || observed_loc == 0)
+    {
+        for (size_t i = displacement + 1; i < _obs_displacement_probs.size(); ++i)
+        { res += _obs_displacement_probs[i] * .5; }
+    }
+
+    return res;
 }
 
 bool GridWorldCoffee::agentOnCarpet(GridWorldCoffeeState::pos const& agent_pos) const {
@@ -149,7 +204,10 @@ double GridWorldCoffee::computeObservationProbability(
     auto const& carpet_config = static_cast<GridWorldCoffeeState const*>(new_s)->_carpet_config;
     auto const& observed_carpet_config = static_cast<GridWorldCoffeeObservation const*>(o)->_carpet_config;
 
-    return ((agent_pos == observed_pos) && (rain == observed_rain) && (carpet_config == observed_carpet_config)) ? 1 : 0;
+    if ((rain == observed_rain) && (carpet_config == observed_carpet_config)){
+        return obsDisplProb(agent_pos.x, observed_pos.x) * obsDisplProb(agent_pos.y, observed_pos.y);
+    }
+    return 0;
 }
 
 void GridWorldCoffee::releaseAction(Action const* a) const
@@ -286,8 +344,31 @@ Observation const* GridWorldCoffee::generateObservation(
     unsigned int const& rain,
     unsigned int const& carpet_config) const
 {
+    // sample x & y displacement
+    auto const x_displacement = rnd::sample::Dir::sampleFromMult(
+            _obs_displacement_probs.data(), _obs_displacement_probs.size(), 1);
+    auto const y_displacement = rnd::sample::Dir::sampleFromMult(
+            _obs_displacement_probs.data(), _obs_displacement_probs.size(), 1);
+
+    // calculate observed positions
+    auto const observed_x =
+            (rnd::boolean())
+            ? std::max(
+                    0, static_cast<int>(agent_pos.x - x_displacement)) // x_displacement to the left
+            : std::min(
+                    agent_pos.x + x_displacement,
+                    static_cast<unsigned int>(_size) - 1); // displacement to the right
+
+    auto const observed_y =
+            (rnd::boolean())
+            ? std::max(
+                    0, static_cast<int>(agent_pos.y - y_displacement)) // y_displacement to the left
+            : std::min(
+                    agent_pos.y + y_displacement,
+                    static_cast<unsigned int>(_size) - 1); // displacement to the right
+
     // return corresponding indexed observation
-    return &_O[positionsToObservationIndex(agent_pos, rain, carpet_config)];
+    return &_O[positionsToObservationIndex({observed_x, observed_y}, rain, carpet_config)];
 }
 
 void GridWorldCoffee::assertLegal(Action const* a) const

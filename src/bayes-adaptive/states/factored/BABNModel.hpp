@@ -116,7 +116,7 @@ public:
     /**
      * @brief takes a abstraction with fewer features and returns a marginalized-out model
      **/
-    BABNModel abstract(std::vector<int> abstraction, Structure structure) const;
+    BABNModel abstract(int abstraction, Structure structure) const;
 
     /**
      * @brief returns the structure of its nodes

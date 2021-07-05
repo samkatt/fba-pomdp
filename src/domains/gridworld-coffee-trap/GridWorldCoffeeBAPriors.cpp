@@ -1,6 +1,7 @@
 #include "GridWorldCoffeeBAPriors.hpp"
 
 #include "bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp"
+#include "bayes-adaptive/states/factored/FBAPOMDPState.hpp"
 #include "bayes-adaptive/states/table/BAPOMDPState.hpp"
 #include "configurations/BAConf.hpp"
 #include "configurations/FBAConf.hpp"
@@ -19,7 +20,8 @@ using GridWorldCoffeeState       = GridWorldCoffee::GridWorldCoffeeState;
 // constexpr static double const move_prob      = .95;
 // constexpr static double const slow_move_prob = .1;
 // ((agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 1 && agent_pos.y == 3) || (agent_pos.x == 2 && agent_pos.y == 1))
-bool correctPrior = false ;
+bool correctPrior = false;
+bool useAbstraction = true;
 
 namespace priors {
 
@@ -156,7 +158,6 @@ void GridWorldCoffeeFlatBAPrior::setPriorObservationProbabilities(
     GridWorldCoffeeState const* new_s,
     GridWorldCoffee const& domain)
 {
-
     double acc_prob = 0;
     for (unsigned int x = 0; x < _size; ++x)
     {
@@ -568,7 +569,10 @@ FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFullyConnectedState(State const
 
     FBAPOMDPState const* GridWorldCoffeeFactBAPrior::sampleCorrectGraphState(State const* domain_state) const
 {
-    return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
+    if (useAbstraction) {
+        return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
+    }
+    return new FBAPOMDPState(domain_state, _correct_struct_prior);
 }
 
 // TODO constructs the correct model? or the model that the agent beliefs is correct?
@@ -580,15 +584,32 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
         IndexAction const action(a);
 
         /*** O (known) ***/
-        // observe agent location, rain and carpet function deterministically
-        for (auto f = 0; f < (int) _domain_feature_size._O.size(); ++f)
+        // observe agent location, depends on state feature and observation probabilities
+        for (auto f = 0; f < 2; ++f)
+        {
+            _correct_struct_prior.resetObservationNode(&action, f, {f});
+
+            for (auto agent_loc = 0; agent_loc < _domain_feature_size._S[f]; ++agent_loc)
+            {
+                for (auto observed_loc = 0; observed_loc < _domain_feature_size._S[f];
+                     ++observed_loc)
+                {
+                    _correct_struct_prior.observationNode(&action, f)
+                            .count({agent_loc}, observed_loc) =
+                            _domain.obsDisplProb(agent_loc, observed_loc) * _static_total_count;
+                }
+            }
+        }
+
+        // observe rain and carpet function deterministically
+        for (auto f = 2; f < (int) _domain_feature_size._O.size(); ++f)
         {
             _correct_struct_prior.resetObservationNode(&action, f, {f});
 
             for (auto v = 0; v < _domain_feature_size._S[f]; ++v)
             {
-                  _correct_struct_prior.observationNode(&action, f).count({v}, v) =
-                          _static_total_count;
+                _correct_struct_prior.observationNode(&action, f).count({v}, v) =
+                        _static_total_count;
             }
         }
 
@@ -667,7 +688,10 @@ FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* doma
 //        return new AbstractFBAPOMDPSTATE(domain_state, _correct_struct_prior);
 //    }
     if (correctPrior) {
-        return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
+        if (useAbstraction) {
+            return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
+        }
+        return new FBAPOMDPState(domain_state, _correct_struct_prior);
     }
 
     /*** noisy struct prior ****/
@@ -706,8 +730,10 @@ FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* doma
             structure.T[a][_agent_y_feature].emplace_back(_carpet_feature);
         }
     }
-
-    return new AbstractFBAPOMDPState(domain_state, computePriorModel(structure));
+    if (useAbstraction) {
+        return new AbstractFBAPOMDPState(domain_state, computePriorModel(structure));
+    }
+    return new FBAPOMDPState(domain_state, computePriorModel(structure));
 }
 
     Domain_Feature_Size *GridWorldCoffeeFactBAPrior::getDomainFeatureSize() {

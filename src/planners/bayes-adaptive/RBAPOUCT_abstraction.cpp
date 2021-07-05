@@ -85,40 +85,34 @@ Action const* RBAPOUCT_abstraction::selectAction(
     // make sure counts are not changed over time (changed back after simulations)
     auto const old_mode = simulator.mode();
     simulator.mode(BAPOMDP::StepType::KeepCounts);
-
+    int sims_per_particle = 200;
     // perform simulations
-    for (auto i = 0; i < _n; ++i)
+    for (auto i = 0; i < _n/sims_per_particle; ++i)
     {
         // hier particle aanpassen?
         // do not copy!!
         auto particle = (AbstractFBAPOMDPState *) static_cast<BAState const *>(belief.sample());
 
         // Adding abstraction, if it's not there yet.
-        // Maybe do it once per episode?
-        if (static_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction()->size() == 0) {
-            static_cast<AbstractFBAPOMDPState*>(particle)->setAbstraction({0,1});
+        if (*static_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction() != 0) {
+            static_cast<AbstractFBAPOMDPState*>(particle)->setAbstraction(0);
         }
 
         // but safe old state, so that we can reset the particle (counts are not modified)
         auto const old_domain_state = simulator.copyDomainState(particle->_domain_state); // domain_state = pomdp state
-        // TODO Sammie, does removing this "const_cast<BAState*>" break anything?
-//        const_cast<BAState*>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
         particle->_domain_state = simulator.copyDomainState(old_domain_state);
+        for (auto j = 0; j < sims_per_particle; ++j){
+            VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
 
+            auto r = traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
 
-        VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
+            VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
 
-        auto r = traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
-
-        VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
-
-        // return particle in correct state
-        simulator.releaseDomainState(particle->_domain_state);
-//        const_cast<BAState*>(particle)->_domain_state = old_domain_state;
-        particle->_domain_state = old_domain_state;
-        // TODO remove abstraction (or maybe not)
+            // return particle in correct state
+            simulator.releaseDomainState(particle->_domain_state);
+            particle->_domain_state = old_domain_state;
+        }
     }
-
     simulator.mode(old_mode);
 
     // pick best action
@@ -249,7 +243,7 @@ Return RBAPOUCT_abstraction::traverseChanceNode(
     Reward immediate_reward(0);
     Return delayed_return;
 
-    auto terminal = simulator.step(&s, n._action, &o, &immediate_reward);
+    auto terminal = simulator.step(&s, n._action, &o, &immediate_reward, BAPOMDP::SampleType::Abstract);
 
     // continue traverse if not terminated
     if (!terminal.terminated())
@@ -308,7 +302,7 @@ Return RBAPOUCT_abstraction::rollout(State const* s, BAPOMDP const& simulator, i
     while (depth_to_go > 0 && !t.terminated())
     {
         auto const a = simulator.generateRandomAction(s);
-        t            = simulator.step(&s, a, &o, &immediate_reward);
+        t            = simulator.step(&s, a, &o, &immediate_reward, BAPOMDP::SampleType::Abstract);
 
         ret.add(immediate_reward, discount);
         discount.increment();

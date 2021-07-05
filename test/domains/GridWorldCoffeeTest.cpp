@@ -32,6 +32,24 @@ SCENARIO("GridWorldCoffee actions, observations & states", "[domain][gridworldco
         REQUIRE((pos{x, y} == pos{x, y}));
         REQUIRE((pos{x, y} != pos{x, y2}));
     }
+
+    WHEN("Calculating the observation probabilities")
+    {
+
+        domains::GridWorldCoffee d;
+
+        REQUIRE(d.obsDisplProb(0, 0) == Approx(.9));
+        REQUIRE(d.obsDisplProb(0, 1) == Approx(.05));
+        REQUIRE(d.obsDisplProb(0, 2) == Approx(.025));
+
+        REQUIRE(d.obsDisplProb(1, 1) == Approx(.8));
+        REQUIRE(d.obsDisplProb(1, 0) == Approx(.1));
+
+        REQUIRE(d.obsDisplProb(2, 3) == Approx(.05));
+
+        REQUIRE(d.obsDisplProb(4, 4) == Approx(.9));
+        REQUIRE(d.obsDisplProb(4, 2) == Approx(.025));
+    }
 }
 
 SCENARIO("GridWorldCoffee dynamics", "[domain][gridworldcoffee]")

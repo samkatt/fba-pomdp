@@ -41,6 +41,7 @@ public:
     constexpr static double const same_weather_prob = .7;
     constexpr static double const move_prob      = .95;
     constexpr static double const slow_move_prob = .1;
+    constexpr static double const wrong_obs_prob = .1;
 
     /**
      * @brief A state in the grid world problem
@@ -153,6 +154,11 @@ public:
     bool agentOnCarpet(GridWorldCoffeeState::pos const& agent_pos) const;
     State const* sampleRandomState() const;
 
+    /**
+     * @brief returns probability of observing a location given the real one (1 dimensional)
+     **/
+    float obsDisplProb(unsigned int loc, unsigned int observed_loc) const;
+
     bool foundGoal(GridWorldCoffeeState const* s) const;
 
     GridWorldCoffeeState const*
@@ -190,6 +196,9 @@ private:
     int _A_size = 4;
     int _S_size;
     int _O_size;
+
+    // describes the probability of displacement in our observation in 1 dimension
+    std::vector<float> _obs_displacement_probs = {};
 
     std::vector<GridWorldCoffeeState> _S       = {};
     std::vector<GridWorldCoffeeObservation> _O = {};

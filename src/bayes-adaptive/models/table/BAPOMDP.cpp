@@ -10,6 +10,8 @@
 #include "environment/Observation.hpp"
 #include "environment/Reward.hpp"
 
+#include <bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp>
+
 BAPOMDP::BAPOMDP(
     std::unique_ptr<POMDP> domain,
     std::unique_ptr<BADomainExtension> ba_domain_ext,
@@ -105,7 +107,17 @@ State const* BAPOMDP::sampleStartState() const
 
 Terminal BAPOMDP::step(State const** s, Action const* a, Observation const** o, Reward* r) const
 {
-    return step(s, a, o, r, _mode);
+    return step(s, a, o, r, _mode, _sample);
+}
+
+Terminal BAPOMDP::step(State const** s, Action const* a, Observation const** o, Reward* r, StepType step_type) const
+{
+    return step(s, a, o, r, step_type, _sample);
+}
+
+Terminal BAPOMDP::step(State const** s, Action const* a, Observation const** o, Reward* r, SampleType sample_type) const
+{
+    return step(s, a, o, r, _mode, sample_type);
 }
 
 Terminal BAPOMDP::step(
@@ -113,7 +125,8 @@ Terminal BAPOMDP::step(
     Action const* a,
     Observation const** o,
     Reward* r,
-    StepType step_type) const
+    StepType step_type,
+    SampleType sample_type) const
 {
     assert(s != nullptr && *s != nullptr && (*s)->index() >= 0);
     assert(a != nullptr && a->index() >= 0);
@@ -124,8 +137,10 @@ Terminal BAPOMDP::step(
     auto const domain_state = ba_s->_domain_state;
 
     // sample state
-    auto const new_s =
-        _ba_domain_ext->getState(ba_s->sampleStateIndex(domain_state, a, _sample_method));
+    auto const new_s = (sample_type == SampleType::Abstract) ?
+            _ba_domain_ext->getState(static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method)) :
+            _ba_domain_ext->getState(ba_s->sampleStateIndex(domain_state, a, _sample_method));
+
     *o = _observations.get(ba_s->sampleObservationIndex(a, new_s, _sample_method));
 
     auto const t = _ba_domain_ext->terminal(domain_state, a, new_s);
