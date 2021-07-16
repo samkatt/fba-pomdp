@@ -7,6 +7,7 @@
 #include "domains/sysadmin/SysAdminFBAExtension.hpp"
 #include "domains/tiger/FactoredTigerFBAExtension.hpp"
 #include "domains/gridworld-coffee-trap/GridWorldCoffeeFBAExtension.hpp"
+#include "domains/gridworld-coffee-trap-big/GridWorldCoffeeBigFBAExtension.hpp"
 
 namespace factory {
 std::unique_ptr<FBADomainExtension> makeFBADomainExtension(configurations::FBAConf const& c)
@@ -34,6 +35,10 @@ std::unique_ptr<FBADomainExtension> makeFBADomainExtension(configurations::FBACo
     if (d == "gridworldcoffee")
         return std::unique_ptr<FBADomainExtension>(
                 new ext::GridWorldCoffeeFBAExtension());
+
+    if (d == "gridworldcoffeebig")
+        return std::unique_ptr<FBADomainExtension>(
+                new ext::GridWorldCoffeeBigFBAExtension());
 
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
     {

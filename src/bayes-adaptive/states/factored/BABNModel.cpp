@@ -239,7 +239,8 @@ void remove_parents(std::vector<int>& a, std::vector<int>& b){
 //    b.erase(std::remove_if(b.begin(), b.end(), predicate), b.end());
 }
 
-BABNModel BABNModel::abstract(int abstraction, Structure structure) const {
+BABNModel BABNModel::abstract(int abstraction, BABNModel::Structure structure, const Domain_Size *ds,
+                                        const Domain_Feature_Size *dfs, const BABNModel::Indexing_Steps *is) const {
     auto new_structure = std::move(structure);
     // TODO this should maybe be part of the environment
     // if abstraction = 0: keep only x and y
@@ -261,7 +262,38 @@ BABNModel BABNModel::abstract(int abstraction, Structure structure) const {
             remove_parents(new_structure.T[a][abstraction_set[f]], abstraction_set);
         }
     }
-    return marginalizeOut(new_structure);
+
+    // marginalize and reduce
+    std::vector<DBNNode> T_marginalized, O_marginalized;
+
+    auto action = IndexAction(0);
+    for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
+    {
+        action.index(a);
+
+        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
+        {
+            T_marginalized.emplace_back(
+                    transitionNode(&action, f).marginalizeOut(std::move(new_structure.T[a][f])));
+        }
+
+        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)
+        {
+            O_marginalized.emplace_back(
+                    observationNode(&action, f).marginalizeOut(std::move(new_structure.O[a][f])));
+        }
+    }
+
+    if (abstraction == 0) {
+        T_marginalized.erase(std::remove_if(T_marginalized.begin(), T_marginalized.end(),
+                                            [](DBNNode i) {return i.range() != 5; }), T_marginalized.end());
+
+        return BABNModel(
+                ds, dfs, is, T_marginalized, O_marginalized);
+    }
+
+    return BABNModel(
+            _domain_size, _domain_feature_size, _step_sizes, T_marginalized, O_marginalized);
 }
 
 DBNNode& BABNModel::transitionNode(Action const* a, int feature)
@@ -334,6 +366,18 @@ int BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Di
     //fill the vector by sampling next stage feature 1 by 1
     for (auto n = 0; n < (int)_domain_feature_size->_S.size(); ++n)
     { feature_values[n] = transitionNode(a, n).sample(parent_values, m); }
+
+    return indexing::project(feature_values, _domain_feature_size->_S);
+}
+
+int BABNModel::sampleStateIndexThroughAbstraction(const State *s, const Action *a, std::vector<int> newfeature_values) const {
+    assertLegal(s);
+    assertLegal(a);
+
+    //create a vector for the next-stage variables - XXX: this is a memory allocation... expensive!?
+    auto feature_values = std::vector<int>(_domain_feature_size->_S.size(), 0);
+    feature_values[0] = newfeature_values[0];
+    feature_values[1] = newfeature_values[1];
 
     return indexing::project(feature_values, _domain_feature_size->_S);
 }

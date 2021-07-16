@@ -73,6 +73,7 @@ public:
     BABNModel& operator=(BABNModel&&) = default;
 
     int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m) const;
+    int sampleStateIndexThroughAbstraction(State const* s, Action const* a, std::vector<int> parent_values) const;
     int sampleObservationIndex(
         Action const* a,
         State const* new_s,
@@ -114,9 +115,10 @@ public:
     BABNModel marginalizeOut(Structure new_structure) const;
 
     /**
-     * @brief takes a abstraction with fewer features and returns a marginalized-out model
+     * @brief takes a abstraction with fewer features and marginalizes out the other features
      **/
-    BABNModel abstract(int abstraction, Structure structure) const;
+    BABNModel abstract(int abstraction, Structure structure, Domain_Size const* ds,
+                       Domain_Feature_Size const* dfs, Indexing_Steps const* is) const;
 
     /**
      * @brief returns the structure of its nodes
@@ -146,6 +148,11 @@ public:
 
     void log() const;
 
+/**
+ * @brief returns the state feature values associated with provided state
+ **/
+std::vector<int> stateFeatureValues(State const* s) const;
+
 private:
     Domain_Size const* _domain_size;
     Domain_Feature_Size const* _domain_feature_size;
@@ -163,10 +170,6 @@ private:
      **/
     std::vector<int> observationFeatureValues(Observation const* o) const;
 
-    /**
-     * @brief returns the state feature values associated with provided state
-     **/
-    std::vector<int> stateFeatureValues(State const* s) const;
 };
 
 }} // namespace bayes_adaptive::factored

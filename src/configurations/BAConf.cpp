@@ -80,7 +80,8 @@ void BAConf::validate() const
                                                      "random-collision-avoidance",
                                                      "centered-collision-avoidance",
                                                      "gridworld",
-                                                     "gridworldcoffee"};
+                                                     "gridworldcoffee",
+                                                     "gridworldcoffeebig"};
 
     Conf::validate();
 

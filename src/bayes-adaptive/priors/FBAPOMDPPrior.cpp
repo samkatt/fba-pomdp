@@ -15,6 +15,8 @@
 #include "domains/gridworld/GridWorldBAPriors.hpp"
 #include "domains/gridworld-coffee-trap/GridWorldCoffee.hpp"
 #include "domains/gridworld-coffee-trap/GridWorldCoffeeBAPriors.hpp"
+#include "domains/gridworld-coffee-trap-big/GridWorldCoffeeBig.hpp"
+#include "domains/gridworld-coffee-trap-big/GridWorldCoffeeBigBAPriors.hpp"
 #include "domains/sysadmin/SysAdmin.hpp"
 #include "domains/sysadmin/SysAdminFactoredPrior.hpp"
 #include "domains/tiger/FactoredTigerPriors.hpp"
@@ -67,6 +69,9 @@ std::unique_ptr<FBAPOMDPPrior>
     if (d == "gridworldcoffee")
         return std::unique_ptr<FBAPOMDPPrior>(
                 new priors::GridWorldCoffeeFactBAPrior(static_cast<domains::GridWorldCoffee const&>(domain), c));
+    if (d == "gridworldcoffeebig")
+        return std::unique_ptr<FBAPOMDPPrior>(
+                new priors::GridWorldCoffeeBigFactBAPrior(static_cast<domains::GridWorldCoffeeBig const&>(domain), c));
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<FBAPOMDPPrior>(new priors::CollisionAvoidanceFactoredPrior(c));
 

@@ -84,9 +84,11 @@ Action const* RBAPOUCT::selectAction(
     // make sure counts are not changed over time (changed back after simulations)
     auto const old_mode = simulator.mode();
     simulator.mode(BAPOMDP::StepType::KeepCounts);
+    int sims_per_particle = 1;
+
 
     // perform simulations
-    for (auto i = 0; i < _n; ++i)
+    for (auto i = 0; i < _n/sims_per_particle; ++i)
     {
         // do not copy!!
         auto particle = static_cast<BAState const*>(belief.sample());
@@ -94,16 +96,18 @@ Action const* RBAPOUCT::selectAction(
         // but safe old state, so that we can reset the particle (counts are not modified)
         auto const old_domain_state = simulator.copyDomainState(particle->_domain_state);
         const_cast<BAState*>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
+        for (auto j = 0; j < sims_per_particle; ++j) {
 
-        VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
+            VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
 
-        auto r = traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
+            auto r = traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
 
-        VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
+            VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
 
-        // return particle in correct state
-        simulator.releaseDomainState(particle->_domain_state);
-        const_cast<BAState*>(particle)->_domain_state = old_domain_state;
+            // return particle in correct state
+            simulator.releaseDomainState(particle->_domain_state);
+            const_cast<BAState *>(particle)->_domain_state = old_domain_state;
+        }
     }
 
     simulator.mode(old_mode);

@@ -20,8 +20,8 @@ using GridWorldCoffeeState       = GridWorldCoffee::GridWorldCoffeeState;
 // constexpr static double const move_prob      = .95;
 // constexpr static double const slow_move_prob = .1;
 // ((agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 1 && agent_pos.y == 3) || (agent_pos.x == 2 && agent_pos.y == 1))
-bool correctPrior = false;
-bool useAbstraction = false;
+bool correctPrior = true;
+bool useAbstraction = true;
 
 namespace priors {
 
@@ -674,9 +674,11 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
                         (trans_prob)*_unknown_counts_total;
                 _correct_struct_prior.transitionNode(&action, _agent_y_feature).count({x, y}, new_pos.y) +=
                         (trans_prob)*_unknown_counts_total;
+
             }
         }
     }
+
 }
 
 FBAPOMDPState* GridWorldCoffeeFactBAPrior::sampleFBAPOMDPState(State const* domain_state) const

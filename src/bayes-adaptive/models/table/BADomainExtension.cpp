@@ -5,6 +5,7 @@
 #include "domains/dummy/DummyDomainBAExtension.hpp"
 #include "domains/dummy/FactoredDummyDomainBAExtension.hpp"
 #include "domains/gridworld-coffee-trap/GridWorldCoffeeBAExtension.hpp"
+#include "domains/gridworld-coffee-trap-big/GridWorldCoffeeBigBAExtension.hpp"
 #include "domains/gridworld/GridWorldBAExtension.hpp"
 #include "domains/sysadmin/SysAdminBAExtension.hpp"
 #include "domains/tiger/FactoredTigerBAExtension.hpp"
@@ -55,6 +56,10 @@ std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf 
     if (d == "gridworldcoffee")
         return std::unique_ptr<BADomainExtension>(
             new ext::GridWorldCoffeeBAExtension());
+
+    if (d == "gridworldcoffeebig")
+        return std::unique_ptr<BADomainExtension>(
+                new ext::GridWorldCoffeeBigBAExtension());
 
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<BADomainExtension>(new ext::CollisionAvoidanceBAExtension(

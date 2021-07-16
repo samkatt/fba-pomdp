@@ -38,17 +38,17 @@ SCENARIO("GridWorldCoffee actions, observations & states", "[domain][gridworldco
 
         domains::GridWorldCoffee d;
 
-        REQUIRE(d.obsDisplProb(0, 0) == Approx(.9));
+        REQUIRE(d.obsDisplProb(0, 0) == Approx(.95));
         REQUIRE(d.obsDisplProb(0, 1) == Approx(.05));
-        REQUIRE(d.obsDisplProb(0, 2) == Approx(.025));
+        REQUIRE(d.obsDisplProb(0, 2) == Approx(.0));
 
-        REQUIRE(d.obsDisplProb(1, 1) == Approx(.8));
-        REQUIRE(d.obsDisplProb(1, 0) == Approx(.1));
+        REQUIRE(d.obsDisplProb(1, 1) == Approx(.9));
+        REQUIRE(d.obsDisplProb(1, 0) == Approx(.05));
 
         REQUIRE(d.obsDisplProb(2, 3) == Approx(.05));
 
-        REQUIRE(d.obsDisplProb(4, 4) == Approx(.9));
-        REQUIRE(d.obsDisplProb(4, 2) == Approx(.025));
+        REQUIRE(d.obsDisplProb(4, 4) == Approx(.95));
+        REQUIRE(d.obsDisplProb(4, 2) == Approx(.0));
     }
 }
 

@@ -60,7 +60,7 @@ RBAPOUCT_abstraction::RBAPOUCT_abstraction(configurations::Conf const& c) :
 
     initiateUCBTable();
 
-    VLOG(1) << "initiated RBAPOUCT planner with " << _n << " simulations, " << _max_depth
+    VLOG(1) << "initiated RBAPOUCT-abstraction planner with " << _n << " simulations, " << _max_depth
             << " max depth, " << _u << " exploration constant, " << _discount.toDouble()
             << " discount and " << _h << " horizon";
 }
@@ -85,7 +85,7 @@ Action const* RBAPOUCT_abstraction::selectAction(
     // make sure counts are not changed over time (changed back after simulations)
     auto const old_mode = simulator.mode();
     simulator.mode(BAPOMDP::StepType::KeepCounts);
-    int sims_per_particle = 200;
+    int sims_per_particle = 1;
     // perform simulations
     for (auto i = 0; i < _n/sims_per_particle; ++i)
     {

@@ -89,7 +89,7 @@ SCENARIO("gridworldCoffee domain sizes", "[domain][gridworldCoffee][bayes-adapti
 
     domains::GridWorldCoffee d;
     bayes_adaptive::domain_extensions::GridWorldCoffeeBAExtension ext;
-    bayes_adaptive::domain_extensions::GridWorldCoffeeFBAExtension f_ext;
+    bayes_adaptive::domain_extensions::GridWorldCoffeeFBAExtensionBig f_ext;
 
     WHEN("asking the size of the gridworldCoffee domain")
     {
@@ -121,7 +121,7 @@ SCENARIO("gridworldCoffee domain sizes", "[domain][gridworldCoffee][bayes-adapti
 SCENARIO("gridworldCoffee state prior", "[bayes-adaptive][gridworldCoffee][domain][factored]")
 {
 
-    bayes_adaptive::domain_extensions::GridWorldCoffeeFBAExtension const f_ext;
+    bayes_adaptive::domain_extensions::GridWorldCoffeeFBAExtensionBig const f_ext;
 
     // I know that the index of the state should be deterministic
     REQUIRE(f_ext.statePrior()->sample() == 0);

@@ -17,7 +17,10 @@
 AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model) :
         FBAPOMDPState(domain_state, std::move(model)),
         _abstraction(-1), // Empty initialization.
-        _abstract_model() // Initialized later, when abstraction is added
+        _abstract_model(), // Initialized later, when abstraction is added
+        _abstract_domain_size(25,4,25),
+        _abstract_domain_feature_size({5,5}, {5,5}),
+        _step_size({5,1},{5,1})
 {
     assert(model.domainFeatureSize());
 }
@@ -36,13 +39,21 @@ int AbstractFBAPOMDPState::sampleStateIndex(
     return model()->sampleStateIndex(s,a,m);
 }
 
-// this samples a new state, using the abstract model (TODO currently it still samples from all the variables)
+// this samples a new state, using the abstract model
 int AbstractFBAPOMDPState::sampleStateIndexAbstract(
         State const* s,
         Action const* a,
         rnd::sample::Dir::sampleMethod m) const
 {
-        return _abstract_model.sampleStateIndex(s,a,m);
+    if (_abstraction == 0) {
+        auto parent_values = model()->stateFeatureValues(s);
+        std::vector<int> next_values = {0, 0};
+        next_values[0] = _abstract_model.transitionNode(a, 0).sample(parent_values, m);
+        next_values[1] = _abstract_model.transitionNode(a, 1).sample(parent_values, m);
+        // TODO this needs to be changed?
+        return model()->sampleStateIndexThroughAbstraction(s,a, next_values);
+    }
+    return _abstract_model.sampleStateIndex(s,a,m);
 }
 
 int AbstractFBAPOMDPState::sampleObservationIndex(
@@ -83,8 +94,10 @@ void AbstractFBAPOMDPState::setAbstraction(int k){
 }
 
 // Construct abstract model from the model given the features to keep in the abstraction
-bayes_adaptive::factored::BABNModel AbstractFBAPOMDPState::construct_abstract_model(bayes_adaptive::factored::BABNModel model) {
-    return model.abstract(_abstraction, model.structure());
+bayes_adaptive::factored::BABNModel AbstractFBAPOMDPState::construct_abstract_model(bayes_adaptive::factored::BABNModel model) const {
+//    if (_abstraction == 0) {
+    return model.abstract(_abstraction, model.structure(), &_abstract_domain_size, &_abstract_domain_feature_size, &_step_size);
+//    }
 }
 
 void AbstractFBAPOMDPState::logCounts() const {
