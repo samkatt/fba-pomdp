@@ -39,6 +39,7 @@ private:
 
     // params
     int const _n; // number of simulations
+    int const _sims_per_sample; // number of simulations done per sampled particle
     int const _max_depth; // max depth of the search tree
     int const _h; // horizon of the problem
     double const _u; // exploration constant

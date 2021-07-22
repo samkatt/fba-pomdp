@@ -13,7 +13,6 @@
 
 
 #include "utils/index.hpp"
-// TODO after every "real" timestep, will these be constructed again? I.e. can I assume _abstraction will be empty?
 AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model) :
         FBAPOMDPState(domain_state, std::move(model)),
         _abstraction(-1), // Empty initialization.
@@ -83,7 +82,7 @@ double AbstractFBAPOMDPState::computeObservationProbability(
 
 bool updateAbstractModel = true;
 
-void AbstractFBAPOMDPState::incrementCountsOf(
+void AbstractFBAPOMDPState::incrementCountsOfAbstract(
     State const* s,
     Action const* a,
     Observation const* o,
@@ -106,6 +105,16 @@ void AbstractFBAPOMDPState::incrementCountsOf(
         for (auto n = 0; n < (int)_abstract_domain_feature_size._O.size(); ++n)
         { _abstract_model.observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
     }
+    FBAPOMDPState::model()->incrementCountsOf(s, a, o, new_s, amount);
+}
+
+void AbstractFBAPOMDPState::incrementCountsOf(
+        State const* s,
+        Action const* a,
+        Observation const* o,
+        State const* new_s,
+        float amount)
+{
     FBAPOMDPState::model()->incrementCountsOf(s, a, o, new_s, amount);
 }
 

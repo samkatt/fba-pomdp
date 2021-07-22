@@ -15,10 +15,12 @@ std::unique_ptr<Planner> makeBAPlanner(configurations::Conf const& c)
         return std::unique_ptr<Planner>(new planners::RandomPlanner());
     if (c.planner == "ts")
         return std::unique_ptr<Planner>(new planners::BATSPlanner(c));
-    if (c.planner == "po-uct")
+    if (c.planner == "po-uct") {
+        if (c.domain_conf.abstraction) {
+            return std::unique_ptr<Planner>(new planners::RBAPOUCT_abstraction(c));
+        }
         return std::unique_ptr<Planner>(new planners::RBAPOUCT(c));
-    if (c.planner == "po-uct-abstraction")
-        return std::unique_ptr<Planner>(new planners::RBAPOUCT_abstraction(c));
+    }
 
     throw "incorrect planner provided";
 }

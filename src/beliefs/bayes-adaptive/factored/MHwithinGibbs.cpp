@@ -6,6 +6,7 @@
 #include <numeric>
 #include <string>
 #include <utility>
+#include <bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp>
 
 #include "easylogging++.h"
 
@@ -236,9 +237,11 @@ std::vector<IndexState> sampleStateHistory(
 MHwithinGibbs::MHwithinGibbs(
     size_t size,
     double ll_threshold,
+    bool abstraction,
     SAMPLE_STATE_HISTORY_TYPE state_history_sample_type) :
         _size(size),
         _ll_threshold(ll_threshold),
+        _abstraction(abstraction),
         _state_history_sample_type(state_history_sample_type)
 {
 
@@ -366,11 +369,17 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
 
         if (log(rnd::uniform_rand01()) < (new_score - score))
         {
-
-            _belief.add(
+            if (_abstraction) {
+                _belief.add(
+                new AbstractFBAPOMDPState(
+                        fbapomdp.domainState(state_sequence.back().index()), std::move(new_model)),
+                1 / static_cast<double>(_size));
+            } else {
+                _belief.add(
                 new FBAPOMDPState(
                     fbapomdp.domainState(state_sequence.back().index()), std::move(new_model)),
-                1 / static_cast<double>(_size));
+                        1 / static_cast<double>(_size));
+            }
 
             // gibbs sample 1: sample p(states | struct)
             state_sequence = ::beliefs::bayes_adaptive::factored::sampleStateHistory(

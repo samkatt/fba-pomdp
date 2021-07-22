@@ -14,8 +14,10 @@ struct PlannerConf
 {
 
     int mcts_simulation_amount    = 1000;
+    int sims_per_sample           = 1;
     int mcts_max_depth            = -1;
     double mcts_exploration_const = 100;
+    int remake_abstract_model     = 0;
 
     /**
      * /brief adds options in this structure to descr

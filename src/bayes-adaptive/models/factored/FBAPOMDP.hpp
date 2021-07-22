@@ -31,7 +31,8 @@ public:
         std::unique_ptr<FBADomainExtension> fba_domain_ext,
         std::unique_ptr<FBAPOMDPPrior> prior,
         rnd::sample::Dir::sampleMethod sample_method,
-        rnd::sample::Dir::sampleMultinominal compute_mult_method);
+        rnd::sample::Dir::sampleMultinominal compute_mult_method,
+        bool update_abstract_model);
 
     Domain_Feature_Size const* domainFeatureSize() const;
 

@@ -58,6 +58,10 @@ void BAConf::addOptions(boost::program_options::options_description* descr)
          po::value(&noise)->default_value(noise),
          "The noise parameter")
         (
+        "update_abstract_model",
+        po::value(&update_abstract_model)->default_value(update_abstract_model),
+        "Whether or not the abstract model is updated every timestep")
+        (
         "counts-total,C",
         po::value(&counts_total)->default_value(counts_total),
         "Total number of initial counts in a dirichlet distibution that needs to be learned");

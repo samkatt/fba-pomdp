@@ -34,6 +34,7 @@ public:
     MHwithinGibbs(
         size_t size,
         double ll_threshold,
+        bool abstraction,
         SAMPLE_STATE_HISTORY_TYPE state_history_sample_type);
 
     /*** BABelief interface ***/
@@ -49,6 +50,7 @@ private:
     // params
     size_t const _size;
     double const _ll_threshold;
+    bool const _abstraction;
 
     SAMPLE_STATE_HISTORY_TYPE const _state_history_sample_type;
 

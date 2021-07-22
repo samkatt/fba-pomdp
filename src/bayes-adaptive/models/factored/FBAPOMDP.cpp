@@ -18,13 +18,15 @@ FBAPOMDP::FBAPOMDP(
     std::unique_ptr<FBADomainExtension> fba_domain_ext,
     std::unique_ptr<FBAPOMDPPrior> prior,
     rnd::sample::Dir::sampleMethod sample_method,
-    rnd::sample::Dir::sampleMultinominal compute_mult_method) :
+    rnd::sample::Dir::sampleMultinominal compute_mult_method,
+    bool update_abstract_model) :
         BAPOMDP(
             std::move(domain),
             std::move(ba_domain_ext),
             std::unique_ptr<BAPrior>(prior.release()),
             sample_method,
-            compute_mult_method),
+            compute_mult_method,
+            update_abstract_model),
         _fba_domain_ext(std::move(fba_domain_ext)),
         _domain_feature_size(_fba_domain_ext->domainFeatureSize()),
         _step_sizes(
@@ -91,13 +93,16 @@ std::unique_ptr<BAPOMDP> makeFBAPOMDP(configurations::FBAConf const& c)
     auto compute_mult_method = (c.bayes_sample_method == 0) ? rnd::sample::Dir::sampleMult
                                                             : rnd::sample::Dir::expectedMult;
 
+    auto update_abstract_model = c.update_abstract_model != 0;
+
     return std::unique_ptr<BAPOMDP>(new bayes_adaptive::factored::FBAPOMDP(
         std::unique_ptr<POMDP>(domain),
         std::move(ba_domain_ext),
         std::move(fba_domain_ext),
         std::move(prior),
         sample_method,
-        compute_mult_method));
+        compute_mult_method,
+        update_abstract_model));
 }
 
 } // namespace factory

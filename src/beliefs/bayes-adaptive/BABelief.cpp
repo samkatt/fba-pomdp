@@ -23,7 +23,7 @@ std::unique_ptr<beliefs::BABelief> makeBABelief(configurations::Conf const& c)
             new beliefs::BARejectionSampling(c.belief_conf.particle_amount));
     if (c.belief == "importance_sampling")
         return std::unique_ptr<beliefs::BABelief>(
-            new beliefs::BAImportanceSampling(c.belief_conf.particle_amount));
+            new beliefs::BAImportanceSampling(c.belief_conf.particle_amount, c.domain_conf.abstraction, c.planner_conf.remake_abstract_model));
 
     if (c.belief == "reinvigoration")
         return std::unique_ptr<beliefs::BABelief>(
@@ -41,12 +41,14 @@ std::unique_ptr<beliefs::BABelief> makeBABelief(configurations::Conf const& c)
                 new beliefs::bayes_adaptive::factored::MHwithinGibbs(
                     c.belief_conf.particle_amount,
                     c.belief_conf.threshold,
+                    c.domain_conf.abstraction,
                     beliefs::bayes_adaptive::factored::MHwithinGibbs::MSG));
         else if (c.belief_conf.option == "rs")
             return std::unique_ptr<beliefs::BABelief>(
                 new beliefs::bayes_adaptive::factored::MHwithinGibbs(
                     c.belief_conf.particle_amount,
                     c.belief_conf.threshold,
+                    c.domain_conf.abstraction,
                     beliefs::bayes_adaptive::factored::MHwithinGibbs::RS));
     }
 

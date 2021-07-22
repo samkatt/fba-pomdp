@@ -15,8 +15,6 @@ void assertLegalCoffeeBig(State const* s, size_t grid_size, size_t state_space_s
 {
     assert(s != nullptr);
     assert(s->index() >= 0 && s->index() < static_cast<int>(state_space_size));
-    // TODO can use _carpet_tiles instead of 15?
-    assert(static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s)->_carpet_config < 1 << 5);
     assert(static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s)->_rain < 2 );
     assertLegalCoffeeBig(
         static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s)->_agent_position, grid_size);

@@ -38,7 +38,8 @@ public:
         std::unique_ptr<BADomainExtension> ba_domain_ext,
         std::unique_ptr<BAPrior> prior,
         rnd::sample::Dir::sampleMethod sample_method,
-        rnd::sample::Dir::sampleMultinominal compute_mult_method);
+        rnd::sample::Dir::sampleMultinominal compute_mult_method,
+        bool update_abstract_model);
 
     StepType mode() const;
     void mode(StepType new_mode) const;
@@ -143,6 +144,8 @@ private:
 
     // whether to use sampled or expected mult models when computing observation
     rnd::sample::Dir::sampleMultinominal* _compute_mult_method;
+
+    bool _update_abstract_model;
 };
 
 namespace factory {

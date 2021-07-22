@@ -17,8 +17,7 @@ using GridWorldCoffeeBigAction      = GridWorldCoffeeBig::GridWorldCoffeeBigActi
 using GridWorldCoffeeBigObservation = GridWorldCoffeeBig::GridWorldCoffeeBigObservation;
 using GridWorldCoffeeBigState       = GridWorldCoffeeBig::GridWorldCoffeeBigState;
 
-bool correctBigPrior = true;
-//bool useBigAbstraction = true;
+bool correctBigPrior = false;
 
 namespace priors {
 

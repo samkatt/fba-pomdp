@@ -17,14 +17,16 @@ BAPOMDP::BAPOMDP(
     std::unique_ptr<BADomainExtension> ba_domain_ext,
     std::unique_ptr<BAPrior> prior,
     rnd::sample::Dir::sampleMethod sample_method,
-    rnd::sample::Dir::sampleMultinominal compute_mult_method) :
+    rnd::sample::Dir::sampleMultinominal compute_mult_method,
+    bool update_abstract_model) :
         _domain(std::move(domain)),
         _ba_domain_ext(std::move(ba_domain_ext)),
         _ba_prior(std::move(prior)),
         _observations(_ba_domain_ext->domainSize()._O),
         _domain_size(_ba_domain_ext->domainSize()),
         _sample_method(sample_method),
-        _compute_mult_method(compute_mult_method)
+        _compute_mult_method(compute_mult_method),
+        _update_abstract_model(update_abstract_model)
 {
     assert(_domain != nullptr);
     assert(_domain_size._A > 0 && _domain_size._O > 0 && _domain_size._S > 0);
@@ -148,7 +150,11 @@ Terminal BAPOMDP::step(
 
     if (step_type == StepType::UpdateCounts)
     {
-        ba_s->incrementCountsOf(domain_state, a, *o, new_s);
+        if (_update_abstract_model) {
+            static_cast<AbstractFBAPOMDPState*>(ba_s)->incrementCountsOfAbstract(domain_state, a, *o, new_s);
+        } else {
+            ba_s->incrementCountsOf(domain_state, a, *o, new_s);
+        }
     }
 
     _domain->releaseState(ba_s->_domain_state);
@@ -215,12 +221,15 @@ std::unique_ptr<BAPOMDP> makeTBAPOMDP(configurations::BAConf const& c)
     auto const compute_mult_method = (c.bayes_sample_method == 0) ? rnd::sample::Dir::sampleMult
                                                                   : rnd::sample::Dir::expectedMult;
 
+    auto update_abstract_model = c.update_abstract_model != 0;
+
     return std::unique_ptr<BAPOMDP>(new BAPOMDP(
         std::unique_ptr<POMDP>(domain),
         std::move(ba_domain_ext),
         std::move(prior),
         sample_method,
-        compute_mult_method));
+        compute_mult_method,
+        update_abstract_model));
 }
 
 } // namespace factory

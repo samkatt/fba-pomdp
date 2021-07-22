@@ -3,6 +3,7 @@
 #include "easylogging++.h"
 
 #include <string>
+#include <bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp>
 
 #include "bayes-adaptive/models/table/BAPOMDP.hpp"
 
@@ -16,7 +17,10 @@ std::string stateToString(State const* s)
     return std::to_string(s->index());
 }
 
-BAImportanceSampling::BAImportanceSampling(size_t n) : _n(n)
+BAImportanceSampling::BAImportanceSampling(size_t n, bool abstraction, bool remake_abstract_model) :
+    _n(n),
+    _abstraction(abstraction),
+    _remake_abstract_model(remake_abstract_model)
 {
 
     if (_n < 1)
@@ -27,9 +31,11 @@ BAImportanceSampling::BAImportanceSampling(size_t n) : _n(n)
     VLOG(1) << "Initiated Importance Sampling belief of size " << n;
 }
 
-BAImportanceSampling::BAImportanceSampling(WeightedFilter<State const*> f, size_t n) :
+BAImportanceSampling::BAImportanceSampling(WeightedFilter<State const*> f, size_t n, bool abstraction, bool remake_abstract_model) :
         _filter(std::move(f)),
-        _n(n)
+        _n(n),
+        _abstraction(abstraction),
+        _remake_abstract_model(remake_abstract_model)
 {
 
     if (_n < 1)
@@ -96,8 +102,15 @@ void BAImportanceSampling::resetDomainStateDistribution(BAPOMDP const& bapomdp)
     // by sampling models from our current belief
     while (new_filter.size() != _n)
     {
-        auto s = dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
+        auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
         bapomdp.resetDomainState(s);
+        if (_abstraction) {
+            if(_remake_abstract_model) {
+                if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() == 0) {
+                    static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(0);
+                }
+            }
+        }
 
         new_filter.add(s, 1.0 / static_cast<double>(_n));
     }

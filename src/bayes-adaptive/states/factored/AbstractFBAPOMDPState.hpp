@@ -51,6 +51,13 @@ public:
         State const* new_s,
         float amount = 1) final;
 
+    void incrementCountsOfAbstract(
+            State const* s,
+            Action const* a,
+            Observation const* o,
+            State const* new_s,
+            float amount = 1);
+
     /**
      * @brief logs the whole model to a file
      **/

@@ -30,6 +30,7 @@ namespace planners {
 
 RBAPOUCT_abstraction::RBAPOUCT_abstraction(configurations::Conf const& c) :
         _n(c.planner_conf.mcts_simulation_amount),
+        _sims_per_sample(c.planner_conf.sims_per_sample),
         _max_depth(c.planner_conf.mcts_max_depth),
         _h(c.horizon),
         _u(c.planner_conf.mcts_exploration_const),
@@ -85,9 +86,13 @@ Action const* RBAPOUCT_abstraction::selectAction(
     // make sure counts are not changed over time (changed back after simulations)
     auto const old_mode = simulator.mode();
     simulator.mode(BAPOMDP::StepType::KeepCounts);
-    int sims_per_particle = 1;
+    int extra = 0;
+    if (_n % _sims_per_sample != 0) {
+        extra = 1;
+    }
+
     // perform simulations
-    for (auto i = 0; i < _n/sims_per_particle; ++i)
+    for (auto i = 0; i < (extra + _n/_sims_per_sample); ++i)
     {
         // hier particle aanpassen?
         // do not copy!!
@@ -101,7 +106,9 @@ Action const* RBAPOUCT_abstraction::selectAction(
         // but safe old state, so that we can reset the particle (counts are not modified)
         auto const old_domain_state = simulator.copyDomainState(particle->_domain_state); // domain_state = pomdp state
         particle->_domain_state = simulator.copyDomainState(old_domain_state);
-        for (auto j = 0; j < sims_per_particle; ++j){
+
+        int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample*i);
+        for (auto j = 0; j < sims_to_do; ++j){
             VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
 
             auto r = traverseActionNode(root, particle, simulator, _stats.max_tree_depth);

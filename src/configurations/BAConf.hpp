@@ -21,6 +21,8 @@ struct BAConf : public Conf
 
     rnd::sample::Dir::SAMPLETYPE bayes_sample_method = rnd::sample::Dir::Expected;
 
+    int update_abstract_model = 0;
+
     void addOptions(boost::program_options::options_description* descr) override;
     void validate() const override;
 };
