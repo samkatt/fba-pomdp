@@ -21,11 +21,9 @@ namespace bayes_adaptive { namespace factored {
  **/
 class BABNModel
 {
-private:
+public:
     std::vector<DBNNode> _transition_nodes  = {};
     std::vector<DBNNode> _observation_nodes = {};
-
-public:
     /**
      * @brief the step sizes used to project/index from features to indices
      **/
@@ -153,6 +151,11 @@ public:
  **/
 std::vector<int> stateFeatureValues(State const* s) const;
 
+/**
+ * @brief returns the observation feature values associated with provided observation
+ **/
+std::vector<int> observationFeatureValues(Observation const* o) const;
+
 private:
     Domain_Size const* _domain_size;
     Domain_Feature_Size const* _domain_feature_size;
@@ -164,11 +167,6 @@ private:
     void assertLegal(Action const* a) const;
     void assertLegalStateFeature(int f) const;
     void assertLegalObservationFeature(int f) const;
-
-    /**
-     * @brief returns the observation feature values associated with provided observation
-     **/
-    std::vector<int> observationFeatureValues(Observation const* o) const;
 
 };
 

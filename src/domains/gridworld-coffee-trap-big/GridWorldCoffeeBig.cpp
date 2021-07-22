@@ -18,15 +18,24 @@ std::vector<std::string> const GridWorldCoffeeBig::GridWorldCoffeeBigAction::act
 
 GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const GridWorldCoffeeBig::start_location = {0, 0};
 GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const GridWorldCoffeeBig::goal_location = {2,4};
+std::vector<GridWorldCoffeeBig::GridWorldCoffeeBigState::pos> const GridWorldCoffeeBig::slow_locations = {{0, 3},{1, 3}, {2, 1}};
 
 
-GridWorldCoffeeBig::GridWorldCoffeeBig() :
+GridWorldCoffeeBig::GridWorldCoffeeBig(size_t carpet_tiles ):
+    _carpet_tiles(carpet_tiles),
     _S_size(0), // initiated below
     _O_size(0) // initiated below
 {
-    // Number of states, 5x5 grid, rain/no rain, carpet configuration (0 or 1), carpet on tile (0 or 1, 1 per tile).
+    if (_carpet_tiles > 15) {
+        throw "please enter a size between 0 and 15 to be able to run gridworldcoffeebig \
+                    (you entered " + std::to_string(_size) + ")";
+    }
+    // Number of states, 5x5 grid, rain/no rain, carpet on tile (0 or 1, 1 per tile).
     _S_size = (_size * _size * 2) << _carpet_tiles, _S.reserve(_S_size);
-    _O_size = _size * _size; //  * 2 * _carpet_configurations, _O.reserve(_O_size);
+    _O_size = _size * _size; //
+
+    _S.reserve(_S_size);
+    _O.reserve(_O_size);
 
     // generate state space
     for (unsigned int x_agent = 0; x_agent < _size; ++x_agent)
@@ -53,39 +62,6 @@ GridWorldCoffeeBig::GridWorldCoffeeBig() :
 
         }
     }
-
-    /** observation function **/
-    _obs_displacement_probs.emplace_back(1 - wrong_obs_prob);
-
-    // TODO pas aan
-    // probability of generating location further and further away with diminishing return
-//    auto prob = wrong_obs_prob;
-//    auto prob_sum = .0;
-//    for (size_t i = 1; i < _size - 2; ++i) // i < _size -3?
-//    {
-//        prob *= .55;
-//        prob_sum += prob;
-//        _obs_displacement_probs.emplace_back(prob);
-//    }
-
-    // fill up all probability of the end to ensure it sums up to 1
-    auto prob = wrong_obs_prob;
-    _obs_displacement_probs.emplace_back(prob);
-//    _obs_displacement_probs.emplace_back(wrong_obs_prob - prob_sum);
-    _obs_displacement_probs.emplace_back(0);
-    _obs_displacement_probs.emplace_back(0);
-    _obs_displacement_probs.emplace_back(0);
-
-    // probability of generating location further and further away with diminishing return
-//    auto prob = wrong_obs_prob;
-//    for (size_t i = 1; i < _size - 1; ++i)
-//    {
-//        prob *= .5;
-//        _obs_displacement_probs.emplace_back(prob);
-//    }
-//
-//    // fill up all probability of the end to ensure it sums up to 1
-//    _obs_displacement_probs.emplace_back(prob);
 
     VLOG(1) << "initiated gridworld-coffee";
 }
@@ -127,11 +103,26 @@ float GridWorldCoffeeBig::obsDisplProb(unsigned int loc, unsigned int observed_l
     return res;
 }
 
-bool GridWorldCoffeeBig::agentOnCarpet(GridWorldCoffeeBigState::pos const& agent_pos) const {
+float GridWorldCoffeeBig::believedTransitionProb(bool const& carpet, bool const& rain) {
+    return carpet ? (rain ? 0.05f : 0.1f) // carpet
+    : (rain ? 0.9f : 0.95f); // no carpet
+}
+
+// Todo: change for the new carpet tiles? CHECK IF WORKS
+bool GridWorldCoffeeBig::agentOnCarpet(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& carpet_config) const {
+    // _carpet_tiles between 0 and 15. Carpet can not be in the top or bottom row.
+    // _carpet_config should be an int between 0 and 2^{_carpet_tiles}.
     // carpet states, rectangular area
-    if (agent_pos.x < 3 && agent_pos.y > 0 && agent_pos.y < 4)
+    if (agent_pos.y > 0 && agent_pos.y < 4)
     {
-        return true; // Carpet
+        // can use projectUsingStepSize? in indexing
+        auto tilesWithCarpet = indexing::projectUsingStepSize(carpet_config, _stepSizes);
+        unsigned int agentPos = (agent_pos.y - 1)*_size + agent_pos.x;
+        if (agentPos > tilesWithCarpet.size()) {
+            return false;
+        } else if (tilesWithCarpet[agentPos] == 1) {
+            return true; // carpet
+        }
     }
     return false; // No carpet
 }
@@ -139,12 +130,8 @@ bool GridWorldCoffeeBig::agentOnCarpet(GridWorldCoffeeBigState::pos const& agent
 bool GridWorldCoffeeBig::agentOnSlowLocation(GridWorldCoffeeBigState::pos const& agent_pos) const
 {
     // On trap state
-    if ((agent_pos.x == 0 && agent_pos.y == 3) || (agent_pos.x == 1 && agent_pos.y == 3)
-        || (agent_pos.x == 2 && agent_pos.y == 1)) // || (agent_pos.x == 3 && agent_pos.y == 2))
-    {
-        return true;
-    }
-    return false;
+    return std::find(slow_locations.begin(), slow_locations.end(), agent_pos)
+           != slow_locations.end();
 }
 
 bool GridWorldCoffeeBig::foundGoal(GridWorldCoffeeBigState const* s) const
@@ -158,7 +145,7 @@ State const* GridWorldCoffeeBig::sampleRandomState() const
         {static_cast<unsigned int>(rnd::slowRandomInt(0, _size)),
          static_cast<unsigned int>(rnd::slowRandomInt(0, _size))},
         static_cast<unsigned int>(rnd::slowRandomInt(0, 2)),
-        static_cast<unsigned int>(rnd::slowRandomInt(0, 2)));
+        static_cast<unsigned int>(rnd::slowRandomInt(0, 1<<_carpet_tiles)));
 }
 
 GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState(
@@ -169,11 +156,9 @@ GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState(
 }
 
 GridWorldCoffeeBig::GridWorldCoffeeBigObservation const* GridWorldCoffeeBig::getObservation(
-    GridWorldCoffeeBigState::pos const& agent_pos
-//    , unsigned int const& rain, unsigned int const& carpet_config
-    ) const
+    GridWorldCoffeeBigState::pos const& agent_pos) const
 {
-    return &_O[positionsToObservationIndex(agent_pos)]; // , rain, carpet_config)];
+    return &_O[positionsToObservationIndex(agent_pos)];
 }
 
 Action const* GridWorldCoffeeBig::generateRandomAction(State const* s) const
@@ -201,15 +186,8 @@ double GridWorldCoffeeBig::computeObservationProbability(
 
     auto const& agent_pos    = static_cast<GridWorldCoffeeBigState const*>(new_s)->_agent_position;
     auto const& observed_pos = static_cast<GridWorldCoffeeBigObservation const*>(o)->_agent_pos;
-//    auto const& rain = static_cast<GridWorldCoffeeBigState const*>(new_s)->_rain;
-//    auto const& observed_rain = static_cast<GridWorldCoffeeBigObservation const*>(o)->_rain;
-//    auto const& carpet_config = static_cast<GridWorldCoffeeBigState const*>(new_s)->_carpet_config;
-//    auto const& observed_carpet_config = static_cast<GridWorldCoffeeBigObservation const*>(o)->_carpet_config;
 
-//    if ((rain == observed_rain) && (carpet_config == observed_carpet_config)){
     return obsDisplProb(agent_pos.x, observed_pos.x) * obsDisplProb(agent_pos.y, observed_pos.y);
-//    }
-    return 0;
 }
 
 void GridWorldCoffeeBig::releaseAction(Action const* a) const
@@ -228,11 +206,11 @@ Action const* GridWorldCoffeeBig::copyAction(Action const* a) const
 
 State const* GridWorldCoffeeBig::sampleStartState() const
 {
-    // sample random agent position (there should be only 1, (0,0), no rain)
-
-    auto const agent_pos = start_location; //s[rnd::slowRandomInt(0, start_locations.size())];
-    auto index = positionsToIndex(agent_pos, 0, 0);
-    return &_S[index]; //, 1)];
+    // sample random start state, fixed location but random carpet configuration.
+    auto const agent_pos = start_location;
+    auto carpet_config = rnd::slowRandomInt(0, 1<<_carpet_tiles);
+    auto index = positionsToIndex(agent_pos, 0, carpet_config);
+    return &_S[index];
 }
 
 Terminal GridWorldCoffeeBig::step(State const** s, Action const* a, Observation const** o, Reward* r) const
@@ -255,7 +233,6 @@ Terminal GridWorldCoffeeBig::step(State const** s, Action const* a, Observation 
     // on top of a slow surface
     // no carpet: rain: 0.8, no rain: 0.95
     // carpet: rain: 0.05, no rain: 0.15
-    // trap states TODO: make a property of the domain
     bool const move_succeeds = (agentOnSlowLocation(grid_state->_agent_position))
             ? rnd::uniform_rand01() < slow_move_prob
             : rnd::uniform_rand01() < move_prob;
@@ -264,14 +241,12 @@ Terminal GridWorldCoffeeBig::step(State const** s, Action const* a, Observation 
 
     auto const found_goal = foundGoal(grid_state);
 
-//    auto const new_carpet_config = grid_state->_carpet_config;
-
     auto const new_index = positionsToIndex(new_agent_pos, new_rain, grid_state->_carpet_config);
     *s                   = &_S[new_index];
 
     /*** R & O ***/
     r->set(found_goal ? goal_reward : step_reward);
-    *o = generateObservation(new_agent_pos); // , new_rain, grid_state->_carpet_config);
+    *o = generateObservation(new_agent_pos);
 
     return Terminal(found_goal);
 }
@@ -308,13 +283,9 @@ int GridWorldCoffeeBig::positionsToIndex(
 }
 
 int GridWorldCoffeeBig::positionsToObservationIndex(
-    GridWorldCoffeeBigState::pos const& agent_pos
-//    , unsigned int const& rain, unsigned int const& carpet_config
-    ) const
+    GridWorldCoffeeBigState::pos const& agent_pos) const
 {
-    // indexing: from 3 elements projecting to 1 dimension
-    // x*size*2 + y*2 + rain
-//    return agent_pos.x * _size * 2 * _carpet_configurations + agent_pos.y * 2 * _carpet_configurations + rain * _carpet_configurations + carpet_config;
+    // indexing: from 2 elements projecting to 1 dimension
     return agent_pos.x * _size + agent_pos.y;
 }
 
@@ -344,9 +315,7 @@ GridWorldCoffeeBig::applyMove(GridWorldCoffeeBigState::pos const& old_pos, Actio
 }
 
 Observation const* GridWorldCoffeeBig::generateObservation(
-    GridWorldCoffeeBigState::pos const& agent_pos
-//    , unsigned int const& rain, unsigned int const& carpet_config
-    ) const
+    GridWorldCoffeeBigState::pos const& agent_pos) const
 {
     // sample x & y displacement
     auto const x_displacement = rnd::sample::Dir::sampleFromMult(
@@ -386,8 +355,6 @@ void GridWorldCoffeeBig::assertLegal(Observation const* o) const
     assert(o != nullptr);
     assert(o->index() >= 0 && o->index() < _O_size);
     assertLegal(static_cast<GridWorldCoffeeBigObservation const*>(o)->_agent_pos);
-//    assert((static_cast<GridWorldCoffeeBigObservation const*>(o)->_rain == 0) || (static_cast<GridWorldCoffeeBigObservation const*>(o)->_rain == 1));
-//    assert(static_cast<GridWorldCoffeeBigObservation const*>(o)->_carpet_config < _carpet_configurations);
 }
 
 void GridWorldCoffeeBig::assertLegal(State const* s) const

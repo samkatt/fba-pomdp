@@ -38,7 +38,7 @@ std::unique_ptr<FBADomainExtension> makeFBADomainExtension(configurations::FBACo
 
     if (d == "gridworldcoffeebig")
         return std::unique_ptr<FBADomainExtension>(
-                new ext::GridWorldCoffeeBigFBAExtension());
+                new ext::GridWorldCoffeeBigFBAExtension(c.domain_conf.size));
 
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
     {

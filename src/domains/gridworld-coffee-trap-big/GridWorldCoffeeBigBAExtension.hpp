@@ -21,7 +21,7 @@ class GridWorldCoffeeBigBAExtension : public BADomainExtension
 {
 
 public:
-    explicit GridWorldCoffeeBigBAExtension();
+    explicit GridWorldCoffeeBigBAExtension(size_t carpet_tiles);
 
     /*** BADomainExtension interface implementation ****/
     Domain_Size domainSize() const final;

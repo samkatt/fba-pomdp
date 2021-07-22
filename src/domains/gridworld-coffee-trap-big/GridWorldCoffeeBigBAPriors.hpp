@@ -33,7 +33,8 @@ public:
 
 private:
     size_t const _size;
-//    size_t const _carpet_configurations;
+    bool const _abstraction;
+    size_t const _carpet_tiles;
     std::vector<unsigned int> const rain_values = {0,1};
 
     float const _unknown_counts_total;
@@ -81,9 +82,9 @@ public:
 
 private:
     size_t const _size;
-    size_t const _carpet_features;
+    bool const _abstraction;
+    size_t const _carpet_tiles;
 
-//    float const _noise;
     float const _unknown_counts_total;
     float const _static_total_count = 100000;
 
@@ -93,12 +94,7 @@ private:
     int const _agent_x_feature = 0;
     int const _agent_y_feature = 1;
     int const _rain_feature    = 2;
-//    int const _velocity_feature    = 3;
-//    int const _carpet_feature1    = 3; // carpet = beforehand we know on which tiles there is carpet
-//    int const _carpet_feature2    = 4;
-//    int const _carpet_feature3    = 5;
-//    int const _carpet_feature4    = 6;
-    int const _num_features = 3 + _carpet_features;
+    int const _num_features = 3 + _carpet_tiles;
 
     Domain_Size _domain_size;
     Domain_Feature_Size _domain_feature_size;

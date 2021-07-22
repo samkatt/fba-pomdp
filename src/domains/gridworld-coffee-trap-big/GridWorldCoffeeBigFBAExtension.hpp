@@ -19,14 +19,14 @@ namespace bayes_adaptive { namespace domain_extensions {
 class GridWorldCoffeeBigFBAExtension : public FBADomainExtension
 {
 public:
-    explicit GridWorldCoffeeBigFBAExtension();
+    explicit GridWorldCoffeeBigFBAExtension(size_t carpet_tiles);
 
     /**** FBADomainExtension interface ****/
     Domain_Feature_Size domainFeatureSize() const final; // final TODO need final?
     utils::categoricalDistr const* statePrior() const final; // final
 
 private:
-    size_t _size, _carpet_configurations;
+    size_t _size, _carpet_tiles;
     utils::categoricalDistr _state_prior;
 };
 

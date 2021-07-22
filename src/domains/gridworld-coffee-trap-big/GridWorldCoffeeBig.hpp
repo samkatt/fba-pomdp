@@ -11,6 +11,7 @@
 #include "environment/Observation.hpp"
 #include "environment/State.hpp"
 #include "environment/Terminal.hpp"
+#include "utils/index.hpp"
 class Reward;
 
 namespace domains {
@@ -99,12 +100,8 @@ public:
     public:
         GridWorldCoffeeBigObservation(
             ::domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos agent_pos,
-//            unsigned int rain,
-//            int carpet_tiles,
             int i) :
             _agent_pos(agent_pos),
-//            _rain(rain),
-//            _carpet_tiles(carpet_tiles), // initiated below
             _index(i)
         {
         }
@@ -115,8 +112,6 @@ public:
         std::string toString() const final { return _agent_pos.toString(); }
 
         ::domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const _agent_pos;
-//        unsigned int const _rain;
-//        unsigned int const _carpet_tiles;
 
     private:
         int const _index;
@@ -142,7 +137,9 @@ public:
         int const _index;
     };
 
-    explicit GridWorldCoffeeBig();
+    explicit GridWorldCoffeeBig(size_t carpet_tiles);
+
+    static std::vector<GridWorldCoffeeBigState::pos> const slow_locations;
 
     static GridWorldCoffeeBigState::pos const start_location; // = {0,0};
     static GridWorldCoffeeBigState::pos const goal_location;
@@ -151,7 +148,8 @@ public:
     size_t size() const;
     double goalReward() const;
     bool agentOnSlowLocation(GridWorldCoffeeBigState::pos const& agent_pos) const;
-    bool agentOnCarpet(GridWorldCoffeeBigState::pos const& agent_pos) const;
+    bool agentOnCarpet(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& carpet_config) const;
+    static float believedTransitionProb(bool const& onCarpet, bool const& rain);
     State const* sampleRandomState() const;
 
     /**
@@ -162,11 +160,8 @@ public:
     bool foundGoal(GridWorldCoffeeBigState const* s) const;
 
     GridWorldCoffeeBigState const*
-        getState(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_tiles) const;
-    GridWorldCoffeeBigObservation const* getObservation(
-        GridWorldCoffeeBigState::pos const& agent_pos
-        // , unsigned int const& rain, unsigned int const& carpet_tiles
-        ) const;
+        getState(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const;
+    GridWorldCoffeeBigObservation const* getObservation(GridWorldCoffeeBigState::pos const& agent_pos) const;
 
     /**
      * @brief applies a move a on the old_pos to get a new pos
@@ -191,7 +186,8 @@ public:
 private:
     // problem settings
     size_t const _size = 5;
-    size_t const _carpet_tiles = 15;
+    size_t const _carpet_tiles;
+    std::vector<int> _stepSizes = indexing::stepSize(std::vector<int>(_carpet_tiles, 2));
 
     // initiated in constructor
     int _A_size = 4;
@@ -199,7 +195,8 @@ private:
     int _O_size;
 
     // describes the probability of displacement in our observation in 1 dimension
-    std::vector<float> _obs_displacement_probs = {};
+    std::vector<float> _obs_displacement_probs = {1-wrong_obs_prob,wrong_obs_prob,0,0,0};
+
 
     std::vector<GridWorldCoffeeBigState> _S       = {};
     std::vector<GridWorldCoffeeBigObservation> _O = {};
@@ -207,15 +204,11 @@ private:
     /**
      * @brief returns an observation from position agent_pos and rain
      **/
-    Observation const* generateObservation(
-        GridWorldCoffeeBigState::pos const& agent_pos
-//        , unsigned int const& rain, unsigned int const& carpet_tiles
-        ) const;
+    Observation const* generateObservation(GridWorldCoffeeBigState::pos const& agent_pos) const;
 
-    int positionsToIndex(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_tiles)
+    int positionsToIndex(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
         const;
     int positionsToObservationIndex(GridWorldCoffeeBigState::pos const& agent_pos) const;
-    //, unsigned int const& rain, unsigned int const& carpet_tiles) const;
 
 
     /** some functions to check input from system **/

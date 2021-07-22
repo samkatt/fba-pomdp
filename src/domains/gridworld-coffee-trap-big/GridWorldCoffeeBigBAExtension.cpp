@@ -16,7 +16,7 @@ void assertLegalCoffeeBig(State const* s, size_t grid_size, size_t state_space_s
     assert(s != nullptr);
     assert(s->index() >= 0 && s->index() < static_cast<int>(state_space_size));
     // TODO can use _carpet_tiles instead of 15?
-    assert(static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s)->_carpet_config < 1 << 15);
+    assert(static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s)->_carpet_config < 1 << 5);
     assert(static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s)->_rain < 2 );
     assertLegalCoffeeBig(
         static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s)->_agent_position, grid_size);
@@ -28,17 +28,17 @@ void assertLegalCoffeeBig(Action const* a, size_t action_space_size)
     assert(a->index() >= 0 && a->index() < static_cast<int>(action_space_size));
 }
 
-GridWorldCoffeeBigBAExtension::GridWorldCoffeeBigBAExtension() :
+GridWorldCoffeeBigBAExtension::GridWorldCoffeeBigBAExtension(size_t carpet_tiles) :
     _size(5),
-    _carpet_tiles(1<<15), // TODO use carpet_tiles?
+    _carpet_tiles(carpet_tiles),
     _states(), // initiated below
     _domain_size(0, 0, 0) // initiated below
 {
 
     _domain_size = Domain_Size(
-        static_cast<int>(_size * _size * 2 * _carpet_tiles),
+        static_cast<int>((_size * _size * 2) << _carpet_tiles),
         4,
-        static_cast<int>(_size * _size)); // * 2 * _carpet_configurations));
+        static_cast<int>(_size * _size));
 
     // generate state space
     _states.reserve(_domain_size._S);
@@ -49,7 +49,7 @@ GridWorldCoffeeBigBAExtension::GridWorldCoffeeBigBAExtension() :
         {
             for (unsigned int rain = 0; rain < 2; ++rain)
             {
-                for (unsigned int carpet_config = 0; carpet_config < _carpet_tiles; ++carpet_config)
+                for (unsigned int carpet_config = 0; carpet_config < (unsigned int) (1 << _carpet_tiles); ++carpet_config)
                 {
                     domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const agent_pos{x_agent, y_agent};
                     assert(static_cast<unsigned int>(i) == _states.size());

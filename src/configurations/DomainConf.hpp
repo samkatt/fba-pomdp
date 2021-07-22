@@ -18,6 +18,8 @@ struct DomainConf
     size_t height = 0; // domain specific
     size_t width  = 0; // domain specific
 
+    bool abstraction = false; // domain specific
+
     /**
      * /brief adds options in this structure to descr
      **/

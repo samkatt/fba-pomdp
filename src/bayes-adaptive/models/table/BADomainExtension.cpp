@@ -59,7 +59,7 @@ std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf 
 
     if (d == "gridworldcoffeebig")
         return std::unique_ptr<BADomainExtension>(
-                new ext::GridWorldCoffeeBigBAExtension());
+                new ext::GridWorldCoffeeBigBAExtension(c.domain_conf.size));
 
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<BADomainExtension>(new ext::CollisionAvoidanceBAExtension(

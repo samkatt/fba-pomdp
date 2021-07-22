@@ -26,7 +26,11 @@ void DomainConf::addOptions(boost::program_options::options_description* descr)
         (
         "width",
         po::value(&width)->default_value(width),
-        "The width of the domain: collision avoidance grid size");
+        "The width of the domain: collision avoidance grid size")
+        (
+        "abstraction",
+        po::value(&abstraction)->default_value(abstraction),
+        "Whether or not we use abstraction: gridworldcoffee and gridworldcoffeebig");;
     // clang-format on
 }
 
@@ -67,6 +71,7 @@ void DomainConf::validate() const
         ^ (domain == "factored-dummy" || domain == "independent-sysadmin"
            || domain == "linear-sysadmin" || domain == "episodic-factored-tiger"
            || domain == "continuous-factored-tiger" || domain == "gridworld"
+           || domain == "gridworldcoffeebig"
            || domain == "random-collision-avoidance" || domain == "centered-collision-avoidance"))
     {
         throw error(

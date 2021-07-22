@@ -27,7 +27,13 @@ AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_ad
 
 BAState* AbstractFBAPOMDPState::copy(State const* domain_state) const
 {
-    return new AbstractFBAPOMDPState(domain_state, FBAPOMDPState::model_real());
+    auto toReturn = new AbstractFBAPOMDPState(domain_state, FBAPOMDPState::model_real());
+    toReturn->_abstraction = _abstraction;
+    if (_abstraction == 0) {
+        toReturn->_abstract_model = bayes_adaptive::factored::BABNModel(
+                &toReturn->_abstract_domain_size, &toReturn->_abstract_domain_feature_size, &toReturn->_step_size, _abstract_model._transition_nodes, _abstract_model._observation_nodes);
+    }
+    return toReturn; // new AbstractFBAPOMDPState(domain_state, FBAPOMDPState::model_real());
 }
 
 // this samples a new state
@@ -48,8 +54,9 @@ int AbstractFBAPOMDPState::sampleStateIndexAbstract(
     if (_abstraction == 0) {
         auto parent_values = model()->stateFeatureValues(s);
         std::vector<int> next_values = {0, 0};
-        next_values[0] = _abstract_model.transitionNode(a, 0).sample(parent_values, m);
-        next_values[1] = _abstract_model.transitionNode(a, 1).sample(parent_values, m);
+        std::vector<int> actual_parent_values = {parent_values[0], parent_values[1]};
+        next_values[0] = _abstract_model.transitionNode(a, 0).sample(actual_parent_values, m);
+        next_values[1] = _abstract_model.transitionNode(a, 1).sample(actual_parent_values, m);
         // TODO this needs to be changed?
         return model()->sampleStateIndexThroughAbstraction(s,a, next_values);
     }
@@ -74,6 +81,8 @@ double AbstractFBAPOMDPState::computeObservationProbability(
     return FBAPOMDPState::model()->computeObservationProbability(o, a, s, sampleMultinominal);
 }
 
+bool updateAbstractModel = true;
+
 void AbstractFBAPOMDPState::incrementCountsOf(
     State const* s,
     Action const* a,
@@ -81,6 +90,22 @@ void AbstractFBAPOMDPState::incrementCountsOf(
     State const* new_s,
     float amount)
 {
+    if (updateAbstractModel && _abstraction == 0) {
+        auto parent_values = model()->stateFeatureValues(s);
+
+        auto state_feature_values = model()->stateFeatureValues(new_s);
+
+        std::vector<int> next_values = {state_feature_values[0], state_feature_values[1]};
+        std::vector<int> actual_parent_values = {parent_values[0], parent_values[1]};
+        // update transition DBN
+        for (auto n = 0; n < (int)_abstract_domain_feature_size._S.size(); ++n)
+        { _abstract_model.transitionNode(a, n).increment(actual_parent_values, next_values[n], amount); }
+
+        auto observation_feature_values = model()->observationFeatureValues(o);
+        // update observation DBN
+        for (auto n = 0; n < (int)_abstract_domain_feature_size._O.size(); ++n)
+        { _abstract_model.observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
+    }
     FBAPOMDPState::model()->incrementCountsOf(s, a, o, new_s, amount);
 }
 
