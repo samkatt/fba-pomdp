@@ -76,7 +76,7 @@ void DomainConf::validate() const
     {
         throw error(
             "--size and -D should be used together, either one is useless without the other (size "
-            "&& factored-dummy, *-collision-avoidance, sysadmin or a factored_tiger domain), "
+            "&& factored-dummy, *-collision-avoidance, sysadmin, gridworldcoffeebig or a factored_tiger domain), "
             "provided domain "
             + domain + " with size " + std::to_string(size));
     }

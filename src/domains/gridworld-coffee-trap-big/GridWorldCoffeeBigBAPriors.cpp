@@ -18,6 +18,7 @@ using GridWorldCoffeeBigObservation = GridWorldCoffeeBig::GridWorldCoffeeBigObse
 using GridWorldCoffeeBigState       = GridWorldCoffeeBig::GridWorldCoffeeBigState;
 
 bool correctBigPrior = false;
+bool correctStructurePrior = false;
 
 namespace priors {
 
@@ -462,6 +463,12 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
 //        return new AbstractFBAPOMDPSTATE(domain_state, _correct_struct_prior);
 //    }
     if (correctBigPrior) {
+        if (_abstraction) {
+            return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
+        }
+        return new FBAPOMDPState(domain_state, _correct_struct_prior);
+    }
+    if (correctStructurePrior) {
         if (_abstraction) {
             return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
         }

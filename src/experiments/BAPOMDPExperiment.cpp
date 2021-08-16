@@ -55,10 +55,12 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
         {
             VLOG(1) << "run " << run + 1 << "/" << conf.num_runs << ", episode " << episode + 1
                     << "/" << conf.num_episodes;
-
+            // time including resetDomainState
+            timer.restart();
             belief->resetDomainStateDistribution(*bapomdp);
 
-            timer.restart();
+            // time excluding resetDomainState
+//            timer.restart();
             auto const r = episode::run(*planner, *belief, *env, *bapomdp, h, discount);
 
             learning_results.r[episode].ret.add(r.ret.toDouble());
