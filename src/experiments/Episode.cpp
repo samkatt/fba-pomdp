@@ -35,7 +35,7 @@ Result
     VLOG(2) << "Episode starts with s=" << s->toString();
 
     // interact until horizon or terminal interaction occurred
-    auto t = 0;
+    int t;
     for (t = 0; t < h.toInt() && !terminal.terminated(); ++t)
     {
         auto const a = planner.selectAction(simulator, belief, hist);

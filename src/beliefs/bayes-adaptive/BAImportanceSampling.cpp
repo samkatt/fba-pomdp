@@ -106,6 +106,7 @@ void BAImportanceSampling::resetDomainStateDistribution(BAPOMDP const& bapomdp)
         bapomdp.resetDomainState(s);
         if (_abstraction) {
             if(_remake_abstract_model) {
+                // Update the abstraction if it is already there. If not, it can be created later when needed.
                 if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() == 0) {
                     static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(0);
                 }

@@ -479,8 +479,6 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
     auto structure = _correct_struct_prior.structure();
 
     // what to do here
-    // randomly remove y from parents of x for each action
-    // randomly remove x from parents of y for each action
     // randomly add features to parents of x and y for each action
     for (auto a = 0; a < _domain_size._A; ++a)
     {
