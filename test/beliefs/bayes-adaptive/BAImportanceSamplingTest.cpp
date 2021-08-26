@@ -28,7 +28,7 @@ SCENARIO(
         auto filter = WeightedFilter<State const*>();
 
         filter.add(s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 10));
-        beliefs::BAImportanceSampling belief(filter, 1);
+        beliefs::BAImportanceSampling belief(filter, 1, false, false);
 
         REQUIRE(belief.sample()->index() == 0);
 
@@ -44,7 +44,7 @@ SCENARIO(
 
         belief.free(d);
 
-        belief = beliefs::BAImportanceSampling(1);
+        belief = beliefs::BAImportanceSampling(1, false, false);
         belief.initiate(d);
 
         REQUIRE(belief.sample()->index() == 0);
@@ -67,7 +67,7 @@ SCENARIO(
     {
         domains::LinearDummyDomain d;
 
-        beliefs::BAImportanceSampling belief(10);
+        beliefs::BAImportanceSampling belief(10, false, false);
         belief.initiate(d);
 
         REQUIRE(belief.sample()->index() == 0);
@@ -92,7 +92,7 @@ SCENARIO(
     {
         domains::CollisionAvoidance d(3, 3);
 
-        beliefs::BAImportanceSampling belief(10);
+        beliefs::BAImportanceSampling belief(10, false, false);
         belief.initiate(d);
 
         auto const init_state       = d.sampleStartState();

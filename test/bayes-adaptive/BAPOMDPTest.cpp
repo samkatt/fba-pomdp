@@ -44,12 +44,15 @@ TEST_CASE("step function", "[bayes-adaptive]")
                 auto compute_mult_method =
                     (m == 0) ? rnd::sample::Dir::sampleMult : rnd::sample::Dir::expectedMult;
 
+                auto update_abstract_model = false;
+
                 BAPOMDP d(
                     std::move(domain),
                     std::move(ext),
                     std::move(prior),
                     sample_method,
-                    compute_mult_method);
+                    compute_mult_method,
+                 update_abstract_model);
 
                 auto s               = d.sampleStartState();
                 auto a               = d.generateRandomAction(s);
