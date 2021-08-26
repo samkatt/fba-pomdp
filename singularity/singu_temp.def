@@ -1,0 +1,36 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%post
+    apt-get -yq update
+    DEBIAN_FRONTEND="noninteractive" apt-get -yq install tzdata
+    apt-get -yq --no-install-recommends install \
+        software-properties-common \
+	build-essential \
+        apt-transport-https \
+        ca-certificates \
+        aptitude \
+        wget \
+        vim \
+        rsync \
+        python3-pip \
+        python3-dev \
+        python3-setuptools \
+        unzip && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test
+    apt-get -yq install gcc-10 g++-10
+    apt-get -yq install libgoogle-glog-dev
+    apt-get -yq install cmake
+    apt-get -yq install libeigen3-dev
+    ln -s -f /usr/bin/gcc-10 /usr/bin/gcc
+    ln -s -f /usr/bin/g++-10 /usr/bin/g++
+
+    apt-get -yq install gdb vim
+    apt-get -yq install valgrind
+    chmod -R 777 /opt
+    chmod -R 777 /root
+	
+    git clone https://github.com/INFLUENCEorg/fba-pomdp.git
+    cd fba-pomdp
+    cmake -DCMAKE_BUILD_TYPE=Release .
+    make
