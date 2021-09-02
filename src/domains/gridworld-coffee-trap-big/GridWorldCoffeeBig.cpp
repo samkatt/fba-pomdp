@@ -28,7 +28,7 @@ GridWorldCoffeeBig::GridWorldCoffeeBig(size_t carpet_tiles ):
 {
     if (_carpet_tiles > 15) {
         throw "please enter a size between 0 and 15 to be able to run gridworldcoffeebig \
-                    (you entered " + std::to_string(_size) + ")";
+                    (you entered " + std::to_string(carpet_tiles) + ")";
     }
     // Number of states, 5x5 grid, rain/no rain, carpet on tile (0 or 1, 1 per tile).
     _S_size = (_size * _size * 2) << _carpet_tiles, _S.reserve(_S_size);

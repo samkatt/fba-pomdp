@@ -80,8 +80,6 @@ double AbstractFBAPOMDPState::computeObservationProbability(
     return FBAPOMDPState::model()->computeObservationProbability(o, a, s, sampleMultinominal);
 }
 
-bool updateAbstractModel = true;
-
 void AbstractFBAPOMDPState::incrementCountsOfAbstract(
     State const* s,
     Action const* a,
@@ -89,7 +87,7 @@ void AbstractFBAPOMDPState::incrementCountsOfAbstract(
     State const* new_s,
     float amount)
 {
-    if (updateAbstractModel && _abstraction == 0) {
+    if(_abstraction == 0) {
         auto parent_values = model()->stateFeatureValues(s);
 
         auto state_feature_values = model()->stateFeatureValues(new_s);
