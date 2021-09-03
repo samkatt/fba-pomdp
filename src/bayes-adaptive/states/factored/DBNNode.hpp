@@ -94,6 +94,12 @@ public:
     DBNNode marginalizeOut(std::vector<int> new_parents) const;
 
     /**
+     * @brief instantiates a node from its CPTS according to given parents, and normalizes the counts.
+     * Used for initial abstractions based on the prior.
+     */
+    DBNNode marginalizeOutAndNormalize(std::vector<int> new_parents) const;
+
+    /**
      * @brief writes of its cpts in LOG(INFO)
      **/
     void logCPTs() const;

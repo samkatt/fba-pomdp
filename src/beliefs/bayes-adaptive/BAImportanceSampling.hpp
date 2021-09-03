@@ -23,7 +23,7 @@ public:
     /**
      * @brief initiates importance sampling of n samples with an empty filter
      **/
-    explicit BAImportanceSampling(size_t n, bool abstraction, bool remake_abstraction);
+    explicit BAImportanceSampling(size_t n, bool abstraction, bool remake_abstraction, bool update_abstraction, bool update_abstract_model_normalized);
 
     /**
      * @brief initiates importance sampling of n samples with provided filter
@@ -31,7 +31,7 @@ public:
      * Assumes the filter size is not larger than provided n
      *
      **/
-    BAImportanceSampling(WeightedFilter<State const*> f, size_t n, bool abstraction, bool remake_abstraction);
+    BAImportanceSampling(WeightedFilter<State const*> f, size_t n, bool abstraction, bool remake_abstraction, bool update_abstraction, bool update_abstract_model_normalized);
 
     /***** BABelief interface *****/
     void resetDomainStateDistribution(BAPOMDP const& bapomdp) final;
@@ -49,6 +49,8 @@ private:
     size_t _n;
     bool _abstraction;
     bool _remake_abstract_model;
+    bool _update_abstract_model;
+    bool _update_abstract_model_normalized;
 };
 
 } // namespace beliefs

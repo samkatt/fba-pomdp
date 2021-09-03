@@ -27,13 +27,13 @@ GridWorldCoffeeBigFlatBAPrior::GridWorldCoffeeBigFlatBAPrior(
     configurations::BAConf const& c) :
         _size(5),
         _abstraction(c.domain_conf.abstraction),
-        _carpet_tiles(c.domain_conf.size),
+        _extra_features(c.domain_conf.size),
         _unknown_counts_total(c.counts_total),
         _domain_size(0, 0, 0), // initialized below
         _prior_model()
 {
 
-    bayes_adaptive::domain_extensions::GridWorldCoffeeBigBAExtension ba_ext(_carpet_tiles);
+    bayes_adaptive::domain_extensions::GridWorldCoffeeBigBAExtension ba_ext(_extra_features);
 
     _domain_size = ba_ext.domainSize();
     _prior_model = bayes_adaptive::table::BAFlatModel(&_domain_size);
@@ -77,7 +77,7 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
         }
     }
     else {
-        success_prob = domain.believedTransitionProb(domain.agentOnCarpet(s->_agent_position, s->_carpet_config), s->_rain);
+        success_prob = domain.believedTransitionProb(domain.agentOnCarpet(s->_agent_position, s->_feature_config), s->_rain);
     }
 
     /*** fail move ***/
@@ -88,7 +88,7 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
         {
             auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
 
-            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config);
+            auto new_s = domain.getState(s->_agent_position, rain, s->_feature_config);
 
             _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total;
             acc_prob += prob * rain_prob;
@@ -102,7 +102,7 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
         {
             auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
 
-            auto new_s = domain.getState(s->_agent_position, rain, s->_carpet_config);
+            auto new_s = domain.getState(s->_agent_position, rain, s->_feature_config);
 
             _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total;
             acc_prob += prob * rain_prob;
@@ -119,7 +119,7 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
         {
             auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
 
-            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config);
+            auto new_s = domain.getState(new_agent_pos, rain, s->_feature_config);
 
             _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total;
             acc_prob += success_prob * rain_prob;
@@ -132,7 +132,7 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
         {
             auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
 
-            auto new_s = domain.getState(new_agent_pos, rain, s->_carpet_config);
+            auto new_s = domain.getState(new_agent_pos, rain, s->_feature_config);
 
             _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total;
             acc_prob += success_prob * rain_prob;
@@ -273,14 +273,6 @@ bayes_adaptive::factored::BABNModel GridWorldCoffeeBigFactBAPrior::computePriorM
     return prior;
 }
 
-//bool AgentOnCarpet(int x, int y, int carpet):
-//    unsigned int agentPos = (agent_pos.y - 1)*_size + agent_pos.x;
-//    if (agentPos > tilesWithCarpet.size()) {
-//    return false;
-//} else if (tilesWithCarpet[agentPos] == 1) {
-//return true; // carpet
-//}
-
 void GridWorldCoffeeBigFactBAPrior::setNoisyTransitionNode(
         bayes_adaptive::factored::BABNModel* model,
         Action const& action,
@@ -311,7 +303,6 @@ void GridWorldCoffeeBigFactBAPrior::setNoisyTransitionNode(
                     trans_prob = GridWorldCoffeeBig::move_prob;
                 }
             } else {
-                unsigned int agentPos = (parent_values[1] - 1)*_size + parent_values[0];
                 bool raining = false;
                 unsigned int start = 2;
                 if (parents[2] == _rain_feature) { // rain feature
@@ -320,16 +311,13 @@ void GridWorldCoffeeBigFactBAPrior::setNoisyTransitionNode(
                         raining = true;
                     }
                 }
-                bool onCarpet = false;
+                int features_on = 0;
                 for (unsigned int i = start; i < parents.size(); ++i) {
-                    if (agentPos == (unsigned int) (parents[i] - 3)) {
-                        if (parent_values[i] == 1) {
-                            onCarpet = true;
-                        }
-                        break;
+                    if (parent_values[i] == 1) {
+                        features_on++;
                     }
                 }
-                trans_prob = GridWorldCoffeeBig::believedTransitionProb(onCarpet, raining);
+                trans_prob = GridWorldCoffeeBig::believedTransitionProb(raining, features_on);
             }
 
             // fail move
@@ -415,13 +403,13 @@ void GridWorldCoffeeBigFactBAPrior::preComputePrior()
             }
         }
 
-        // rain
+        // agent knows the chances of the rain changing
         for (auto r = 0; r < _domain_feature_size._S[_rain_feature]; ++r)
         {
             _correct_struct_prior.transitionNode(&action, _rain_feature).count({r}, r) +=
-                    GridWorldCoffeeBig::same_weather_prob * _unknown_counts_total;
+                    GridWorldCoffeeBig::same_weather_prob * _static_total_count;
             _correct_struct_prior.transitionNode(&action, _rain_feature).count({r}, (1-r)) +=
-                    (1 - GridWorldCoffeeBig::same_weather_prob) * _unknown_counts_total;
+                    (1 - GridWorldCoffeeBig::same_weather_prob) * _static_total_count;
         }
 
         // X and Y
@@ -493,11 +481,11 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
         // uniformly add any extra binary feature as parent
         for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
         {
-            if (rnd::boolean()) // randomly add carpet to parents of x
+            if (rnd::boolean()) // randomly add binary feature to parents of x
             {
                 structure.T[a][_agent_x_feature].emplace_back(f);
             }
-            if (rnd::boolean()) // randomly add carpet to parents of y
+            if (rnd::boolean()) // randomly add binary feature to parents of y
             {
                 structure.T[a][_agent_y_feature].emplace_back(f);
             }

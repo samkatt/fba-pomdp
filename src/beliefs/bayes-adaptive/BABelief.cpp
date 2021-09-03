@@ -23,7 +23,9 @@ std::unique_ptr<beliefs::BABelief> makeBABelief(configurations::Conf const& c)
             new beliefs::BARejectionSampling(c.belief_conf.particle_amount));
     if (c.belief == "importance_sampling")
         return std::unique_ptr<beliefs::BABelief>(
-            new beliefs::BAImportanceSampling(c.belief_conf.particle_amount, c.domain_conf.abstraction, c.planner_conf.remake_abstract_model));
+            new beliefs::BAImportanceSampling(c.belief_conf.particle_amount, c.domain_conf.abstraction,
+                                              c.planner_conf.remake_abstract_model, c.planner_conf.update_abstract_model,
+                                              c.planner_conf.update_abstract_model_normalized));
 
     if (c.belief == "reinvigoration")
         return std::unique_ptr<beliefs::BABelief>(

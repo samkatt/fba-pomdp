@@ -18,6 +18,8 @@ struct PlannerConf
     int mcts_max_depth            = -1;
     double mcts_exploration_const = 100;
     int remake_abstract_model     = 0;
+    int update_abstract_model    = 0;
+    int update_abstract_model_normalized = 0;
 
     /**
      * /brief adds options in this structure to descr

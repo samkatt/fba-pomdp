@@ -23,6 +23,14 @@ void PlannerConf::addOptions(boost::program_options::options_description* descr)
         po::value(&remake_abstract_model)->default_value(remake_abstract_model),
         "Whether or not the abstract model is constructed every episode or just once")
         (
+        "update_abstract_model",
+        po::value(&update_abstract_model)->default_value(update_abstract_model),
+        "Whether or not the abstract model is updated during an episode")
+        (
+        "update_abstract_model_normalized",
+        po::value(&update_abstract_model_normalized)->default_value(update_abstract_model_normalized),
+        "In case we want to normalize the initial prior for the abstraction")
+        (
         "mcts-max-depth,max-depth",
         po::value(&mcts_max_depth)->default_value(mcts_max_depth),
         "The maximum depth Tree Search methods will search- will be set to the horizon if "

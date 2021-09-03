@@ -239,8 +239,9 @@ void remove_parents(std::vector<int>& a, std::vector<int>& b){
 //    b.erase(std::remove_if(b.begin(), b.end(), predicate), b.end());
 }
 
-BABNModel BABNModel::abstract(int abstraction, BABNModel::Structure structure, const Domain_Size *ds,
-                                        const Domain_Feature_Size *dfs, const BABNModel::Indexing_Steps *is) const {
+BABNModel
+BABNModel::abstract(int abstraction, Structure structure, const Domain_Size *ds, const Domain_Feature_Size *dfs,
+                    const Indexing_Steps *is, bool normalize) const {
     auto new_structure = std::move(structure);
     // TODO this should maybe be part of the environment
     // if abstraction = 0: keep only x and y
@@ -273,8 +274,13 @@ BABNModel BABNModel::abstract(int abstraction, BABNModel::Structure structure, c
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
         {
-            T_marginalized.emplace_back(
-                    transitionNode(&action, f).marginalizeOut(std::move(new_structure.T[a][f])));
+            if(normalize) {
+                T_marginalized.emplace_back(
+                        transitionNode(&action, f).marginalizeOutAndNormalize(std::move(new_structure.T[a][f])));
+            } else {
+                T_marginalized.emplace_back(
+                        transitionNode(&action, f).marginalizeOut(std::move(new_structure.T[a][f])));
+            }
         }
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)

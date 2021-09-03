@@ -65,6 +65,7 @@ public:
 
     int* getAbstraction();
     void setAbstraction(int);
+    void setAbstractionNormalized(int);
 
     /*** State interface ***/
     std::string toString() const override;
@@ -73,7 +74,7 @@ private:
 //    bayes_adaptive::factored::BABNModel _model;
     int _abstraction; // Vector with the features that are included in the abstract model
     bayes_adaptive::factored::BABNModel _abstract_model;  // Abstract model that only uses the feature in _abstraction
-    bayes_adaptive::factored::BABNModel construct_abstract_model(bayes_adaptive::factored::BABNModel model) const;
+    bayes_adaptive::factored::BABNModel construct_abstract_model(bayes_adaptive::factored::BABNModel model, bool normalize) const;
 
     Domain_Size const _abstract_domain_size;
     Domain_Feature_Size const _abstract_domain_feature_size;

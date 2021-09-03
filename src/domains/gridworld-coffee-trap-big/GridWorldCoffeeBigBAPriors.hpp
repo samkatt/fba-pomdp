@@ -34,7 +34,7 @@ public:
 private:
     size_t const _size;
     bool const _abstraction;
-    size_t const _carpet_tiles;
+    size_t const _extra_features;
     std::vector<unsigned int> const rain_values = {0,1};
 
     float const _unknown_counts_total;

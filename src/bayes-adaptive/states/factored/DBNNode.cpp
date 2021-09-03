@@ -88,6 +88,26 @@ DBNNode DBNNode::marginalizeOut(std::vector<int> new_parents) const
     return new_node;
 }
 
+//void DivideVectorByScalar(std::vector<float> &v, int k){
+//    transform(v.begin(), v.end(), v.begin(), [k](int &c){ return c/k; });
+//}
+
+DBNNode DBNNode::marginalizeOutAndNormalize(std::vector<int> new_parents) const
+{
+    auto new_node = marginalizeOut(new_parents);
+
+    // base case, no parents
+    if (_parent_nodes.empty())
+    {
+        return new_node;
+    }
+    // TODO need to generalize, when not removing just binary variables
+    auto normalize_constant= pow(2, _parent_nodes.size() - new_parents.size());
+    std::transform(new_node._cpts.begin(), new_node._cpts.end(), new_node._cpts.begin(), [normalize_constant](float &c){return c/normalize_constant;});
+
+    return new_node;
+}
+
 double DBNNode::LogBDScore(DBNNode const& prior) const
 {
     assert(_output_size == prior._output_size);

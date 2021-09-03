@@ -122,13 +122,19 @@ int* AbstractFBAPOMDPState::getAbstraction(){
 
 void AbstractFBAPOMDPState::setAbstraction(int k){
     _abstraction = k;
-    _abstract_model = construct_abstract_model(FBAPOMDPState::model_real());
+    _abstract_model = construct_abstract_model(FBAPOMDPState::model_real(), false);
+}
+
+void AbstractFBAPOMDPState::setAbstractionNormalized(int k){
+    _abstraction = k;
+    _abstract_model = construct_abstract_model(FBAPOMDPState::model_real(), true);
 }
 
 // Construct abstract model from the model given the features to keep in the abstraction
-bayes_adaptive::factored::BABNModel AbstractFBAPOMDPState::construct_abstract_model(bayes_adaptive::factored::BABNModel model) const {
+bayes_adaptive::factored::BABNModel AbstractFBAPOMDPState::construct_abstract_model(bayes_adaptive::factored::BABNModel model, bool normalize) const {
 //    if (_abstraction == 0) {
-    return model.abstract(_abstraction, model.structure(), &_abstract_domain_size, &_abstract_domain_feature_size, &_step_size);
+    return model.abstract(_abstraction, model.structure(), &_abstract_domain_size, &_abstract_domain_feature_size,
+                          &_step_size, normalize); // TODO change to not fixed normalize
 //    }
 }
 

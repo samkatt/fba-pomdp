@@ -41,6 +41,8 @@ public:
     constexpr static double const step_reward    = 0;
     constexpr static double const same_weather_prob = .7;
     constexpr static double const move_prob      = .95;
+    constexpr static double const rain_move_prob = .3; // the probability that the agent believes
+    constexpr static double const move_prob_reduction = .9; // per feature that is "on" how much does the agent believe the movement probability is lowered
     constexpr static double const slow_move_prob = .1;
     constexpr static double const wrong_obs_prob = .1;
 
@@ -68,10 +70,10 @@ public:
             }
         };
 
-        GridWorldCoffeeBigState(pos agent_pos, unsigned int rain, unsigned int carpet_config, int i) :
+        GridWorldCoffeeBigState(pos agent_pos, unsigned int rain, unsigned int feature_config, int i) :
             _agent_position(agent_pos),
             _rain(rain),
-            _carpet_config(carpet_config),
+            _feature_config(feature_config),
             _index(i)
         {
         }
@@ -81,12 +83,12 @@ public:
         int index() const final { return _index; }
         std::string toString() const final
         {
-            return "agent" + _agent_position.toString() + " rain " + std::to_string(_rain) + " carpet configuration " + std::to_string(_carpet_config);
+            return "agent" + _agent_position.toString() + " rain " + std::to_string(_rain) + " carpet configuration " + std::to_string(_feature_config);
         }
 
         pos const _agent_position;
         unsigned int const _rain;
-        unsigned int const _carpet_config;
+        unsigned int const _feature_config;
 
     private:
         int const _index;
@@ -137,7 +139,7 @@ public:
         int const _index;
     };
 
-    explicit GridWorldCoffeeBig(size_t carpet_tiles);
+    explicit GridWorldCoffeeBig(size_t extra_features);
 
     static std::vector<GridWorldCoffeeBigState::pos> const slow_locations;
 
@@ -149,7 +151,7 @@ public:
     double goalReward() const;
     bool agentOnSlowLocation(GridWorldCoffeeBigState::pos const& agent_pos) const;
     bool agentOnCarpet(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& carpet_config) const;
-    static float believedTransitionProb(bool const& onCarpet, bool const& rain);
+    static float believedTransitionProb(bool const& rain, int const& features_on);
     State const* sampleRandomState() const;
 
     /**
@@ -186,8 +188,8 @@ public:
 private:
     // problem settings
     size_t const _size = 5;
-    size_t const _carpet_tiles;
-    std::vector<int> _stepSizes = indexing::stepSize(std::vector<int>(_carpet_tiles, 2));
+    size_t const _extra_features;
+    std::vector<int> _stepSizes = indexing::stepSize(std::vector<int>(_extra_features, 2));
 
     // initiated in constructor
     int _A_size = 4;
@@ -206,7 +208,7 @@ private:
      **/
     Observation const* generateObservation(GridWorldCoffeeBigState::pos const& agent_pos) const;
 
-    int positionsToIndex(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
+    int positionsToIndex(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& feature_config)
         const;
     int positionsToObservationIndex(GridWorldCoffeeBigState::pos const& agent_pos) const;
 

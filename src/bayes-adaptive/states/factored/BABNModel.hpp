@@ -115,8 +115,8 @@ public:
     /**
      * @brief takes a abstraction with fewer features and marginalizes out the other features
      **/
-    BABNModel abstract(int abstraction, Structure structure, Domain_Size const* ds,
-                       Domain_Feature_Size const* dfs, Indexing_Steps const* is) const;
+    BABNModel abstract(int abstraction, Structure structure, const Domain_Size *ds, const Domain_Feature_Size *dfs,
+                       const Indexing_Steps *is, bool normalize) const;
 
     /**
      * @brief returns the structure of its nodes

@@ -21,7 +21,7 @@ class GridWorldCoffeeBigBAExtension : public BADomainExtension
 {
 
 public:
-    explicit GridWorldCoffeeBigBAExtension(size_t carpet_tiles);
+    explicit GridWorldCoffeeBigBAExtension(size_t extra_features);
 
     /*** BADomainExtension interface implementation ****/
     Domain_Size domainSize() const final;
@@ -31,7 +31,7 @@ public:
 
 private:
     size_t const _size;
-    size_t const _carpet_tiles;
+    size_t const _extra_features;
     std::vector<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState> _states; // initialized in the constructor
     Domain_Size _domain_size;
 };

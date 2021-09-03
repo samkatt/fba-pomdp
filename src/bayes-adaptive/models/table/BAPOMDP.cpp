@@ -221,7 +221,7 @@ std::unique_ptr<BAPOMDP> makeTBAPOMDP(configurations::BAConf const& c)
     auto const compute_mult_method = (c.bayes_sample_method == 0) ? rnd::sample::Dir::sampleMult
                                                                   : rnd::sample::Dir::expectedMult;
 
-    auto update_abstract_model = c.update_abstract_model != 0;
+    auto update_abstract_model = c.planner_conf.update_abstract_model != 0;
 
     return std::unique_ptr<BAPOMDP>(new BAPOMDP(
         std::unique_ptr<POMDP>(domain),
