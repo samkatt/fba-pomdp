@@ -69,8 +69,7 @@ void BAImportanceSampling::initiate(POMDP const& d)
             if (_update_abstract_model_normalized) {
                 // Update the abstraction
                 static_cast<AbstractFBAPOMDPState *>(s)->setAbstractionNormalized(0);
-            }
-            if (_update_abstract_model) {
+            } else if (_update_abstract_model) {
                 // Update the abstraction
                 static_cast<AbstractFBAPOMDPState *>(s)->setAbstraction(0);
             }
