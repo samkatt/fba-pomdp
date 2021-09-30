@@ -127,4 +127,20 @@ void ReinvigoratingRejectionSampling::reinvigorateParticles(POMDP const& domain)
     }
 }
 
-}}} // namespace beliefs::bayes_adaptive::factored
+void ReinvigoratingRejectionSampling::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                                    Abstraction &abstraction,
+                                                                                    int i) {
+    assert(_belief.size() == _size);
+    assert(_fully_connected_belief.size() == _size);
+
+    for (auto& p : _belief.particles()) { bapomdp.resetDomainState(p); }
+
+    for (auto& p : _fully_connected_belief.particles()) { bapomdp.resetDomainState(p); }
+
+    VLOG(3) << "Status of rejection sampling filter after initiating while keeping counts:\n"
+            << _belief.toString();
+    VLOG( 3) << abstraction.printSomething();
+    VLOG( 3) << i;
+}
+
+        }}} // namespace beliefs::bayes_adaptive::factored

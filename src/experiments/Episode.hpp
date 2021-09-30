@@ -25,8 +25,9 @@ struct Result
 {
     Return ret;
     int length;
+    int simulations;
 
-    Result(Return r, int l) : ret(r), length(l) {}
+    Result(Return r, int l, int sims) : ret(r), length(l), simulations(sims) {}
 };
 
 /**

@@ -77,7 +77,9 @@ public:
         State const* new_s,
         rnd::sample::Dir::sampleMethod m) const;
 
-    Domain_Feature_Size const* domainFeatureSize();
+    const Domain_Size * domainSize() const;
+    const Domain_Feature_Size * domainFeatureSize() const;
+    const Indexing_Steps * stepSizes() const;
 
     /**
      * @brief returns a table of probabilities [s][a][new_s]
@@ -117,6 +119,10 @@ public:
      **/
     BABNModel abstract(int abstraction, Structure structure, const Domain_Size *ds, const Domain_Feature_Size *dfs,
                        const Indexing_Steps *is, bool normalize) const;
+    BABNModel abstract(std::vector<int> abstraction_set, Structure structure, const Domain_Size *ds, const Domain_Feature_Size *dfs,
+                       const Indexing_Steps *is, bool normalize) const;
+
+    void abstractionNormalizeCounts(BABNModel prior, BABNModel prior_normalized);
 
     /**
      * @brief returns the structure of its nodes
@@ -167,7 +173,6 @@ private:
     void assertLegal(Action const* a) const;
     void assertLegalStateFeature(int f) const;
     void assertLegalObservationFeature(int f) const;
-
 };
 
 }} // namespace bayes_adaptive::factored

@@ -104,6 +104,8 @@ public:
      **/
     void logCPTs() const;
 
+    void doAbstractionNormalizeCounts(DBNNode &node, DBNNode &node1);
+
 private:
     /**
      * @brief range of values this node can take on
@@ -156,6 +158,8 @@ private:
      * @brief takes graph values as input and extract the parent values
      **/
     void parentValues(std::vector<int> const& node_input, std::vector<int>* parent_values) const;
+
+    void parentValuesAbstract(const std::vector<int> &node_input, std::vector<int> *parent_values) const;
 };
 
 #endif // DBNNODE_HPP

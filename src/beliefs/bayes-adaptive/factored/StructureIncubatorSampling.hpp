@@ -1,6 +1,7 @@
 #ifndef STRUCTUREINCUBATORSAMPLING_HPP
 #define STRUCTUREINCUBATORSAMPLING_HPP
 
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 #include "beliefs/bayes-adaptive/BABelief.hpp"
 
 #include "bayes-adaptive/models/factored/FBAPOMDP.hpp"
@@ -39,6 +40,7 @@ public:
 
     /***** BABelief interface *****/
     void resetDomainStateDistribution(BAPOMDP const& bapomdp) final;
+    void resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp, Abstraction &abstraction, int i) final;
 
     /***** Belief interface *****/
     void initiate(POMDP const& domain) final;

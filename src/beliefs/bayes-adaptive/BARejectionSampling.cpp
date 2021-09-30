@@ -1,3 +1,4 @@
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 #include "BARejectionSampling.hpp"
 
 #include "easylogging++.h"
@@ -56,5 +57,19 @@ void BARejectionSampling::resetDomainStateDistribution(BAPOMDP const& bapomdp)
     VLOG(3) << "Status of rejection sampling filter after initiating while keeping counts:"
             << _filter.toString();
 }
+
+    void BARejectionSampling::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                            Abstraction &abstraction, int i) {
+        assert(_filter.size() == _n);
+
+        for (auto& s : _filter.particles())
+        { bapomdp.resetDomainState(dynamic_cast<BAState const*>(s)); }
+
+        VLOG(3) << "Status of rejection sampling filter after initiating while keeping counts:"
+                << _filter.toString();
+        VLOG( 3) << abstraction.printSomething();
+        VLOG( 3) << i;
+    }
+
 
 } // namespace beliefs

@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 
 #include "beliefs/particle_filters/WeightedFilter.hpp"
 #include "environment/History.hpp"
@@ -28,6 +29,7 @@ public:
 
     /*** BABelief interface ***/
     void resetDomainStateDistribution(BAPOMDP const& bapomdp) final;
+    void resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp, Abstraction &abstraction, int i) final;
 
     /*** Belief interface ***/
     void initiate(POMDP const& domain) final;

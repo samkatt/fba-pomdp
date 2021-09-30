@@ -32,20 +32,20 @@ public:
     Action const* selectAction(
         BAPOMDP const& simulator,
         beliefs::BABelief const& belief,
-        History const& history) const final;
+        History const& history, int& total_simulations) const final;
 
 private:
     enum UCBExploration { ON, OFF };
 
     // params
     int const _n; // number of simulations
-    int const _sims_per_sample; // number of simulations done per sampled particle
+    int const _milliseconds_thinking; // thinking time for doing simulations
     int const _max_depth; // max depth of the search tree
     int const _h; // horizon of the problem
     double const _u; // exploration constant
     Discount const _discount; // discount used during simulations
 
-    std::vector<double> _ucb_table; // quick ucb lookup table
+//    std::vector<double> _ucb_table; // quick ucb lookup table
 
     mutable std::vector<ActionNode*> _action_nodes =
         {}; // memory efficient way of storing action nodes
@@ -126,7 +126,7 @@ private:
     /**
      * @brief sets up the quick ucb lookup table
      **/
-    void initiateUCBTable();
+//    void initiateUCBTable();
 };
 
 } // namespace planners

@@ -60,7 +60,7 @@ POUCT::POUCT(configurations::Conf const& c) :
 }
 
 Action const*
-    POUCT::selectAction(POMDP const& simulator, Belief const& belief, History const& history) const
+    POUCT::selectAction(POMDP const& simulator, Belief const& belief, History const& history, int& total_simulations) const
 {
     _stats = treeStatistics();
 
@@ -83,7 +83,7 @@ Action const*
         auto r = traverseActionNode(root, state, simulator, _stats.max_tree_depth);
         VLOG(4) << "POUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
     }
-
+    total_simulations += _n;
     // pick best action
     auto const& best_chance_node = selectChanceNodeUCB(root, UCBExploration::OFF);
     auto const best_action       = simulator.copyAction(best_chance_node._action);

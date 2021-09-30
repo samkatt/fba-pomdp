@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 
 #include "easylogging++.h"
 
@@ -148,4 +149,26 @@ void CheatingReinvigoration::cheat(POMDP const& pomdp)
     }
 }
 
-}}} // namespace beliefs::bayes_adaptive::prototypes
+            void CheatingReinvigoration::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                                       Abstraction &abstraction,
+                                                                                       int k) {
+                assert(_belief.size() == _size);
+                assert(_correct_structured_belief.size() == _size);
+
+                auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(bapomdp);
+
+                for (auto& s : _correct_structured_belief.particles()) { fbapomdp.resetDomainState(s); }
+
+                for (size_t i = 0; i < _size; ++i) { fbapomdp.resetDomainState(_belief.particle(i)->particle); }
+
+                VLOG(3) << "Status of cheating filter after resetting domain states:\n"
+                        << _correct_structured_belief.toString()
+                        << "Status of actual belief after resetting domain states:\n"
+                        << _belief.toString(printStateIndex);
+                VLOG( 3) << abstraction.printSomething();
+                VLOG( 3) << k;
+            }
+
+
+
+        }}} // namespace beliefs::bayes_adaptive::prototypes

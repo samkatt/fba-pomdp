@@ -254,4 +254,23 @@ void MHNIPS2018::MH(POMDP const& domain)
     _log_likelihood = 0;
 }
 
-}}} // namespace beliefs::bayes_adaptive::factored
+            void MHNIPS2018::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                           Abstraction &abstraction, int k) {
+                assert(_belief.size() == _size);
+
+                auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(bapomdp);
+
+                for (size_t i = 0; i < _size; ++i) { fbapomdp.resetDomainState(_belief.particle(i)->particle); }
+
+                VLOG(4) << "Reset domain state, current state belief:\n" << _belief.toString(printStateIndex);
+
+                if (_history.back().length() != 0)
+                {
+                    _history.emplace_back();
+                }
+                VLOG( 3) << abstraction.printSomething();
+                VLOG( 3) << k;
+
+            }
+
+        }}} // namespace beliefs::bayes_adaptive::factored

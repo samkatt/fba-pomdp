@@ -30,7 +30,7 @@ void DomainConf::addOptions(boost::program_options::options_description* descr)
         (
         "abstraction",
         po::value(&abstraction)->default_value(abstraction),
-        "Whether or not we use abstraction: gridworldcoffee and gridworldcoffeebig");;
+        "Whether or not we use abstraction: gridworldcoffee, gridworldbuttons, and gridworldcoffeebig");;
     // clang-format on
 }
 
@@ -53,6 +53,7 @@ void DomainConf::validate() const
                                               "gridworld",
                                               "gridworldcoffee",
                                               "gridworldcoffeebig",
+                                              "gridworldbuttons",
                                               "random-collision-avoidance",
                                               "centered-collision-avoidance"};
 
@@ -71,12 +72,13 @@ void DomainConf::validate() const
         ^ (domain == "factored-dummy" || domain == "independent-sysadmin"
            || domain == "linear-sysadmin" || domain == "episodic-factored-tiger"
            || domain == "continuous-factored-tiger" || domain == "gridworld"
-           || domain == "gridworldcoffeebig"
+           || domain == "gridworldcoffeebig" || domain == "gridworldbuttons"
            || domain == "random-collision-avoidance" || domain == "centered-collision-avoidance"))
     {
         throw error(
             "--size and -D should be used together, either one is useless without the other (size "
-            "&& factored-dummy, *-collision-avoidance, sysadmin, gridworldcoffeebig or a factored_tiger domain), "
+            "&& factored-dummy, *-collision-avoidance, sysadmin, gridworldbuttons, "
+            "gridworldcoffeebig or a factored_tiger domain), "
             "provided domain "
             + domain + " with size " + std::to_string(size));
     }

@@ -239,21 +239,74 @@ void remove_parents(std::vector<int>& a, std::vector<int>& b){
 //    b.erase(std::remove_if(b.begin(), b.end(), predicate), b.end());
 }
 
+//BABNModel
+//BABNModel::abstract(int abstraction, Structure structure, const Domain_Size *ds, const Domain_Feature_Size *dfs,
+//                    const Indexing_Steps *is, bool normalize) const {
+//    auto new_structure = std::move(structure);
+//    // TODO this should maybe be part of the environment
+//    // if abstraction = 0: keep only x and y
+//    // if abstraction = 1: keep x and y, and rain/carpet if they influence x and/or y
+//    // if abstraction = 2: keep x and y, and rain/carpet if they influence x and/or y,
+//    // and rain/carpet if they influence rain/carpet (if it influences x and/or y
+//    std::vector<int> abstraction_set = {};
+//    if (abstraction == 0) {
+//        abstraction_set = {0,1};
+//    } else if (abstraction == 1) {
+//        abstraction_set = {0, 1, 2, 3};
+//    }
+//
+//    for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
+//    {
+//        // if abstraction == 2 we should keep variables if they indirectly influence x and y.
+//        // currently sort of happens because we only remove parents from x and y
+//        for (auto f = 0; f < 2; ++f) {
+//            remove_parents(new_structure.T[a][abstraction_set[f]], abstraction_set);
+//        }
+//    }
+//
+//    // marginalize and reduce
+//    std::vector<DBNNode> T_marginalized, O_marginalized;
+//
+//    auto action = IndexAction(0);
+//    for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
+//    {
+//        action.index(a);
+//
+//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
+//        {
+//            if(normalize) {
+//                T_marginalized.emplace_back(
+//                        transitionNode(&action, f).marginalizeOutAndNormalize(std::move(new_structure.T[a][f])));
+//            } else {
+//                T_marginalized.emplace_back(
+//                        transitionNode(&action, f).marginalizeOut(std::move(new_structure.T[a][f])));
+//            }
+//        }
+//
+//        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)
+//        {
+//            O_marginalized.emplace_back(
+//                    observationNode(&action, f).marginalizeOut(std::move(new_structure.O[a][f])));
+//        }
+//    }
+//
+//    // Remove factors that are not used
+//    if (abstraction == 0) {
+//        T_marginalized.erase(std::remove_if(T_marginalized.begin(), T_marginalized.end(),
+//                                            [](DBNNode i) {return i.range() != 5; }), T_marginalized.end());
+//
+//        return BABNModel(
+//                ds, dfs, is, T_marginalized, O_marginalized);
+//    }
+//
+//    return BABNModel(
+//            _domain_size, _domain_feature_size, _step_sizes, T_marginalized, O_marginalized);
+//}
+
 BABNModel
-BABNModel::abstract(int abstraction, Structure structure, const Domain_Size *ds, const Domain_Feature_Size *dfs,
+BABNModel::abstract(std::vector<int> abstraction_set, Structure structure, const Domain_Size *ds, const Domain_Feature_Size *dfs,
                     const Indexing_Steps *is, bool normalize) const {
     auto new_structure = std::move(structure);
-    // TODO this should maybe be part of the environment
-    // if abstraction = 0: keep only x and y
-    // if abstraction = 1: keep x and y, and rain/carpet if they influence x and/or y
-    // if abstraction = 2: keep x and y, and rain/carpet if they influence x and/or y,
-    // and rain/carpet if they influence rain/carpet (if it influences x and/or y
-    std::vector<int> abstraction_set = {};
-    if (abstraction == 0) {
-        abstraction_set = {0,1};
-    } else if (abstraction == 1) {
-        abstraction_set = {0, 1, 2, 3};
-    }
 
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
@@ -289,17 +342,40 @@ BABNModel::abstract(int abstraction, Structure structure, const Domain_Size *ds,
                     observationNode(&action, f).marginalizeOut(std::move(new_structure.O[a][f])));
         }
     }
+    // TODO check how we can see which factors are not used?
+    // Ah so this goes wrong now
+    // normally the model always contains all the features, so now we should compare the sizes?
 
-    if (abstraction == 0) {
+    if (true) {
+        // remove nodes when they are not in the abstraction set
+//        T_marginalized.erase(std::remove_if(T_marginalized.begin(), T_marginalized.end(),
+//                                            [abstraction_set](DBNNode i) {return (i.range() != 5);}), T_marginalized.end());
         T_marginalized.erase(std::remove_if(T_marginalized.begin(), T_marginalized.end(),
-                                            [](DBNNode i) {return i.range() != 5; }), T_marginalized.end());
+                                            [abstraction_set](DBNNode i) {return
+                                            find(abstraction_set.begin(), abstraction_set.end(), i.parents()->at(0))
+                                            == abstraction_set.end();}), T_marginalized.end()); // remove if not in the abstraction_set
 
         return BABNModel(
                 ds, dfs, is, T_marginalized, O_marginalized);
     }
 
-    return BABNModel(
-            _domain_size, _domain_feature_size, _step_sizes, T_marginalized, O_marginalized);
+    // TODO place back if /when we remove the if true
+//    return BABNModel(
+//            _domain_size, _domain_feature_size, _step_sizes, T_marginalized, O_marginalized);
+}
+
+void BABNModel::abstractionNormalizeCounts(BABNModel prior, BABNModel prior_normalized)
+{
+    auto action = IndexAction(0);
+    for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
+    {
+        action.index(a);
+
+        for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
+        {
+            transitionNode(&action, f).doAbstractionNormalizeCounts(prior.transitionNode(&action, f), prior_normalized.transitionNode(&action, f));
+        }
+    }
 }
 
 DBNNode& BABNModel::transitionNode(Action const* a, int feature)
@@ -379,13 +455,13 @@ int BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Di
 int BABNModel::sampleStateIndexThroughAbstraction(const State *s, const Action *a, std::vector<int> newfeature_values) const {
     assertLegal(s);
     assertLegal(a);
-
+    // TODO this only works for abstration {0,1}
     //create a vector for the next-stage variables - XXX: this is a memory allocation... expensive!?
-    auto feature_values = std::vector<int>(_domain_feature_size->_S.size(), 0);
-    feature_values[0] = newfeature_values[0];
-    feature_values[1] = newfeature_values[1];
+//    auto feature_values = std::vector<int>(_domain_feature_size->_S.size(), 0);
+//    feature_values[0] = newfeature_values[0];
+//    feature_values[1] = newfeature_values[1];
 
-    return indexing::project(feature_values, _domain_feature_size->_S);
+    return indexing::project(newfeature_values, _domain_feature_size->_S);
 }
 
 int BABNModel::sampleObservationIndex(
@@ -549,8 +625,16 @@ double BABNModel::LogBDScore(BABNModel const& prior) const
     return bd_score;
 }
 
-    Domain_Feature_Size const *BABNModel::domainFeatureSize() {
+    const Domain_Feature_Size* BABNModel::domainFeatureSize() const {
         return _domain_feature_size;
+    }
+
+    const Domain_Size* BABNModel::domainSize() const {
+        return _domain_size;
+    }
+
+    const BABNModel::Indexing_Steps* BABNModel::stepSizes() const {
+        return _step_sizes;
     }
 
     }} // namespace bayes_adaptive::factored

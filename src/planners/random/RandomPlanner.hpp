@@ -18,7 +18,7 @@ class RandomPlanner : public Planner
 public:
     RandomPlanner();
     Action const*
-        selectAction(POMDP const& simulator, Belief const& belief, History const& h) const final;
+        selectAction(POMDP const& simulator, Belief const& belief, History const& h, int& total_simulations) const final;
 };
 
 } // namespace planners

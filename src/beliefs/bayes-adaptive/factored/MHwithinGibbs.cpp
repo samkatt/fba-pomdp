@@ -7,6 +7,8 @@
 #include <string>
 #include <utility>
 #include <bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp>
+#include <boost/timer.hpp>
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 
 #include "easylogging++.h"
 
@@ -336,8 +338,10 @@ void MHwithinGibbs::updateEstimation(Action const* a, Observation const* o, POMD
 
 void MHwithinGibbs::reinvigorate(POMDP const& domain)
 {
-    VLOG(3) << "Initiating reinvigoration after ll dropped to " << _log_likelihood;
-
+    VLOG(1) << "Initiating reinvigoration after ll dropped to " << _log_likelihood;
+    boost::timer timer1;
+    boost::timer timer2;
+    timer2.restart();
     auto old_belief      = std::move(_belief);
     auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(domain);
 
@@ -355,9 +359,11 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
     auto score = model.LogBDScore(prior_model);
 
     auto i = 0;
+    auto numAccepted = 0;
     // gibbs loob
     while (_belief.size() < _size)
     {
+        timer1.restart();
 
         // 2: mh within gibbs to sample p(model | states)
         prior_model = fbapomdp.prior()->computePriorModel(fbapomdp.mutate(model.structure()));
@@ -389,18 +395,20 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
             model = computePosteriorCounts(prior_model, _history, state_sequence);
 
             score = model.LogBDScore(prior_model);
-
+            numAccepted++;
             VLOG(5) << "Sample " << i << " accepted";
+            VLOG(1) << "Reinvigoration accepted: " << numAccepted;
+            VLOG(1) << "Took time: " << timer1.elapsed();
         } else
         {
             VLOG(5) << "Sample " << i << " rejected";
         }
-
         i++;
     }
 
     old_belief.free([&domain](State const* s) { domain.releaseState(s); });
     _log_likelihood = 0;
+    VLOG(1) << "Reinvigoration took time: " << timer2.elapsed();
 }
 
 ::bayes_adaptive::factored::BABNModel MHwithinGibbs::computePosteriorCounts(
@@ -444,4 +452,24 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
     return result;
 }
 
-}}} // namespace beliefs::bayes_adaptive::factored
+            void MHwithinGibbs::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                              Abstraction &abstraction, int k) {
+
+                assert(_belief.size() == _size);
+
+                auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(bapomdp);
+
+                for (size_t i = 0; i < _size; ++i) { fbapomdp.resetDomainState(_belief.particle(i)->particle); }
+
+                VLOG(4) << "Reset domain state, current state belief:\n" << _belief.toString(printStateIndex);
+
+                if (_history.back().length() != 0)
+                {
+                    _history.emplace_back();
+                }
+                VLOG( 3) << abstraction.printSomething();
+                VLOG( 3) << k;
+
+            }
+
+        }}} // namespace beliefs::bayes_adaptive::factored

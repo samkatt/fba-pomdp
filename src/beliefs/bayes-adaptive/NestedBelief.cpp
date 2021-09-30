@@ -3,6 +3,7 @@
 #include "easylogging++.h"
 
 #include <string>
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 
 namespace {
 
@@ -205,4 +206,32 @@ void NestedBelief::assertValidBelief() const
     }
 }
 
-}} // namespace beliefs::bayes_adaptive
+    void NestedBelief::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                     Abstraction &abstraction, int k) {
+        assertValidBelief();
+
+        auto& domain = bapomdp._domain;
+
+        for (size_t i = 0; i < _top_filter_size; ++i)
+        {
+
+            // construct domain state prior
+            std::vector<State const*> domain_states;
+            for (size_t j = 0; j < _bottom_filter_size; ++j)
+            { domain_states.emplace_back(domain->sampleStartState()); }
+
+            // reconstruct each nested filter by freeing up current first
+
+            _filter.particle(i)->particle.second.free(
+                    [&domain](State const* s) { domain->releaseState(s); });
+            _filter.particle(i)->particle.second = FlatFilter<State const*>(std::move(domain_states));
+        }
+
+        VLOG(3) << "Status after resetting domain state to initial distribution\n"
+                << _filter.toString(describeParticle);
+        VLOG( 3) << abstraction.printSomething();
+        VLOG( 3) << k;
+    }
+
+
+    }} // namespace beliefs::bayes_adaptive

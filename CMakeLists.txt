@@ -63,6 +63,7 @@ set(SRC
     )
 
 set(BA_SRC
+    "src/bayes-adaptive/abstractions/Abstraction.cpp"
     "src/bayes-adaptive/models/factored/FBADomainExtension.cpp"
     "src/bayes-adaptive/models/factored/FBAPOMDP.cpp"
     "src/bayes-adaptive/models/table/BADomainExtension.cpp"
@@ -104,6 +105,7 @@ set(BA_SRC
     "src/domains/gridworld-coffee-trap-big/GridWorldCoffeeBigBAExtension.cpp"
     "src/domains/gridworld-coffee-trap-big/GridWorldCoffeeBigBAPriors.cpp"
     "src/domains/gridworld-coffee-trap-big/GridWorldCoffeeBigFBAExtension.cpp"
+    "src/domains/gridworld-coffee-trap-big/GridWorldCoffeeBigAbstraction.cpp"
     "src/domains/sysadmin/SysAdminBAExtension.cpp"
     "src/domains/sysadmin/SysAdminFBAExtension.cpp"
     "src/domains/sysadmin/SysAdminFactoredPrior.cpp"

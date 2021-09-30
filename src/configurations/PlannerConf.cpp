@@ -14,9 +14,9 @@ void PlannerConf::addOptions(boost::program_options::options_description* descr)
         "The number of simulations used by Tree Search methods (note you will need to set the "
         "planner accordingly)")
         (
-        "sims-per-sample,s",
-        po::value(&sims_per_sample)->default_value(sims_per_sample),
-        "The number of simulations done per sampled particle by Tree Search methods (note you will need to set the "
+        "milliseconds-thinking",
+        po::value(&milliseconds_thinking)->default_value(milliseconds_thinking),
+        "The number of milliseconds to do simulations by Tree Search methods (note you will need to set the "
         "planner accordingly)")
         (
         "remake_abstract_model",
@@ -30,6 +30,10 @@ void PlannerConf::addOptions(boost::program_options::options_description* descr)
         "update_abstract_model_normalized",
         po::value(&update_abstract_model_normalized)->default_value(update_abstract_model_normalized),
         "In case we want to normalize the initial prior for the abstraction")
+            (
+                    "abstraction_k",
+                    po::value(&abstraction_k)->default_value(abstraction_k),
+                    "Which abstraction to use")
         (
         "mcts-max-depth,max-depth",
         po::value(&mcts_max_depth)->default_value(mcts_max_depth),
@@ -51,9 +55,9 @@ void PlannerConf::validate() const
         throw error("Please set a positive number of simulations");
     }
 
-    if (sims_per_sample < 0 or sims_per_sample > mcts_simulation_amount)
+    if (milliseconds_thinking < 0)
     {
-        throw error("Please set a number between 0 and mcts_simulation_amount");
+        throw error("Please set a number above 0");
     }
 
     if (mcts_max_depth < 0)

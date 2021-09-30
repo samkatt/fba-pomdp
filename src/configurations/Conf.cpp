@@ -96,7 +96,7 @@ void Conf::validate() const
     if (std::find(valid_belief.begin(), valid_belief.end(), belief) == valid_belief.end())
     {
         throw error(
-            "please enter a legit state stimator: point, rejection_sampling, importance_sampling, "
+            "please enter a legit state estimator: point, rejection_sampling, importance_sampling, "
             "mh-nips, mh-within-gibbs, (cheating-)reinvigoration or incubator, provided: "
             + belief);
     }

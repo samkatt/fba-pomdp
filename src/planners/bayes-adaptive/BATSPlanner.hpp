@@ -27,7 +27,8 @@ public:
     Action const* selectAction(
         BAPOMDP const& bapomdp,
         beliefs::BABelief const& belief,
-        History const& h) const final;
+        History const& h,
+        int& total_simulations) const final;
 
 private:
     RBAPOUCT _planner;

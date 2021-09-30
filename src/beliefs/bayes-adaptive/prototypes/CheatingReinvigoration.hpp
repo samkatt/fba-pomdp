@@ -4,6 +4,7 @@
 #include "beliefs/bayes-adaptive/BABelief.hpp"
 
 #include <cstdlib>
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 
 #include "beliefs/particle_filters/FlatFilter.hpp"
 #include "beliefs/particle_filters/WeightedFilter.hpp"
@@ -31,6 +32,7 @@ public:
 
     /*** BABelief interface ***/
     void resetDomainStateDistribution(BAPOMDP const& bapomdp) final;
+    void resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp, Abstraction &abstraction, int i) final;
 
     /*** Belief interface ***/
     void initiate(POMDP const& domain) final;

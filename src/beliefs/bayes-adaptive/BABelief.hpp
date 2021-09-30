@@ -4,6 +4,7 @@
 #include "beliefs/Belief.hpp"
 
 #include <memory>
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 
 #include "bayes-adaptive/models/table/BAPOMDP.hpp"
 
@@ -31,7 +32,8 @@ public:
      * NOTE: will not affec the counts / learnable
      * aspects that are stored in the states
      **/
-    virtual void resetDomainStateDistribution(BAPOMDP const& domain) = 0;
+    virtual void resetDomainStateDistribution(const BAPOMDP &domain) = 0;
+    virtual void resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &domain, Abstraction &abstraction, int i) = 0;
 };
 
 } // namespace beliefs

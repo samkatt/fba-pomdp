@@ -21,7 +21,7 @@ public:
     virtual ~Planner() = default;
 
     virtual Action const*
-        selectAction(POMDP const& simulator, Belief const& belief, History const& h) const = 0;
+        selectAction(POMDP const& simulator, Belief const& belief, History const& h, int& total_simulations) const = 0;
 };
 
 namespace factory {

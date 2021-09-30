@@ -180,4 +180,23 @@ void StructureIncubatorSampling::reinvigorateBelief(FBAPOMDP const& fbapomdp)
     }
 }
 
-}}} // namespace beliefs::bayes_adaptive::factored
+void StructureIncubatorSampling::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                                   Abstraction &abstraction,
+                                                                                   int k) {
+        assert(_belief.size() == _size);
+        assert(_fully_connected_belief.size() == _size);
+        assert(_shadow_belief.size() == _size);
+
+        for (auto& p : _belief.particles()) { bapomdp.resetDomainState(p); }
+
+        for (auto& p : _fully_connected_belief.particles()) { bapomdp.resetDomainState(p); }
+
+        for (size_t i = 0; i < _size; ++i)
+        { bapomdp.resetDomainState(_shadow_belief.particle(i)->particle); }
+        VLOG( 3) << abstraction.printSomething();
+        VLOG( 3) << k;
+}
+
+
+
+        }}} // namespace beliefs::bayes_adaptive::factored

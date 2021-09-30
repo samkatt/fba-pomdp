@@ -36,9 +36,10 @@ Result
 
     // interact until horizon or terminal interaction occurred
     int t;
+    int simulation_total = 0;
     for (t = 0; t < h.toInt() && !terminal.terminated(); ++t)
     {
-        auto const a = planner.selectAction(simulator, belief, hist);
+        auto const a = planner.selectAction(simulator, belief, hist, simulation_total);
         terminal     = env.step(&s, a, &o, &r);
 
         VLOG(2) << "T=" << t << "\ta=" << a->toString() << "\ts'=" << s->toString()
@@ -60,7 +61,7 @@ Result
     hist.clear(simulator, env);
     env.releaseState(s);
 
-    return {ret, t};
+    return {ret, t, simulation_total};
 }
 
 } // namespace episode

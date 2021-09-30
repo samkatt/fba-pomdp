@@ -16,7 +16,8 @@ BATSPlanner::BATSPlanner(configurations::Conf const& c) : _planner(c)
 Action const* BATSPlanner::selectAction(
     BAPOMDP const& bapomdp,
     ::beliefs::BABelief const& belief,
-    History const& h) const
+    History const& h,
+    int& total_simulations) const
 {
 
     // TS belief (borrows a single sample)
@@ -26,8 +27,8 @@ Action const* BATSPlanner::selectAction(
             << sampled_estimation.sample()->toString();
 
     // plan according to sampled belief
-    auto const a = _planner.selectAction(bapomdp, sampled_estimation, h);
-
+    auto const a = _planner.selectAction(bapomdp, sampled_estimation, h, total_simulations);
+    total_simulations += 1;
     return a;
 }
 

@@ -24,7 +24,7 @@ struct Result : public el::Loggable
      **/
     struct episode_result
     {
-        utils::Statistic ret = utils::Statistic(), duration = utils::Statistic();
+        utils::Statistic ret = utils::Statistic(), duration = utils::Statistic(), simulations = utils::Statistic();
     };
 
     std::vector<episode_result> r;

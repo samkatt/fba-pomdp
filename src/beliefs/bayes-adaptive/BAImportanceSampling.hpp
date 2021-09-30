@@ -1,6 +1,7 @@
 #ifndef BAIMPORTANCESAMPLER_HPP
 #define BAIMPORTANCESAMPLER_HPP
 
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 #include "beliefs/bayes-adaptive/BABelief.hpp"
 #include "beliefs/particle_filters/ImportanceSampler.hpp"
 
@@ -34,7 +35,8 @@ public:
     BAImportanceSampling(WeightedFilter<State const*> f, size_t n, bool abstraction, bool remake_abstraction, bool update_abstraction, bool update_abstract_model_normalized);
 
     /***** BABelief interface *****/
-    void resetDomainStateDistribution(BAPOMDP const& bapomdp) final;
+    void resetDomainStateDistribution(const BAPOMDP &bapomdp) final;
+    void resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp, Abstraction &abstraction, int i) final;
 
     /***** Belief interface *****/
     void initiate(POMDP const& d) final;

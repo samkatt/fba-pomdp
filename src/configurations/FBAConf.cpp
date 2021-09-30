@@ -53,7 +53,8 @@ void FBAConf::validate() const
         "centered-collision-avoidance",
         "gridworld",
         "gridworldcoffee",
-        "gridworldcoffeebig"
+        "gridworldcoffeebig",
+        "gridworldbuttons"
     };
 
     if (std::find(fpomdps.begin(), fpomdps.end(), domain_conf.domain) == fpomdps.end())

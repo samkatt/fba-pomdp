@@ -30,6 +30,7 @@ public:
 
     /*** implement BABelief ***/
     void resetDomainStateDistribution(BAPOMDP const& bapomdp) final;
+    void resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp, Abstraction &abstraction, int i) final;
 
 private:
     // number of particles

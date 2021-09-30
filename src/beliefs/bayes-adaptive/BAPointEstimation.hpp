@@ -1,6 +1,7 @@
 #ifndef BAPOINTESTIMATION_HPP
 #define BAPOINTESTIMATION_HPP
 
+#include <bayes-adaptive/abstractions/Abstraction.hpp>
 #include "beliefs/bayes-adaptive/BABelief.hpp"
 class Action;
 class BAPOMDP;
@@ -41,6 +42,7 @@ public:
 
     /*** implement BABelief ***/
     void resetDomainStateDistribution(BAPOMDP const& bapomdp) final;
+    void resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp, Abstraction &abstraction, int i) final;
 
 private:
     State const* _point_estimate = nullptr;

@@ -236,10 +236,28 @@ int DBNNode::cptIndex(std::vector<int> const& node_input, int node_output) const
     // TODO This was going wrong, not sure if this can go wrong somewhere else as well.
     //  What happened was that when marginalizing out, we call this function with the "previous" parents,
     //  which was not always equal to the whole graph input.
+
+    // TODO, with abstraction it seems the graph_range is not adjusted, so this can happen
+//    if (node_input.size() < _graph_range->size()) {
+//        parentValuesAbstract(node_input, &_parent_value_holder);
+//        return indexing::project(_parent_value_holder, _parent_sizes) * _output_size + node_output;
+//    }
+
     assert(node_input.size() == _graph_range->size());
     parentValues(node_input, &_parent_value_holder);
     return indexing::project(_parent_value_holder, _parent_sizes) * _output_size + node_output;
 }
+
+//// It populates the parent values. Node input is the DBN input
+//void DBNNode::parentValuesAbstract(std::vector<int> const& node_input, std::vector<int>* parent_values)
+//const {
+//
+//
+//    // populate parent values
+//    parent_values->clear();
+//    for (auto const& p : _parent_nodes) { parent_values->emplace_back(node_input[p]); }
+//
+//}
 
 // It populates the parent values. Node input is the DBN input
 void DBNNode::parentValues(std::vector<int> const& node_input, std::vector<int>* parent_values)
@@ -290,4 +308,18 @@ void DBNNode::logCPTs() const
             indexing::increment(input, _parent_sizes);
         }
     }
+}
+
+void DBNNode::doAbstractionNormalizeCounts(DBNNode &node_prior, DBNNode &node_prior_normalized) {
+    // loop over all our distributions and add them to our new node
+    auto parent_values = std::vector<int>(_parent_nodes.size());
+    do
+    {
+        // add and remove our dirichlet counts from the node
+        for (int output = 0; output < _output_size; ++output) {
+            increment(parent_values, output, -node_prior.count(parent_values, output));
+            increment(parent_values, output, node_prior_normalized.count(parent_values, output));
+        }
+
+    } while (!indexing::increment(parent_values, _parent_sizes));
 }

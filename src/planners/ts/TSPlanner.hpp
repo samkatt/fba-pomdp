@@ -25,7 +25,7 @@ public:
     explicit TSPlanner(configurations::Conf const& c);
 
     Action const*
-        selectAction(POMDP const& simulator, Belief const& belief, History const& h) const final;
+        selectAction(POMDP const& simulator, Belief const& belief, History const& h, int& total_simulations) const final;
 
 private:
     POUCT _planner;

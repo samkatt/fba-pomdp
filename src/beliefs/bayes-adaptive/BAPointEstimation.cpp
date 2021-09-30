@@ -87,4 +87,13 @@ void BAPointEstimation::resetDomainStateDistribution(BAPOMDP const& bapomdp)
     bapomdp.resetDomainState(dynamic_cast<BAState const*>(_point_estimate));
 }
 
+    void BAPointEstimation::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                          Abstraction &abstraction, int i) {
+        assert(_point_estimate != nullptr);
+        bapomdp.resetDomainState(dynamic_cast<BAState const*>(_point_estimate));
+        VLOG( 3) << abstraction.printSomething();
+        VLOG( 3) << i;
+    }
+
+
 } // namespace beliefs

@@ -180,6 +180,8 @@ GridWorldCoffeeBigFactBAPrior::GridWorldCoffeeBigFactBAPrior(
     GridWorldCoffeeBig const& domain,
     configurations::FBAConf const& c) :
     FBAPOMDPPrior(c),
+//    _num_abstractions(),
+//    _minimum_abstraction(),
     _size(domain.size()),
     _abstraction(c.domain_conf.abstraction),
     _carpet_tiles(c.domain_conf.size),
@@ -198,6 +200,9 @@ GridWorldCoffeeBigFactBAPrior::GridWorldCoffeeBigFactBAPrior(
     _domain_size         = ba_ext.domainSize();
     _domain_feature_size = fba_ext.domainFeatureSize();
 
+//    _num_abstractions   = fba_ext._num_abstractions;
+//    _minimum_abstraction = fba_ext._minimum_abstraction;
+
     _indexing_steps = {indexing::stepSize(_domain_feature_size._S),
                        indexing::stepSize(_domain_feature_size._O)};
 
@@ -212,7 +217,6 @@ GridWorldCoffeeBigFactBAPrior::GridWorldCoffeeBigFactBAPrior(
 
     preComputePrior();
 }
-
 
 bayes_adaptive::factored::BABNModel::Structure
 GridWorldCoffeeBigFactBAPrior::mutate(bayes_adaptive::factored::BABNModel::Structure structure) const
@@ -344,7 +348,7 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFullyConnectedState(State co
     throw "GridWorldFactBAPrior::sampleFullyConnectedState nyi";
 }
 
-    FBAPOMDPState const* GridWorldCoffeeBigFactBAPrior::sampleCorrectGraphState(State const* domain_state) const
+FBAPOMDPState const* GridWorldCoffeeBigFactBAPrior::sampleCorrectGraphState(State const* domain_state) const
 {
     if (_abstraction) {
         return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
@@ -466,31 +470,62 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
     /*** noisy struct prior ****/
     auto structure = _correct_struct_prior.structure();
 
+    // TODO changed this to be the same for each action
     // what to do here
     // randomly add features to parents of x and y for each action
-    for (auto a = 0; a < _domain_size._A; ++a)
+//    for (auto a = 0; a < _domain_size._A; ++a)
+//    {
+//        if (rnd::boolean()) // randomly add rain to parents of x
+//        {
+//            structure.T[a][_agent_x_feature].emplace_back(_rain_feature);
+//        }
+//        if (rnd::boolean())  // randomly add rain to parents of y
+//        {
+//            structure.T[a][_agent_y_feature].emplace_back(_rain_feature);
+//        }
+//        // uniformly add any extra binary feature as parent
+//        for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
+//        {
+//            if (rnd::boolean()) // randomly add binary feature to parents of x
+//            {
+//                structure.T[a][_agent_x_feature].emplace_back(f);
+//            }
+//            if (rnd::boolean()) // randomly add binary feature to parents of y
+//            {
+//                structure.T[a][_agent_y_feature].emplace_back(f);
+//            }
+//        }
+//    }
+
+    if (rnd::boolean()) // randomly add rain to parents of x
     {
-        if (rnd::boolean()) // randomly add rain to parents of x
-        {
+        for (auto a = 0; a < _domain_size._A; ++a) {
             structure.T[a][_agent_x_feature].emplace_back(_rain_feature);
         }
-        if (rnd::boolean())  // randomly add rain to parents of y
-        {
+    }
+    if (rnd::boolean())  // randomly add rain to parents of y
+    {
+        for (auto a = 0; a < _domain_size._A; ++a) {
             structure.T[a][_agent_y_feature].emplace_back(_rain_feature);
         }
-        // uniformly add any extra binary feature as parent
-        for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
+    }
+    // uniformly add any extra binary feature as parent
+    for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
+    {
+        if (rnd::boolean()) // randomly add binary feature to parents of x
         {
-            if (rnd::boolean()) // randomly add binary feature to parents of x
-            {
+            for (auto a = 0; a < _domain_size._A; ++a) {
                 structure.T[a][_agent_x_feature].emplace_back(f);
             }
-            if (rnd::boolean()) // randomly add binary feature to parents of y
-            {
+        }
+        if (rnd::boolean()) // randomly add binary feature to parents of y
+        {
+            for (auto a = 0; a < _domain_size._A; ++a) {
                 structure.T[a][_agent_y_feature].emplace_back(f);
             }
         }
     }
+
     if (_abstraction) {
         return new AbstractFBAPOMDPState(domain_state, computePriorModel(structure));
     }

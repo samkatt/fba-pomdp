@@ -26,7 +26,7 @@ GridWorldCoffeeBig::GridWorldCoffeeBig(size_t extra_features ):
     _S_size(0), // initiated below
     _O_size(0) // initiated below
 {
-    if (_extra_features > 15) {
+    if (_extra_features > 35) {
         throw "please enter a size between 0 and 15 to be able to run gridworldcoffeebig \
                     (you entered " + std::to_string(_extra_features) + ")";
     }

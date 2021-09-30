@@ -27,6 +27,7 @@ public:
      * @brief initiates AbstractFBAPOMDPState with 0 CPTs
      **/
     AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model);
+    AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model, bayes_adaptive::factored::BABNModel abstract_model);
 
 
     /*** BAState interface ***/
@@ -64,8 +65,9 @@ public:
     void logCounts() const final;
 
     int* getAbstraction();
-    void setAbstraction(int);
-    void setAbstractionNormalized(int);
+//    void setAbstraction(int);
+    void setAbstraction(bayes_adaptive::factored::BABNModel abstr_model);
+//    void setAbstractionNormalized(int);
 
     /*** State interface ***/
     std::string toString() const override;
@@ -74,11 +76,11 @@ private:
 //    bayes_adaptive::factored::BABNModel _model;
     int _abstraction; // Vector with the features that are included in the abstract model
     bayes_adaptive::factored::BABNModel _abstract_model;  // Abstract model that only uses the feature in _abstraction
-    bayes_adaptive::factored::BABNModel construct_abstract_model(bayes_adaptive::factored::BABNModel model, bool normalize) const;
+//    bayes_adaptive::factored::BABNModel construct_abstract_model(bayes_adaptive::factored::BABNModel model, bool normalize) const;
 
-    Domain_Size const _abstract_domain_size;
-    Domain_Feature_Size const _abstract_domain_feature_size;
-    bayes_adaptive::factored::BABNModel::Indexing_Steps const _step_size;
+//    Domain_Size _abstract_domain_size;
+//    Domain_Feature_Size _abstract_domain_feature_size;
+//    bayes_adaptive::factored::BABNModel::Indexing_Steps _step_size;
 };
 
 #endif // ABSTRACTFBAPOMDPSTATE_HPP

@@ -1,4 +1,9 @@
+#include <beliefs/bayes-adaptive/BAImportanceSampling.hpp>
 #include "BAPOMDPExperiment.hpp"
+
+#include "bayes-adaptive/models/factored/FBAPOMDP.hpp"
+#include "bayes-adaptive/models/table/BAPOMDP.hpp"
+#include "bayes-adaptive/abstractions/Abstraction.hpp"
 
 #include "configurations/BAConf.hpp"
 
@@ -20,12 +25,12 @@ Result::Result(int size) : r(size) {}
 void Result::log(el::base::type::ostream_t& os) const
 {
     os << "# version 1:\n# return mean, return var, return count, return stder, step duration "
-          "mean\n";
+          "mean, step simulations mean\n";
 
     for (auto const& i : r)
     {
         os << i.ret.mean() << ", " << i.ret.var() << ", " << i.ret.count() << ", " << i.ret.stder()
-           << ", " << i.duration.mean() << "\n";
+           << ", " << i.duration.mean() << ", " << i.simulations.mean() << "\n";
     }
 }
 
@@ -39,6 +44,15 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
     auto const belief   = factory::makeBABelief(conf);
     auto const discount = Discount(conf.discount);
     auto const h        = Horizon(conf.horizon);
+
+    bool useAbstraction = conf.domain_conf.abstraction;
+    int selectedAbstraction = conf.planner_conf.abstraction_k;
+
+    auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(*bapomdp);
+    auto const abstraction = factory::makeAbstraction(conf);
+//    auto const num_abstractions = fbapomdp.domain()
+    Domain_Feature_Size test = *fbapomdp.domainFeatureSize();
+//    VLOG(1) << "Test " << test._S;
 
     boost::timer timer;
     for (auto run = 0; run < conf.num_runs; ++run)
@@ -57,14 +71,37 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
                     << "/" << conf.num_episodes;
             // time including resetDomainState
 //            timer.restart();
-            belief->resetDomainStateDistribution(*bapomdp);
+//            belief->resetDomainStateDistribution(*bapomdp);
+//            int selectedAbstraction = 1; // abstraction->selectAbstraction();
+//            VLOG(1) << "Selected abstraction " << selectedAbstraction;
+            if (useAbstraction) {
+                if (abstraction->isFullModel(selectedAbstraction)) {
+                    belief->resetDomainStateDistribution(*bapomdp);
+                } else {
+                    belief->resetDomainStateDistributionAndAddAbstraction(*bapomdp, *abstraction, selectedAbstraction);
+                }
+            } else {
+                belief->resetDomainStateDistribution(*bapomdp);
+            }
+
+
+            // TODO
+            // Implement something like:
+            // 1) Maintain Q-values or something for different abstractions
+            // 2) choose abstraction to use for episode
+            // 3) construct abstraction in particles
+            // Implement: 3
+            // Implement: in domain: number of abstractions, set of variables per abstraction?
+
 
             // time excluding resetDomainState
             timer.restart();
             auto const r = episode::run(*planner, *belief, *env, *bapomdp, h, discount);
-
+            learning_results.r[episode].simulations.add((float) r.simulations / (float) r.length);
             learning_results.r[episode].ret.add(r.ret.toDouble());
             learning_results.r[episode].duration.add(timer.elapsed() / r.length);
+            abstraction->addReturn(selectedAbstraction, r.ret.toDouble());
+
         }
 
         if (VLOG_IS_ON(3))

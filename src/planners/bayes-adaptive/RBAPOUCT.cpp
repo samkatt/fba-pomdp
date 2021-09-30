@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <boost/timer.hpp>
 
 #include "easylogging++.h"
 #include "utils/random.hpp"
@@ -29,12 +30,12 @@ namespace planners {
 
 RBAPOUCT::RBAPOUCT(configurations::Conf const& c) :
         _n(c.planner_conf.mcts_simulation_amount),
-        _sims_per_sample(c.planner_conf.sims_per_sample),
+        _milliseconds_thinking(c.planner_conf.milliseconds_thinking),
         _max_depth(c.planner_conf.mcts_max_depth),
         _h(c.horizon),
         _u(c.planner_conf.mcts_exploration_const),
-        _discount(c.discount),
-        _ucb_table(_n * _n)
+        _discount(c.discount) //,
+//        _ucb_table(_n * _n)
 {
 
     if (_n < 1)
@@ -58,7 +59,7 @@ RBAPOUCT::RBAPOUCT(configurations::Conf const& c) :
     // make sure we are working with actual discount
     const_cast<Discount*>(&_discount)->increment();
 
-    initiateUCBTable();
+//    initiateUCBTable();
 
     VLOG(1) << "initiated RBAPOUCT planner with " << _n << " simulations, " << _max_depth
             << " max depth, " << _u << " exploration constant, " << _discount.toDouble()
@@ -68,7 +69,8 @@ RBAPOUCT::RBAPOUCT(configurations::Conf const& c) :
 Action const* RBAPOUCT::selectAction(
     BAPOMDP const& simulator,
     beliefs::BABelief const& belief,
-    History const& history) const
+    History const& history,
+    int& total_simulations) const
 {
     _stats = treeStatistics();
 
@@ -85,36 +87,72 @@ Action const* RBAPOUCT::selectAction(
     // make sure counts are not changed over time (changed back after simulations)
     auto const old_mode = simulator.mode();
     simulator.mode(BAPOMDP::StepType::KeepCounts);
-    int extra = 0;
-    if (_n % _sims_per_sample != 0) {
-        extra = 1;
-    }
+//    int extra = 0;
+//    if (_n % _sims_per_sample != 0) {
+//        extra = 1;
+//    }
 
     // perform simulations
-    for (auto i = 0; i < (extra + _n/_sims_per_sample); ++i)
-    {
-        // do not copy!!
-        auto particle = static_cast<BAState const*>(belief.sample());
+    boost::timer timer;
+    int sims_done = 0;
+//    float test = (float) _sims_per_sample/100;
+    if (_n < 5000) {
+        while (sims_done < _n) {
+            sims_done++;
+//        for (auto i = 0; i < (extra + _n / _sims_per_sample); ++i) {
+            // do not copy!!
+            auto particle = static_cast<BAState const *>(belief.sample());
 
-        // but safe old state, so that we can reset the particle (counts are not modified)
-        auto const old_domain_state = simulator.copyDomainState(particle->_domain_state);
-        const_cast<BAState*>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
-        int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample*i);
-        for (auto j = 0; j < sims_to_do; ++j){
+            // but safe old state, so that we can reset the particle (counts are not modified)
+            auto const old_domain_state = simulator.copyDomainState(particle->_domain_state);
+            const_cast<BAState *>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
+//            int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample * i);
+//            for (auto j = 0; j < sims_to_do; ++j) {
 
-            VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
+//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
 
-            auto r = traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
+//                auto r =
+            traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
 
-            VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
+//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
 
             // return particle in correct state
             simulator.releaseDomainState(particle->_domain_state);
             const_cast<BAState *>(particle)->_domain_state = old_domain_state;
+//            }
+//        }
+        }
+    } else{
+        while (timer.elapsed() < ((float) _milliseconds_thinking/1000)) {
+            sims_done++;
+//        for (auto i = 0; i < (extra + _n / _sims_per_sample); ++i) {
+            // do not copy!!
+            auto particle = static_cast<BAState const *>(belief.sample());
+
+            // but safe old state, so that we can reset the particle (counts are not modified)
+            auto const old_domain_state = simulator.copyDomainState(particle->_domain_state);
+            const_cast<BAState *>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
+//            int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample * i);
+//            for (auto j = 0; j < sims_to_do; ++j) {
+
+//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
+
+//                auto r =
+            traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
+
+//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
+
+            // return particle in correct state
+            simulator.releaseDomainState(particle->_domain_state);
+            const_cast<BAState *>(particle)->_domain_state = old_domain_state;
+//            }
+//        }
         }
     }
 
+//    VLOG(1) << "Simulations done: " << sims_done;
     simulator.mode(old_mode);
+    total_simulations += sims_done;
 
     // pick best action
     auto const& best_chance_node = selectChanceNodeUCB(root, UCBExploration::OFF);
@@ -161,8 +199,11 @@ Action const* RBAPOUCT::selectAction(
 double RBAPOUCT::UCB(int m, int n) const
 {
     assert(m >= 0 && n >= 0);
-
-    return _ucb_table[m * _n + n];
+    if (n == 0) {
+        return std::numeric_limits<double>::max();
+    }
+    return _u * sqrt(log1p(m) / n);
+//    return _ucb_table[m * _n + n];
 }
 
 ChanceNode& RBAPOUCT::selectChanceNodeUCB(ActionNode* n, UCBExploration exploration_option) const
@@ -338,14 +379,14 @@ void RBAPOUCT::freeTree(BAPOMDP const& simulator) const
     _action_nodes.clear();
 }
 
-void RBAPOUCT::initiateUCBTable()
-{
-    for (auto m = 0; m < _n; ++m)
-    {
-        _ucb_table[m * _n] = std::numeric_limits<double>::max();
-
-        for (auto n = 1; n < _n; ++n) { _ucb_table[m * _n + n] = _u * sqrt(log1p(m) / n); }
-    }
-}
+//void RBAPOUCT::initiateUCBTable()
+//{
+//    for (auto m = 0; m < _n; ++m)
+//    {
+//        _ucb_table[m * _n] = std::numeric_limits<double>::max();
+//
+//        for (auto n = 1; n < _n; ++n) { _ucb_table[m * _n + n] = _u * sqrt(log1p(m) / n); }
+//    }
+//}
 
 } // namespace planners

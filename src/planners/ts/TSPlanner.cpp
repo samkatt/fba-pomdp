@@ -15,7 +15,7 @@ TSPlanner::TSPlanner(configurations::Conf const& c) : _planner(c)
 }
 
 Action const*
-    TSPlanner::selectAction(POMDP const& simulator, Belief const& belief, History const& h) const
+    TSPlanner::selectAction(POMDP const& simulator, Belief const& belief, History const& h, int& total_simulations) const
 {
 
     // TS belief (borrows single sample)
@@ -25,8 +25,7 @@ Action const*
             << sampled_estimation.sample()->index();
 
     // plan according to sampled belief
-    auto const a = _planner.selectAction(simulator, sampled_estimation, h);
-
+    auto const a = _planner.selectAction(simulator, sampled_estimation, h, total_simulations);
     return a;
 }
 

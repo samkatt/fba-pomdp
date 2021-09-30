@@ -79,6 +79,8 @@ public:
 
     // Extra
     Domain_Feature_Size* getDomainFeatureSize();
+//    int _num_abstractions;
+//    std::vector<int> _minimum_abstraction;
 
 private:
     size_t const _size;

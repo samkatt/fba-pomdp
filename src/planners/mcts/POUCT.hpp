@@ -28,7 +28,7 @@ public:
     explicit POUCT(configurations::Conf const& c);
 
     /**** Planner interface ****/
-    Action const* selectAction(POMDP const& simulator, Belief const& belief, History const& history)
+    Action const* selectAction(POMDP const& simulator, Belief const& belief, History const& history, int& total_simulations)
         const override;
 
 private:

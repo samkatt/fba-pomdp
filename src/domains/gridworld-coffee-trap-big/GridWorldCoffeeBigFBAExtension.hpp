@@ -25,6 +25,8 @@ public:
     Domain_Feature_Size domainFeatureSize() const final; // final TODO need final?
     utils::categoricalDistr const* statePrior() const final; // final
 
+//    int _num_abstractions;
+//    std::vector<int> _minimum_abstraction;
 private:
     size_t _size, _extra_features;
     utils::categoricalDistr _state_prior;

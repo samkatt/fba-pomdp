@@ -65,15 +65,15 @@ void BAImportanceSampling::initiate(POMDP const& d)
     {
         auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(d.sampleStartState());
         _filter.add(s, 1.0 / static_cast<double>(_n));
-        if (_abstraction) {
-            if (_update_abstract_model_normalized) {
-                // Update the abstraction
-                static_cast<AbstractFBAPOMDPState *>(s)->setAbstractionNormalized(0);
-            } else if (_update_abstract_model) {
-                // Update the abstraction
-                static_cast<AbstractFBAPOMDPState *>(s)->setAbstraction(0);
-            }
-        }
+//        if (_abstraction) {
+//            if (_update_abstract_model_normalized) {
+//                // Update the abstraction
+//                static_cast<AbstractFBAPOMDPState *>(s)->setAbstractionNormalized(0);
+//            } else if (_update_abstract_model) {
+//                // Update the abstraction
+//                static_cast<AbstractFBAPOMDPState *>(s)->setAbstraction(0);
+//            }
+//        }
     }
 
     VLOG(3) << "Status of importance sampling filter after initiating:\n"
@@ -108,7 +108,7 @@ void BAImportanceSampling::updateEstimation(Action const* a, Observation const* 
     assert(_n == _filter.size());
 }
 
-void BAImportanceSampling::resetDomainStateDistribution(BAPOMDP const& bapomdp)
+void BAImportanceSampling::resetDomainStateDistribution(const BAPOMDP &bapomdp)
 {
     assert(_filter.size() == _n);
 
@@ -120,16 +120,16 @@ void BAImportanceSampling::resetDomainStateDistribution(BAPOMDP const& bapomdp)
     {
         auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
         bapomdp.resetDomainState(s);
-        if (_abstraction) {
-            if(_remake_abstract_model) {
-                // Update the abstraction if it is already there. If not, it can be created later when needed.
-                // TODO, actually, better to just make it here? Since this is before the episode,
-                //  more time for simulations if we already have the abstract model ready.
-//                if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() == 0) {
-                static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(0);
-//                }
-            }
-        }
+//        if (_abstraction) {
+//            if(_remake_abstract_model) {
+//                // Update the abstraction if it is already there. If not, it can be created later when needed.
+//                // TODO, actually, better to just make it here? Since this is before the episode,
+//                //  more time for simulations if we already have the abstract model ready.
+////                if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() == 0) {
+//                static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(0);
+////                }
+//            }
+//        }
 
         new_filter.add(s, 1.0 / static_cast<double>(_n));
     }
@@ -140,5 +140,46 @@ void BAImportanceSampling::resetDomainStateDistribution(BAPOMDP const& bapomdp)
     VLOG(3) << "Status of importance sampling filter after initiating while keeping counts:\n"
             << _filter.toString(stateToString);
 }
+
+    void BAImportanceSampling::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp, Abstraction &abstraction, int i)
+    {
+
+        assert(_filter.size() == _n);
+
+        auto new_filter = WeightedFilter<State const*>();
+
+        // fill up the new filter
+        // by sampling models from our current belief
+        while (new_filter.size() != _n)
+        {
+            auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
+            bapomdp.resetDomainState(s);
+            if (_abstraction) {
+                if(_remake_abstract_model) {
+                    // Update the abstraction if it is already there. If not, it can be created later when needed.
+                    // TODO, actually, better to just make it here? Since this is before the episode,
+                    //  more time for simulations if we already have the abstract model ready.
+//                if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() == 0) {
+                    static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(s->model_real(), i, bapomdp));
+//                }
+                } else {
+                    if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() != 0) {
+                        static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(s->model_real(), i, bapomdp));
+                    }
+                }
+            }
+
+            new_filter.add(s, 1.0 / static_cast<double>(_n));
+        }
+
+        _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); });
+        _filter = std::move(new_filter);
+
+        VLOG(3) << "Status of importance sampling filter after initiating while keeping counts:\n"
+                << _filter.toString(stateToString);
+
+
+
+    }
 
 } // namespace beliefs

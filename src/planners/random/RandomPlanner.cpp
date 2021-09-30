@@ -16,13 +16,14 @@ RandomPlanner::RandomPlanner()
 Action const* RandomPlanner::selectAction(
     POMDP const& simulator,
     Belief const& belief,
-    History const& /*h*/
+    History const&, /*h*/
+    int& total_simulations
     ) const
 {
     auto random_action = simulator.generateRandomAction(belief.sample());
 
     VLOG(3) << "Action " << random_action->index() << " randomly picked by Random Planner";
-
+    total_simulations+=1;
     return random_action;
 }
 

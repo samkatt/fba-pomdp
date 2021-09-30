@@ -33,19 +33,19 @@ public:
     virtual Action const* selectAction(
         BAPOMDP const& bapomdp,
         beliefs::BABelief const& belief,
-        History const& h) const = 0;
+        History const& h, int& total_simulations) const = 0;
 
     /**** implementation planner ****/
     /**
      * @brief delegates to implementation, casting the input
      **/
     Action const*
-        selectAction(POMDP const& simulator, Belief const& belief, History const& h) const override
+        selectAction(POMDP const& simulator, Belief const& belief, History const& h, int& total_simulations) const override
     {
         return selectAction(
             dynamic_cast<BAPOMDP const&>(simulator),
             dynamic_cast<beliefs::BABelief const&>(belief),
-            h);
+            h, total_simulations);
     }
 };
 } // namespace planners
