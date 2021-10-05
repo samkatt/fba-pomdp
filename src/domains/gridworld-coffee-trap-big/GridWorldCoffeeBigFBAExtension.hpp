@@ -22,8 +22,8 @@ public:
     explicit GridWorldCoffeeBigFBAExtension(size_t extra_features);
 
     /**** FBADomainExtension interface ****/
-    Domain_Feature_Size domainFeatureSize() const final; // final TODO need final?
-    utils::categoricalDistr const* statePrior() const final; // final
+    Domain_Feature_Size domainFeatureSize() const final;
+    utils::categoricalDistr const* statePrior() const final;
 
 //    int _num_abstractions;
 //    std::vector<int> _minimum_abstraction;

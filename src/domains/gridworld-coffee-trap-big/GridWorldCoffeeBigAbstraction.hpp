@@ -41,18 +41,4 @@ private:
 
 } // namespace abstractions
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif //GridWorldCoffeeBigAbstraction_HPP

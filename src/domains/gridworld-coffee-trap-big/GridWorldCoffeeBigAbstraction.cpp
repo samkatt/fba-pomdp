@@ -76,29 +76,13 @@ abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adapti
         // We assume the same model for each action here
         // TODO Could make one abstraction_set per action?
         auto action = IndexAction(0);
-        std::set_intersection(model.transitionNode(&action, 0).parents()->begin(),
+        std::set_union(model.transitionNode(&action, 0).parents()->begin(),
                               model.transitionNode(&action, 0).parents()->end(),
                               model.transitionNode(&action, 1).parents()->begin(),
                               model.transitionNode(&action, 1).parents()->end(),
                               std::back_inserter(abstraction_set));
         unsigned int index_to_use = abstraction_set.size() - 2;
-//        if (find(_used_abstraction_sets.begin(), _used_abstraction_sets.end(), abstraction_set) == _used_abstraction_sets.end()) {
-////            _used_abstraction_sets.emplace_back(abstraction_set);
-//            _abstract_domain_sizes.emplace_back(Domain_Size((5*5)<<(abstraction_set.size()-2),4,25)); // domain size: (_size * _size * 2) << _extra_features)
-////            Domain feature size:
-//            auto feature_sizes = std::vector<int>(abstraction_set.size(), 2);
-//            feature_sizes[0] = 5;
-//            feature_sizes[1] = 5;
-//            _abstract_domain_feature_sizes.emplace_back(Domain_Feature_Size(feature_sizes, {5,5}));
-//            _abstract_step_sizes.emplace_back(bayes_adaptive::factored::BABNModel::Indexing_Steps(
-//                                            indexing::stepSize(_abstract_domain_feature_sizes[_abstract_domain_feature_sizes.size()-1]._S),
-//                                             indexing::stepSize(_abstract_domain_feature_sizes[_abstract_domain_feature_sizes.size()-1]._O)));
-//            index_to_use = _used_abstraction_sets.size() - 1;
-//        }
-//    else {
-//            // The abstraction set was already used
-//            index_to_use = find(_used_abstraction_sets.begin(), _used_abstraction_sets.end(), abstraction_set) - _used_abstraction_sets.begin();
-//        }
+
         if (_abstraction_normalization) {
             auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(domain);
             auto priorModel = fbapomdp.prior()->computePriorModel(model.structure());
