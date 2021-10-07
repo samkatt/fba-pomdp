@@ -88,6 +88,7 @@ private:
     size_t const _carpet_tiles;
 
     float const _unknown_counts_total;
+    bool const _correct_prior;
     float const _static_total_count = 100000;
 
 //    bool const _only_know_loc_matters;

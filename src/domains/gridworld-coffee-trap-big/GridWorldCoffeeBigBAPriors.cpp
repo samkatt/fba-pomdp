@@ -186,7 +186,7 @@ GridWorldCoffeeBigFactBAPrior::GridWorldCoffeeBigFactBAPrior(
     _abstraction(c.domain_conf.abstraction),
     _carpet_tiles(c.domain_conf.size),
     _unknown_counts_total(c.counts_total),
-//    _only_know_loc_matters(c.structure_prior == "match-uniform"),
+    _correct_prior(c.structure_prior == "match-uniform"),
     _domain_size(0, 0, 0), // initialized below
     _domain_feature_size({}, {}), // initialized below
     _indexing_steps({}, {}), // initialized below
@@ -298,7 +298,7 @@ void GridWorldCoffeeBigFactBAPrior::setNoisyTransitionNode(
 
         do {
             float trans_prob;
-            if (correctBigPrior) {
+            if (correctBigPrior || _correct_prior) {
                 if ((parent_values[0] == 0 && parent_values[1] == 3)
                     || (parent_values[0] == 1 && parent_values[1] == 3)
                     || (parent_values[0] == 2 && parent_values[1] == 1)) {
@@ -422,7 +422,7 @@ void GridWorldCoffeeBigFactBAPrior::preComputePrior()
             for (auto y = 0; y < _domain_feature_size._S[_agent_y_feature]; ++y)
             {
                 float trans_prob = GridWorldCoffeeBig::move_prob;
-                if (correctBigPrior) {
+                if (correctBigPrior || _correct_prior) {
                     if (_domain.agentOnSlowLocation({static_cast<unsigned int>(x),static_cast<unsigned int>(y)})) {
                         trans_prob = GridWorldCoffeeBig::slow_move_prob;
                     }
@@ -454,7 +454,7 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
 //    {
 //        return new AbstractFBAPOMDPSTATE(domain_state, _correct_struct_prior);
 //    }
-    if (correctBigPrior) {
+    if (correctBigPrior || _correct_prior) {
         if (_abstraction) {
             return new AbstractFBAPOMDPState(domain_state, _correct_struct_prior);
         }
