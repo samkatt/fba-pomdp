@@ -470,30 +470,21 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
     /*** noisy struct prior ****/
     auto structure = _correct_struct_prior.structure();
 
-    if (rnd::boolean()) // randomly add rain to parents of x
+    if (rnd::slowRandomInt(1,100) <= 35) // randomly add rain to parents of x and y
     {
         for (auto a = 0; a < _domain_size._A; ++a) {
             structure.T[a][_agent_x_feature].emplace_back(_rain_feature);
-        }
-    }
-    if (rnd::boolean())  // randomly add rain to parents of y
-    {
-        for (auto a = 0; a < _domain_size._A; ++a) {
             structure.T[a][_agent_y_feature].emplace_back(_rain_feature);
         }
     }
+
     // uniformly add any extra binary feature as parent
     for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
     {
-        if (rnd::boolean()) // randomly add binary feature to parents of x
+        if (rnd::slowRandomInt(1,100) <= 35) // randomly add binary feature to parents of x and y
         {
             for (auto a = 0; a < _domain_size._A; ++a) {
                 structure.T[a][_agent_x_feature].emplace_back(f);
-            }
-        }
-        if (rnd::boolean()) // randomly add binary feature to parents of y
-        {
-            for (auto a = 0; a < _domain_size._A; ++a) {
                 structure.T[a][_agent_y_feature].emplace_back(f);
             }
         }
