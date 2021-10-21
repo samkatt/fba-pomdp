@@ -4,6 +4,7 @@
 #include "domains/agr/AGR.hpp"
 #include "domains/coffee/CoffeeProblem.hpp"
 #include "domains/collision-avoidance/CollisionAvoidance.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBig.hpp"
 #include "domains/dummy/DummyDomain.hpp"
 #include "domains/dummy/FactoredDummyDomain.hpp"
 #include "domains/dummy/LinearDummyDomain.hpp"
@@ -71,6 +72,23 @@ std::unique_ptr<Environment> makeEnvironment(configurations::DomainConf const& c
             static_cast<int>(c.height),
             static_cast<int>(c.size),
             domains::CollisionAvoidance::VERSION::INITIALIZE_CENTRE));
+    }
+    if (c.domain == "random-collision-avoidance-big")
+    {
+
+        return std::unique_ptr<Environment>(new domains::CollisionAvoidanceBig(
+                static_cast<int>(c.width),
+                static_cast<int>(c.height),
+                static_cast<int>(c.size),
+                domains::CollisionAvoidanceBig::VERSION::INIT_RANDOM_POSITION));
+    }
+    if (c.domain == "centered-collision-avoidance-big")
+    {
+        return std::unique_ptr<Environment>(new domains::CollisionAvoidanceBig(
+                static_cast<int>(c.width),
+                static_cast<int>(c.height),
+                static_cast<int>(c.size),
+                domains::CollisionAvoidanceBig::VERSION::INITIALIZE_CENTRE));
     }
 
     throw "incorrect domain provided";

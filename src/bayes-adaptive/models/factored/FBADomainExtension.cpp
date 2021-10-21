@@ -2,6 +2,7 @@
 
 #include "configurations/FBAConf.hpp"
 #include "domains/collision-avoidance/CollisionAvoidanceFBAExtension.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBigFBAExtension.hpp"
 #include "domains/dummy/FactoredDummyDomainFBAExtension.hpp"
 #include "domains/gridworld/GridWorldFBAExtension.hpp"
 #include "domains/sysadmin/SysAdminFBAExtension.hpp"
@@ -55,8 +56,24 @@ std::unique_ptr<FBADomainExtension> makeFBADomainExtension(configurations::FBACo
                 c.domain_conf.size,
                 domains::CollisionAvoidance::VERSION::INITIALIZE_CENTRE));
     }
-    // TODO Sammie, shouldn't the message be that it is not supported as a factored BA-POMDP?
-    throw "incorrect domain provided, " + d + " is not supported as tabular BA-POMDP";
+
+    if (d == "random-collision-avoidance-big" || d == "centered-collision-avoidance-big")
+    {
+        if (d == "random-collision-avoidance-big")
+            return std::unique_ptr<FBADomainExtension>(new ext::CollisionAvoidanceBigFBAExtension(
+                    c.domain_conf.width,
+                    c.domain_conf.height,
+                    c.domain_conf.size,
+                    domains::CollisionAvoidanceBig::VERSION::INIT_RANDOM_POSITION));
+        else
+            return std::unique_ptr<FBADomainExtension>(new ext::CollisionAvoidanceBigFBAExtension(
+                    c.domain_conf.width,
+                    c.domain_conf.height,
+                    c.domain_conf.size,
+                    domains::CollisionAvoidanceBig::VERSION::INITIALIZE_CENTRE));
+    }
+
+    throw "incorrect domain provided, " + d + " is not supported as a factored BA-POMDP";
 }
 
 } // namespace factory

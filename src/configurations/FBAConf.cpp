@@ -51,6 +51,8 @@ void FBAConf::validate() const
         "linear-sysadmin",
         "random-collision-avoidance",
         "centered-collision-avoidance",
+        "random-collision-avoidance-big",
+        "centered-collision-avoidance-big",
         "gridworld",
         "gridworldcoffee",
         "gridworldcoffeebig",
@@ -62,7 +64,7 @@ void FBAConf::validate() const
         throw error(
             "please enter a factored domain if you wish to use factored representations: "
             "factored-dummy, a (factored) tiger domain, independent/linear-sysadmin, "
-            " gridworldcoffee(big) or random/centered-collision-avoidance, you provided: "
+            " gridworldcoffee(big) or random/centered-collision-avoidance(-big), you provided: "
             + domain_conf.domain);
     }
 

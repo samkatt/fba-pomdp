@@ -100,8 +100,9 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
             learning_results.r[episode].simulations.add((float) r.simulations / (float) r.length);
             learning_results.r[episode].ret.add(r.ret.toDouble());
             learning_results.r[episode].duration.add(timer.elapsed() / r.length);
-            abstraction->addReturn(selectedAbstraction, r.ret.toDouble());
-
+            if(useAbstraction) {
+                abstraction->addReturn(selectedAbstraction, r.ret.toDouble());
+            }
         }
 
         if (VLOG_IS_ON(3))

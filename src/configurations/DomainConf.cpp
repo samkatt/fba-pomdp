@@ -14,7 +14,7 @@ void DomainConf::addOptions(boost::program_options::options_description* descr)
         po::value(&domain),
         "The domain to experiment in (dummy, linear_dummy, factored-dummy, episodic-tiger, "
         "continuous-tiger, agr, (boutilier-)coffee, episodic-factored-tiger, "
-        "continuous-factored-tiger, gridworld, gridworldcoffee(big) or (random/centered)-collision-avoidance)")
+        "continuous-factored-tiger, gridworld, gridworldcoffee(big) or (random/centered)-collision-avoidance(-big))")
         (
         "size",
         po::value(&size)->default_value(size),
@@ -55,7 +55,9 @@ void DomainConf::validate() const
                                               "gridworldcoffeebig",
                                               "gridworldbuttons",
                                               "random-collision-avoidance",
-                                              "centered-collision-avoidance"};
+                                              "centered-collision-avoidance",
+                                              "random-collision-avoidance-big",
+                                              "centered-collision-avoidance-big"};
 
     if (std::find(valid_domains.begin(), valid_domains.end(), domain) == valid_domains.end())
     {
@@ -63,7 +65,7 @@ void DomainConf::validate() const
             "please enter a legit domain: dummy, linear_dummy, factored-dummy, episodic-tiger, "
             "continuous-tiger, agr, (boutilier-)coffee, episodic-factored-tiger, "
             "continuous-factored-tiger, independent-sysadmin, linear-sysadmin, gridworld, gridworldcoffee(big), or "
-            "(random/centered)-collision-avoidance. Given: "
+            "(random/centered)-collision-avoidance(-big). Given: "
             + domain);
     }
 
@@ -73,21 +75,23 @@ void DomainConf::validate() const
            || domain == "linear-sysadmin" || domain == "episodic-factored-tiger"
            || domain == "continuous-factored-tiger" || domain == "gridworld"
            || domain == "gridworldcoffeebig" || domain == "gridworldbuttons"
-           || domain == "random-collision-avoidance" || domain == "centered-collision-avoidance"))
+           || domain == "random-collision-avoidance" || domain == "centered-collision-avoidance"
+           || domain == "random-collision-avoidance-big" || domain == "centered-collision-avoidance-big"))
     {
         throw error(
             "--size and -D should be used together, either one is useless without the other (size "
-            "&& factored-dummy, *-collision-avoidance, sysadmin, gridworldbuttons, "
+            "&& factored-dummy, *-collision-avoidance(-big), sysadmin, gridworldbuttons, "
             "gridworldcoffeebig or a factored_tiger domain), "
             "provided domain "
             + domain + " with size " + std::to_string(size));
     }
 
     if ((height != 0 || width != 0) && domain != "random-collision-avoidance"
-        && domain != "centered-collision-avoidance")
+        && domain != "centered-collision-avoidance" && domain != "random-collision-avoidance-big"
+           && domain != "centered-collision-avoidance-big")
     {
         throw error(
-            "--height and --width can only be used with domain collision-avoidance (not " + domain
+            "--height and --width can only be used with domain collision-avoidance(-big) (not " + domain
             + ")");
     }
 }

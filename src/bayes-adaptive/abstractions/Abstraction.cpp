@@ -11,9 +11,12 @@ namespace factory {
 
         auto const d = c.domain_conf.domain;
 
-        if (d == "gridworldcoffeebig")
+        if (d == "gridworldcoffeebig") {
             return std::unique_ptr<Abstraction>(
                     new abstractions::GridWorldCoffeeBigAbstraction(c));
+        } else {
+            return nullptr;
+        }
 
         throw "incorrect domain provided, " + d + " is not supported as factored BA-POMDP";
     }

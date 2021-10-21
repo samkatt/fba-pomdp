@@ -10,6 +10,8 @@
 #include "domains/POMDP.hpp"
 #include "domains/collision-avoidance/CollisionAvoidance.hpp"
 #include "domains/collision-avoidance/CollisionAvoidancePriors.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBig.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBigPriors.hpp"
 #include "domains/dummy/FactoredDummyDomainPriors.hpp"
 #include "domains/gridworld/GridWorld.hpp"
 #include "domains/gridworld/GridWorldBAPriors.hpp"
@@ -74,6 +76,8 @@ std::unique_ptr<FBAPOMDPPrior>
                 new priors::GridWorldCoffeeBigFactBAPrior(static_cast<domains::GridWorldCoffeeBig const&>(domain), c));
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<FBAPOMDPPrior>(new priors::CollisionAvoidanceFactoredPrior(c));
+    if (d == "random-collision-avoidance-big" || d == "centered-collision-avoidance-big")
+        return std::unique_ptr<FBAPOMDPPrior>(new priors::CollisionAvoidanceBigFactoredPrior(c));
 
     throw "incorrect domain provided, " + d + " is not supported as factored BA-POMDP";
 }

@@ -2,6 +2,7 @@
 
 #include "configurations/BAConf.hpp"
 #include "domains/collision-avoidance/CollisionAvoidanceBAExtension.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBigBAExtension.hpp"
 #include "domains/dummy/DummyDomainBAExtension.hpp"
 #include "domains/dummy/FactoredDummyDomainBAExtension.hpp"
 #include "domains/gridworld-coffee-trap/GridWorldCoffeeBAExtension.hpp"
@@ -64,6 +65,10 @@ std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf 
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<BADomainExtension>(new ext::CollisionAvoidanceBAExtension(
             c.domain_conf.width, c.domain_conf.height, c.domain_conf.size));
+
+    if (d == "random-collision-avoidance-big" || d == "centered-collision-avoidance-big")
+        return std::unique_ptr<BADomainExtension>(new ext::CollisionAvoidanceBigBAExtension(
+                c.domain_conf.width, c.domain_conf.height, c.domain_conf.size));
 
     throw "incorrect domain provided, " + d + " is not supported as tabular BA-POMDP";
 }

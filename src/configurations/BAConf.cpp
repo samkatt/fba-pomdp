@@ -79,6 +79,8 @@ void BAConf::validate() const
                                                      "linear-sysadmin",
                                                      "random-collision-avoidance",
                                                      "centered-collision-avoidance",
+                                                     "random-collision-avoidance-big",
+                                                     "centered-collision-avoidance-big",
                                                      "gridworld",
                                                      "gridworldcoffee",
                                                      "gridworldcoffeebig",

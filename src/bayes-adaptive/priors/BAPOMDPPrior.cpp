@@ -11,6 +11,8 @@
 #include "domains/POMDP.hpp"
 #include "domains/collision-avoidance/CollisionAvoidance.hpp"
 #include "domains/collision-avoidance/CollisionAvoidancePriors.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBig.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBigPriors.hpp"
 #include "domains/dummy/DummyDomainPrior.hpp"
 #include "domains/dummy/FactoredDummyDomainPriors.hpp"
 #include "domains/gridworld-coffee-trap/GridWorldCoffee.hpp"
@@ -62,6 +64,9 @@ std::unique_ptr<BAPOMDPPrior>
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<BAPOMDPPrior>(new priors::CollisionAvoidanceTablePrior(
             static_cast<domains::CollisionAvoidance const&>(domain), c));
+    if (d == "random-collision-avoidance-big" || d == "centered-collision-avoidance-big")
+        return std::unique_ptr<BAPOMDPPrior>(new priors::CollisionAvoidanceBigTablePrior(
+                static_cast<domains::CollisionAvoidanceBig const&>(domain), c));
 
     throw "incorrect domain provided, " + d + " is not supported as tabular BA-POMDP";
 }
