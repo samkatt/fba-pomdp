@@ -95,15 +95,17 @@ public:
         mutate(bayes_adaptive::factored::BABNModel::Structure structure) const final;
 
 private:
+    // TODO only using at most 1 obstacle now
     static int const _NUM_ACTIONS = 3;
 
     static int const _AGENT_X_FEATURE = 0;
     static int const _AGENT_Y_FEATURE = 1;
-    static int const _SPEED_FEATURE = 2;
-    static int const _TRAFFIC_FEATURE = 3;
-    static int const _TIMEOFDAY_FEATURE = 4;
+    static int const _SPEED_FEATURE = 3;
+    static int const _TRAFFIC_FEATURE = 4;
+    static int const _TIMEOFDAY_FEATURE = 5;
 //    static int const _OBSTACLE_FEATURE = 5; // there are potentially multiple obstacle features I think?
 
+    bool const _abstraction;
     int const _num_obstacles;
     int const _width;
     int const _height;
@@ -111,8 +113,8 @@ private:
     int const _num_traffics = 3;
     int const _num_timeofdays = 2;
 
-    int const _first_obstacle     = 5; // first feature number for obstacle
-    int const _num_state_features = _first_obstacle + _num_obstacles;
+    int const _first_obstacle     = 2; // first feature number for obstacle
+    int const _num_state_features = 6; // TODO now only 1 obstacle, so x+y+obst+speed+traffic+tod = 6  //_first_obstacle + _num_obstacles;
 
     float const _noise, _counts_total;
     std::string const _edge_noise;
@@ -121,7 +123,7 @@ private:
     Domain_Feature_Size const _domain_feature_size;
     bayes_adaptive::factored::BABNModel::Indexing_Steps const _fbapomdp_step_size;
 
-    // samples obstacles TODO what is this?
+    // samples obstacles
     mutable std::uniform_int_distribution<int> _action_distr{
         rnd::integerDistribution(0, _NUM_ACTIONS)};
     mutable std::uniform_int_distribution<int> _obst_distr{

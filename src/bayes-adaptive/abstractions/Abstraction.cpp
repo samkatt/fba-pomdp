@@ -2,6 +2,7 @@
 #include "Abstraction.hpp"
 
 #include "domains/gridworld-coffee-trap-big/GridWorldCoffeeBigAbstraction.hpp"
+#include "domains/collision-avoidance-big/CollisionAvoidanceBigAbstraction.hpp"
 
 
 namespace factory {
@@ -14,6 +15,10 @@ namespace factory {
         if (d == "gridworldcoffeebig") {
             return std::unique_ptr<Abstraction>(
                     new abstractions::GridWorldCoffeeBigAbstraction(c));
+
+        } else if (d == "random-collision-avoidance-big" || d == "centered-collision-avoidance-big") {
+            return std::unique_ptr<Abstraction>(
+                    new abstractions::CollisionAvoidanceBigAbstraction(c));
         } else {
             return nullptr;
         }

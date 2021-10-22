@@ -70,8 +70,6 @@ abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adapti
                                   &_abstract_step_sizes[0], false);
         }
 
-
-
     } else if (k == 1) {
         // We assume the same model for each action here
         // TODO Could make one abstraction_set per action?
@@ -103,8 +101,6 @@ abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adapti
                                   &_abstract_step_sizes[index_to_use], false);
         }
 
-
-
     } else {
         return model;
 
@@ -114,8 +110,6 @@ abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adapti
 int abstractions::GridWorldCoffeeBigAbstraction::selectAbstraction() {
     // Check if we haven't chosen any
     int totalCounts = 0;
-
-
 
     for (int i = 0; i < _num_abstractions; i++) {
         if (_counts[i] == 0) {
@@ -150,30 +144,5 @@ bool abstractions::GridWorldCoffeeBigAbstraction::isFullModel(int abstraction) c
     return abstraction == _num_abstractions-1;
 }
 
-
-
-//bayes_adaptive::factored::BABNModel
-//abstractions::GridWorldCoffeeBigAbstraction::subTractCounts(bayes_adaptive::factored::BABNModel new_model,
-//                                                            bayes_adaptive::factored::BABNModel prior_model_normalized,
-//                                                            bayes_adaptive::factored::BABNModel prior_model) const {
-//    // new_model is the one we need to update
-//    // subtract the prior_model unnormalzied, add the prior_model_normalized counts
-//    // loop over what exactly?
-//    // over transition_nodes of model, and then over cpts
-//    // loop over node input and output, then use count() and increment()
-//    for (unsigned int i = 0; i < new_model._transition_nodes.size(); ++i) {
-//        for (unsigned int j = 0; i < new_model._transition_nodes[0].cpts(); ++j)
-//    }
-//
-////    new_model._transition_nodes
-//    if (!_abstraction_normalization) {
-//        return prior_model;
-//    }
-//    if (_abstraction_normalization) {
-//        return new_model;
-//    } else {
-//        return prior_model_normalized;
-//    }
-//}
 
 

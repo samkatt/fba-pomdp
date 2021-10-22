@@ -17,8 +17,6 @@ public:
     int printSomething() const final;
     bool isFullModel(int abstraction) const final;
 
-
-
 private:
     int _num_abstractions;
     std::vector<int> _minimum_abstraction;
@@ -27,16 +25,12 @@ private:
     std::vector<double> _qvalues;
     int _UCB_exploration = 1;
     std::vector<int> _counts;
-//    std::vector<std::vector<int>> _used_abstraction_sets;
+
     std::vector<Domain_Size> _abstract_domain_sizes;
     std::vector<Domain_Feature_Size> _abstract_domain_feature_sizes;
     std::vector<bayes_adaptive::factored::BABNModel::Indexing_Steps> _abstract_step_sizes;
 
-//    bayes_adaptive::factored::BABNModel
-//    subTractCounts(bayes_adaptive::factored::BABNModel new_model, bayes_adaptive::factored::BABNModel prior_model_normalized,
-//                   bayes_adaptive::factored::BABNModel prior_model) const;
-        void addReturn(int abstraction, double reward);
-
+    void addReturn(int abstraction, double reward);
 };
 
 } // namespace abstractions

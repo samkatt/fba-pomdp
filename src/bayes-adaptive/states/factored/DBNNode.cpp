@@ -94,6 +94,7 @@ DBNNode DBNNode::marginalizeOut(std::vector<int> new_parents) const
 
 DBNNode DBNNode::marginalizeOutAndNormalize(std::vector<int> new_parents) const
 {
+
     auto new_node = marginalizeOut(new_parents);
 
     // base case, no parents
@@ -101,8 +102,19 @@ DBNNode DBNNode::marginalizeOutAndNormalize(std::vector<int> new_parents) const
     {
         return new_node;
     }
-    // TODO need to generalize, when not removing just binary variables
-    auto normalize_constant= pow(2, _parent_nodes.size() - new_parents.size());
+
+    std::vector<int> removed_parents;
+    std::set_difference(_parent_nodes.begin(),
+                        _parent_nodes.end(),
+                        new_parents.begin(),
+                        new_parents.end(),
+                   std::back_inserter(removed_parents));
+    int normalize_constant = 1;
+    for (auto const& item: removed_parents) {
+        int index = find(_parent_nodes.begin(), _parent_nodes.end(), item) - _parent_nodes.begin();// find in _parent_nodes
+        normalize_constant *= _parent_sizes[index];        // then get value from _parent_sizes
+    }
+//    auto normalize_constant= pow(2, _parent_nodes.size() - new_parents.size());
     std::transform(new_node._cpts.begin(), new_node._cpts.end(), new_node._cpts.begin(), [normalize_constant](float &c){return c/normalize_constant;});
 
     return new_node;
@@ -238,6 +250,7 @@ int DBNNode::cptIndex(std::vector<int> const& node_input, int node_output) const
     //  which was not always equal to the whole graph input.
 
     // TODO, with abstraction it seems the graph_range is not adjusted, so this can happen
+    // (think this was fixed? doesn't seem to go wrong anymore
 //    if (node_input.size() < _graph_range->size()) {
 //        parentValuesAbstract(node_input, &_parent_value_holder);
 //        return indexing::project(_parent_value_holder, _parent_sizes) * _output_size + node_output;

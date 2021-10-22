@@ -232,11 +232,9 @@ BABNModel BABNModel::marginalizeOut(Structure new_structure) const
 
 void remove_parents(std::vector<int>& a, std::vector<int>& b){
     std::unordered_multiset<int> st;
-//    st.insert(a.begin(), a.end());
     st.insert(b.begin(), b.end());
     auto predicate = [&st](const int& k){ return st.count(k) < 1; };
     a.erase(std::remove_if(a.begin(), a.end(), predicate), a.end());
-//    b.erase(std::remove_if(b.begin(), b.end(), predicate), b.end());
 }
 
 BABNModel
@@ -246,10 +244,9 @@ BABNModel::abstract(std::vector<int> abstraction_set, Structure structure, const
 
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
-        // if abstraction == 2 we should keep variables if they indirectly influence x and y.
-        // currently sort of happens because we only remove parents from x and y
-        for (auto f = 0; f < 2; ++f) {
-            remove_parents(new_structure.T[a][abstraction_set[f]], abstraction_set);
+        // remove parents that are not part of the abstraction_set, from the features in the abstraction_set
+        for (auto const& f: abstraction_set) {
+            remove_parents(new_structure.T[a][f], abstraction_set);
         }
     }
 

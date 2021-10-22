@@ -96,6 +96,7 @@ set(BA_SRC
     "src/domains/collision-avoidance-big/CollisionAvoidanceBigBAExtension.cpp"
     "src/domains/collision-avoidance-big/CollisionAvoidanceBigFBAExtension.cpp"
     "src/domains/collision-avoidance-big/CollisionAvoidanceBigPriors.cpp"
+        "src/domains/collision-avoidance-big/CollisionAvoidanceBigAbstraction.cpp"
     "src/domains/dummy/DummyDomainBAExtension.cpp"
     "src/domains/dummy/FactoredDummyDomainBAExtension.cpp"
     "src/domains/dummy/FactoredDummyDomainFBAExtension.cpp"

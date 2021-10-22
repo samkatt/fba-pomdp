@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp>
 
 #include "bayes-adaptive/states/factored/FBAPOMDPState.hpp"
 #include "bayes-adaptive/states/table/BAPOMDPState.hpp"
@@ -207,6 +208,7 @@ void CollisionAvoidanceBigTablePrior::setTransitionCounts(
 CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
     configurations::FBAConf const& conf) :
         FBAPOMDPPrior(conf),
+        _abstraction(conf.domain_conf.abstraction),
         _num_obstacles(conf.domain_conf.size),
         _width(conf.domain_conf.width),
         _height(conf.domain_conf.height),
@@ -223,9 +225,9 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
         _fbapomdp_step_size({}, {})
 {
     const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[0] = _width;
-    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[2] = _num_speeds;
-    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[3] = _num_traffics;
-    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[4] = _num_timeofdays;
+    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_SPEED_FEATURE] = _num_speeds;
+    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_TRAFFIC_FEATURE] = _num_traffics;
+    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_TIMEOFDAY_FEATURE] = _num_timeofdays;
     const_cast<bayes_adaptive::factored::BABNModel::Indexing_Steps&>(_fbapomdp_step_size) =
         bayes_adaptive::factored::BABNModel::Indexing_Steps(
             indexing::stepSize(_domain_feature_size._S),
@@ -302,7 +304,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
     /*** compute transition when edges are known ***/
     for (auto a = 0; a < _NUM_ACTIONS; a++) {
         // set block y features for each action
-        for (auto f = _first_obstacle; f < _num_state_features; ++f) {
+        for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f) {
             auto action = IndexAction(a);
             model.resetTransitionNode(&action, f, {f, _SPEED_FEATURE});
             for (auto y = 0; y < _height; ++y) {
@@ -356,7 +358,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
     {
         auto action = IndexAction(a);
 
-        for (auto f = _first_obstacle; f < _num_state_features; ++f)
+        for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f)
         {
 
             model.resetTransitionNode(&action, f, parents);
@@ -390,22 +392,26 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
         _observation_model);
 
     // generate random structure for each obstacle
-    for (auto f = _first_obstacle; f < _num_state_features; ++f) {
+    for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f) {
         auto parents = std::vector<std::vector<int>>(_NUM_ACTIONS);
 
-        for (auto a = 0; a < _NUM_ACTIONS; ++a) {
-            for (auto f_parent = 0; f_parent < _num_state_features; ++f_parent) {
-                // add f_parent as parent randomly,
-                // or for sure if we want to match and f_parent is itself
-                if (rnd::boolean() || (f_parent == f && _edge_noise == "match-uniform")) {
+
+        for (auto f_parent = 0; f_parent < _num_state_features; ++f_parent) {
+            // add f_parent as parent randomly,
+            // or for sure if we want to match and f_parent is itself
+            // TODO perhaps make this part of the environment, the probability for a feature to be added as parent
+            if ((rnd::slowRandomInt(1,100) <= 20) || (f_parent == f && _edge_noise == "match-uniform")) {
+                for (auto a = 0; a < _NUM_ACTIONS; ++a) {
                     parents[a].emplace_back(f_parent);
                 }
             }
         }
-
         sampleBlockTModel(&model, f, std::move(parents));
     }
 
+    if (_abstraction) {
+        return new AbstractFBAPOMDPState(domain_state, std::move(model));
+    }
     return new FBAPOMDPState(domain_state, std::move(model));
 }
 
@@ -447,14 +453,12 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y)
 }
 
 std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y, int speed) {
-//    auto move_prob = static_cast<float>(.25 - .5 * _noise); TODO use noise?
-    float move_prob = 1.0/3 + 1.0/6 * speed;
+    float move_prob = 1.0/3 + 1.0/6 * speed - _noise * std::max(2.f/3, (float) (speed%2));
 
     // probability of staying is 1 - the probability
     // of moving- only not if the obstacle is at the top or bottom:
     // then it is 1 - 0.5 * the probability of moving
     auto stay_prob = (y == 0 || y == _height - 1) ? (1 - 0.5 * move_prob) : (1 - move_prob);
-//            static_cast<float>(3 * .25 + .5 * _noise) : static_cast<float>(2 * .25 + _noise);
 
     std::vector<float> position_counts(_height);
 
@@ -543,6 +547,16 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::timeofdayTransition(int t
 FBAPOMDPState*
     CollisionAvoidanceBigFactoredPrior::sampleFullyConnectedState(State const* domain_state) const
 {
+    if (_abstraction) {
+        return new AbstractFBAPOMDPState(
+                domain_state,
+                bayes_adaptive::factored::BABNModel(
+                        &_domain_size,
+                        &_domain_feature_size,
+                        &_fbapomdp_step_size,
+                        _fully_connected_transition_model,
+                        _observation_model));
+    }
     return new FBAPOMDPState(
         domain_state,
         bayes_adaptive::factored::BABNModel(
@@ -556,6 +570,16 @@ FBAPOMDPState*
 FBAPOMDPState*
     CollisionAvoidanceBigFactoredPrior::sampleCorrectGraphState(State const* domain_state) const
 {
+    if (_abstraction) {
+        return new AbstractFBAPOMDPState(
+                domain_state,
+                bayes_adaptive::factored::BABNModel(
+                        &_domain_size,
+                        &_domain_feature_size,
+                        &_fbapomdp_step_size,
+                        _correctly_connected_transition_model,
+                        _observation_model));
+    }
     return new FBAPOMDPState(
         domain_state,
         bayes_adaptive::factored::BABNModel(
@@ -569,7 +593,7 @@ FBAPOMDPState*
 bayes_adaptive::factored::BABNModel::Structure CollisionAvoidanceBigFactoredPrior::mutate(
     bayes_adaptive::factored::BABNModel::Structure structure) const
 {
-    // TODO change
+    // TODO change if I want to use reinvigoration
     assert(structure.T.size() == _NUM_ACTIONS);
     assert(structure.O.size() == _NUM_ACTIONS);
 
@@ -621,7 +645,7 @@ bayes_adaptive::factored::BABNModel CollisionAvoidanceBigFactoredPrior::computeP
         _transition_model_without_block_features,
         _observation_model);
 
-    for (auto f = _first_obstacle; f < _num_state_features; ++f) {
+    for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f) {
         // extract parents of block feature from structure
         std::vector<std::vector<int>> block_feature_structure(_domain_size._A);
         for (auto a = 0; a < _domain_size._A; ++a) {
@@ -654,7 +678,7 @@ void CollisionAvoidanceBigFactoredPrior::sampleBlockTModel(
 
             if (p == obstacle_feature)
             {
-                correct_edge = parent_values.size(); // TODO why, this size is just 0?
+                correct_edge = parent_values.size();
             }
 
             parent_values.emplace_back(0);
