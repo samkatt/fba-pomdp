@@ -11,7 +11,6 @@
 
 #include "bayes-adaptive/models/factored/Domain_Feature_Size.hpp"
 
-
 #include "utils/index.hpp"
 AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model) :
         FBAPOMDPState(domain_state, std::move(model)),
@@ -22,10 +21,12 @@ AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_ad
 }
 
 AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model,
-                                             bayes_adaptive::factored::BABNModel abstract_model) :
+                                             bayes_adaptive::factored::BABNModel abstract_model, std::vector<int> used_features) :
         FBAPOMDPState(domain_state, std::move(model)),
+        feature_set(std::move(used_features)),
         _abstraction(0), // Empty initialization.
-        _abstract_model(std::move(abstract_model)) // Initialized later, when abstraction is added
+        _abstract_model(std::move(abstract_model))
+        // Initialized later, when abstraction is added
 {
     assert(model.domainFeatureSize());
 }
@@ -33,7 +34,7 @@ AbstractFBAPOMDPState::AbstractFBAPOMDPState(State const* domain_state, bayes_ad
 BAState* AbstractFBAPOMDPState::copy(State const* domain_state) const
 {
     if (_abstraction == 0) {
-        return new AbstractFBAPOMDPState(domain_state, FBAPOMDPState::model_real(), _abstract_model);
+        return new AbstractFBAPOMDPState(domain_state, FBAPOMDPState::model_real(), _abstract_model, feature_set);
     } else {
         return new AbstractFBAPOMDPState(domain_state, FBAPOMDPState::model_real());
     }
@@ -56,12 +57,10 @@ int AbstractFBAPOMDPState::sampleStateIndexAbstract(
 {
     if (_abstraction == 0) {
         auto parent_values = model()->stateFeatureValues(s);
-
-        auto next_values = std::vector<int>(parent_values.size());
-        for (auto n = 0; n < 2; ++n)
-        { next_values[n] = _abstract_model.transitionNode(a, n).sample(parent_values, m); }
-        for (auto n = 2; n < (int)_abstract_model.domainFeatureSize()->_S.size(); ++n)
-        { next_values[_abstract_model.transitionNode(a,n).parents()->at(0)] = _abstract_model.transitionNode(a, n).sample(parent_values, m); }
+        auto next_values = std::vector<int>(parent_values.size(), 0);
+        for (auto n = 0; n < (int) feature_set.size(); ++n) {
+            next_values[feature_set[n]] = _abstract_model.transitionNode(a, n).sample(parent_values, m);
+        }
 
         return model()->sampleStateIndexThroughAbstraction(s,a, next_values);
     }
@@ -94,35 +93,8 @@ void AbstractFBAPOMDPState::incrementCountsOfAbstract(
     float amount)
 {
     if(_abstraction == 0) {
-        auto parent_values = model()->stateFeatureValues(s);
-
-        auto state_feature_values = model()->stateFeatureValues(new_s);
-        // need to do something like before, to find the new values
-        std::vector<int> actual_parent_values; // = std::vector<int>(_abstract_model.domainFeatureSize()->_S.size());
-
-        // for each node
-        // get the parent values
-        // get the next value
-        // increment counts
-        for (auto n = 0; n < 2; ++n) {
-            actual_parent_values = std::vector<int>(_abstract_model.transitionNode(a,n).parents()->size());
-            for (auto i = 0; i < (int) _abstract_model.transitionNode(a,n).parents()->size(); i++) {
-                actual_parent_values[i] = parent_values[_abstract_model.transitionNode(a,n).parents()->at(i)];
-            }
-            _abstract_model.transitionNode(a, n).increment(actual_parent_values, state_feature_values[n], amount);
-        }
-        for (auto n = 2; n < (int)_abstract_model.domainFeatureSize()->_S.size(); ++n) {
-            auto input_node = {parent_values[_abstract_model.transitionNode(a,n).parents()->at(0)]};
-            auto next_togo = state_feature_values[_abstract_model.transitionNode(a,n).parents()->at(0)];
-            _abstract_model.transitionNode(a, n).increment(
-                    input_node,
-                    next_togo, amount);
-        }
-
-        auto observation_feature_values = model()->observationFeatureValues(o);
-        // update observation DBN
-        for (auto n = 0; n < (int)_abstract_model.domainFeatureSize()->_O.size(); ++n)
-        { _abstract_model.observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
+        _abstract_model.incrementCountsOfAbstract(a, o, amount, model()->stateFeatureValues(s),
+                                                  model()->stateFeatureValues(new_s), feature_set);
     }
     FBAPOMDPState::model()->incrementCountsOf(s, a, o, new_s, amount);
 }

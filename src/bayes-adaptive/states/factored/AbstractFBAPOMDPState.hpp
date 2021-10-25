@@ -27,7 +27,8 @@ public:
      * @brief initiates AbstractFBAPOMDPState with 0 CPTs
      **/
     AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model);
-    AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model, bayes_adaptive::factored::BABNModel abstract_model);
+    AbstractFBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model,
+                          bayes_adaptive::factored::BABNModel abstract_model, std::vector<int> used_features);
 
 
     /*** BAState interface ***/
@@ -71,6 +72,8 @@ public:
 
     /*** State interface ***/
     std::string toString() const override;
+
+    std::vector<int> feature_set = {};
 
 private:
 //    bayes_adaptive::factored::BABNModel _model;

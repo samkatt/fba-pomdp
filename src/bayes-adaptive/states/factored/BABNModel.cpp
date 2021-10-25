@@ -374,7 +374,7 @@ int BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Di
     return indexing::project(feature_values, _domain_feature_size->_S);
 }
 
-int BABNModel::sampleStateIndexThroughAbstraction(const State *s, const Action *a, std::vector<int> newfeature_values) const {
+int BABNModel::sampleStateIndexThroughAbstraction(const State *s, const Action *a, const std::vector<int>& newfeature_values) const {
     assertLegal(s);
     assertLegal(a);
 
@@ -422,6 +422,19 @@ double BABNModel::computeObservationProbability(
     }
 
     return prob;
+}
+
+void BABNModel::incrementCountsOfAbstract(const Action *a, const Observation *o, float amount,
+                                          const std::vector<int> &parent_values,
+                                          std::vector<int> state_feature_values, std::vector<int> feature_set) {
+    // update transition DBN
+    for (auto n = 0; n < (int)_domain_feature_size->_S.size(); ++n)
+    { transitionNode(a, n).increment(parent_values, state_feature_values[feature_set[n]], amount); } // goes wrong here? state_feature_values[n] is not necesarily correct here...
+
+    auto observation_feature_values = observationFeatureValues(o);
+    // update observation DBN
+    for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
+    { observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
 }
 
 void BABNModel::incrementCountsOf(
@@ -554,4 +567,4 @@ double BABNModel::LogBDScore(BABNModel const& prior) const
         return _step_sizes;
     }
 
-    }} // namespace bayes_adaptive::factored
+}} // namespace bayes_adaptive::factored

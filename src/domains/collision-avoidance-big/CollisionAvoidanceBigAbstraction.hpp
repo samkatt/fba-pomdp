@@ -12,7 +12,9 @@ namespace abstractions {
         CollisionAvoidanceBigAbstraction(configurations::BAConf c);
 
         /*** Abstraction interface **/
-        bayes_adaptive::factored::BABNModel constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k, POMDP const& domain) final;
+        bayes_adaptive::factored::BABNModel
+        constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k, const POMDP &domain,
+                               std::vector<int> *feature_set) final;
         int  selectAbstraction() final;
         int printSomething() const final;
         bool isFullModel(int abstraction) const final;

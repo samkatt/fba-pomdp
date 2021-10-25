@@ -69,7 +69,9 @@ abstractions::CollisionAvoidanceBigAbstraction::CollisionAvoidanceBigAbstraction
 }
 
 bayes_adaptive::factored::BABNModel
-abstractions::CollisionAvoidanceBigAbstraction::constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k, POMDP const& domain) {
+abstractions::CollisionAvoidanceBigAbstraction::constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k,
+                                                                       const POMDP &domain,
+                                                                       std::vector<int> *feature_set) {
     std::vector<int> abstraction_set; ; // = {};
     unsigned int index_to_use;
     if (k == 0) {
@@ -84,28 +86,31 @@ abstractions::CollisionAvoidanceBigAbstraction::constructAbstractModel(bayes_ada
                        model.transitionNode(&action, 2).parents()->end(),
                        std::back_inserter(abstraction_set));
         if (k > 1) {
+            std::vector<int> previous_set = _minimum_abstraction;
             for (int i = 1; i < k; ++i) {
-                std::vector<int> to_loop_over;
+                std::vector<int> to_loop_over = {};
                 std::vector<int> new_set = abstraction_set;
-                std::set_difference(_minimum_abstraction.begin(),
-                               _minimum_abstraction.end(),
-                                    abstraction_set.begin(),
+                std::set_difference(abstraction_set.begin(),
                                     abstraction_set.end(),
-                               std::back_inserter(to_loop_over));
+                                    previous_set.begin(),
+                                    previous_set.end(),
+                                    std::back_inserter(to_loop_over));
                 for (auto const& value: to_loop_over) {
-                    std::set_union(abstraction_set.begin(),
-                                   abstraction_set.end(),
-                                   model.transitionNode(&action, value).parents()->begin(),
-                                   model.transitionNode(&action, value).parents()->end(),
-                                   std::back_inserter(new_set));
+                    std::set_difference(model.transitionNode(&action, value).parents()->begin(),
+                                        model.transitionNode(&action, value).parents()->end(),
+                                        abstraction_set.begin(),
+                                        abstraction_set.end(),
+                                        std::back_inserter(new_set));
+                    previous_set = abstraction_set;
+                    abstraction_set = new_set;
                 }
-                abstraction_set = new_set;
             }
+            std::sort(abstraction_set.begin(), abstraction_set.end());
         }
     } else {
         return model;
     }
-
+    *feature_set = abstraction_set;
     if (abstraction_set.size() == 3) { // {x, y, obst}
         index_to_use = 0;
     } else if (abstraction_set.size() == 6) { // {x, y, obst, speed, traffic, timeofday}

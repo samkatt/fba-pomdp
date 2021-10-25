@@ -71,7 +71,7 @@ public:
     BABNModel& operator=(BABNModel&&) = default;
 
     int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m) const;
-    int sampleStateIndexThroughAbstraction(State const* s, Action const* a, std::vector<int> parent_values) const;
+    int sampleStateIndexThroughAbstraction(State const* s, Action const* a, const std::vector<int>& parent_values) const;
     int sampleObservationIndex(
         Action const* a,
         State const* new_s,
@@ -161,6 +161,10 @@ std::vector<int> stateFeatureValues(State const* s) const;
  * @brief returns the observation feature values associated with provided observation
  **/
 std::vector<int> observationFeatureValues(Observation const* o) const;
+
+    void incrementCountsOfAbstract(const Action *a, const Observation *o, float amount,
+                                   const std::vector<int> &parent_values,
+                                   std::vector<int> state_feature_values, std::vector<int> vector);
 
 private:
     Domain_Size const* _domain_size;

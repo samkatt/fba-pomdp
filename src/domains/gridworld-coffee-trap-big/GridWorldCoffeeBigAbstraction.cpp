@@ -48,11 +48,13 @@ abstractions::GridWorldCoffeeBigAbstraction::GridWorldCoffeeBigAbstraction(
 }
 
 bayes_adaptive::factored::BABNModel
-abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k, POMDP const& domain) {
+abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k,
+                                                                    const POMDP &domain,
+                                                                    std::vector<int> *feature_set) {
     std::vector<int> abstraction_set; // = {};
     if (k == 0) {
         abstraction_set = {0,1};
-
+        *feature_set = abstraction_set;
         if (_abstraction_normalization) {
             auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(domain);
 
@@ -80,7 +82,7 @@ abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adapti
                               model.transitionNode(&action, 1).parents()->end(),
                               std::back_inserter(abstraction_set));
         unsigned int index_to_use = abstraction_set.size() - 2;
-
+        *feature_set = abstraction_set;
         if (_abstraction_normalization) {
             auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(domain);
             auto priorModel = fbapomdp.prior()->computePriorModel(model.structure());

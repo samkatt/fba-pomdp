@@ -14,7 +14,9 @@ class Abstraction
 public:
     virtual ~Abstraction() = default;
 
-    virtual bayes_adaptive::factored::BABNModel constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k, POMDP const& domain) = 0;
+    virtual bayes_adaptive::factored::BABNModel
+    constructAbstractModel(bayes_adaptive::factored::BABNModel model, int k, const POMDP &domain,
+                           std::vector<int> *feature_set) = 0;
 
     virtual int selectAbstraction() = 0;
 

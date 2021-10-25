@@ -146,10 +146,12 @@ void BAImportanceSampling::resetDomainStateDistributionAndAddAbstraction(const B
         bapomdp.resetDomainState(s);
         if (_abstraction) {
             if(_remake_abstract_model) {
-                static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(s->model_real(), i, bapomdp));
+                static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(
+                        s->model_real(), i, bapomdp, &static_cast<AbstractFBAPOMDPState *>(s)->feature_set));
             } else {
                 if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() != 0) {
-                    static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(s->model_real(), i, bapomdp));
+                    static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(
+                            s->model_real(), i, bapomdp, &static_cast<AbstractFBAPOMDPState *>(s)->feature_set));
                 }
             }
         }
