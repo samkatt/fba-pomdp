@@ -16,7 +16,7 @@ GridWorldCoffeeBigFBAExtension::GridWorldCoffeeBigFBAExtension(size_t extra_feat
 //    _minimum_abstraction({0, 1}) // x and y
 {
 
-    auto const domain = domains::GridWorldCoffeeBig(_extra_features);
+//    auto const domain = domains::GridWorldCoffeeBig(_extra_features);
 //    auto const goals  = domains::GridWorldCoffeeBig::goalLocations(_size);
 
 //    _goal_amount = 1;
@@ -28,14 +28,14 @@ GridWorldCoffeeBigFBAExtension::GridWorldCoffeeBigFBAExtension(size_t extra_feat
 //    float const start_prob =
 //            (static_cast<float>(1) / (1 << _extra_features));
 
-    for (unsigned int feature_config = 0; feature_config < (unsigned int) (1 << _extra_features); ++feature_config)
-    {
-        auto const* s = domain.getState(domains::GridWorldCoffeeBig::start_location, 0, feature_config);
-
-//        _state_prior.setRawValue(s->index(), start_prob);
-
-        domain.releaseState(s);
-    }
+//    for (unsigned int feature_config = 0; feature_config < (unsigned int) (1 << _extra_features); ++feature_config)
+//    {
+//        auto const* s = domain.getState(domains::GridWorldCoffeeBig::start_location, 0, feature_config);
+//        // TODO I don't set the prior probabilities here...? Need to add if I want to use reinvigoration (maybe in general?)
+////        _state_prior.setRawValue(std::stoi(s->index()), start_prob);
+//
+//        domain.releaseState(s);
+//    }
 }
 
 Domain_Feature_Size GridWorldCoffeeBigFBAExtension::domainFeatureSize() const

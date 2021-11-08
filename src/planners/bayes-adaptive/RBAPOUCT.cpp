@@ -7,7 +7,7 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 
 #include "easylogging++.h"
 #include "utils/random.hpp"
@@ -78,6 +78,8 @@ Action const* RBAPOUCT::selectAction(
     auto const _nactions = _actions.size();
     auto const root      = createActionNode(_actions);
 
+    boost::timer::nanosecond_type const one_millisecond(1000000LL);
+
     // does not leak memory: actions stored in root node
     _actions.clear();
 
@@ -93,10 +95,10 @@ Action const* RBAPOUCT::selectAction(
 //    }
 
     // perform simulations
-    boost::timer timer;
+    boost::timer::cpu_timer timer;
     int sims_done = 0;
 //    float test = (float) _sims_per_sample/100;
-    if (_n < 5000) {
+    if (_milliseconds_thinking <= 0.01) {
         while (sims_done < _n) {
             sims_done++;
 //        for (auto i = 0; i < (extra + _n / _sims_per_sample); ++i) {
@@ -123,31 +125,37 @@ Action const* RBAPOUCT::selectAction(
 //        }
         }
     } else{
-        while (timer.elapsed() < ((float) _milliseconds_thinking/1000)) {
-            sims_done++;
-//        for (auto i = 0; i < (extra + _n / _sims_per_sample); ++i) {
-            // do not copy!!
-            auto particle = static_cast<BAState const *>(belief.sample());
+        boost::timer::cpu_times elapsed_time = timer.elapsed();
+        do {
+            for (auto i = 0; i < 100; ++i) {
+                sims_done++;
+                //        for (auto i = 0; i < (extra + _n / _sims_per_sample); ++i) {
+                // do not copy!!
+                auto particle = static_cast<BAState const *>(belief.sample());
 
-            // but safe old state, so that we can reset the particle (counts are not modified)
-            auto const old_domain_state = simulator.copyDomainState(particle->_domain_state);
-            const_cast<BAState *>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
-//            int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample * i);
-//            for (auto j = 0; j < sims_to_do; ++j) {
+                // but safe old state, so that we can reset the particle (counts are not modified)
+                auto const old_domain_state = simulator.copyDomainState(particle->_domain_state);
+                const_cast<BAState *>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
+                //            int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample * i);
+                //            for (auto j = 0; j < sims_to_do; ++j) {
 
-//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
+                //                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
 
-//                auto r =
-            traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
+                //                auto r =
+                traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
 
-//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
+                //                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
 
-            // return particle in correct state
-            simulator.releaseDomainState(particle->_domain_state);
-            const_cast<BAState *>(particle)->_domain_state = old_domain_state;
+                // return particle in correct state
+                simulator.releaseDomainState(particle->_domain_state);
+                const_cast<BAState *>(particle)->_domain_state = old_domain_state;
+            }
 //            }
-//        }
-        }
+            elapsed_time = timer.elapsed();
+////            VLOG(1) << "Elapsed time " << (elapsed_time.user + elapsed_time.system);
+//
+        } while ((elapsed_time.user + elapsed_time.system) < (_milliseconds_thinking*one_millisecond));
+//        } while ((elapsed_time.wall) < (_milliseconds_thinking*one_millisecond));
     }
 
 //    VLOG(1) << "Simulations done: " << sims_done;
@@ -291,13 +299,13 @@ Return RBAPOUCT::traverseChanceNode(
     if (!terminal.terminated())
     {
         // continue in tree if node exists
-        if (n.hasChild(o->index()))
+        if (n.hasChild(std::stoi(o->index())))
         {
-            delayed_return = traverseActionNode(n.child(o->index()), s, simulator, depth_to_go - 1);
+            delayed_return = traverseActionNode(n.child(std::stoi(o->index())), s, simulator, depth_to_go - 1);
         } else // else create leaf and end with rollout
         {
             simulator.addLegalActions(s, &_actions);
-            n.addChild(o->index(), createActionNode(_actions));
+            n.addChild(std::stoi(o->index()), createActionNode(_actions));
 
             // does not leak memory, actions stored in nodes
             _actions.clear();
@@ -322,7 +330,7 @@ void RBAPOUCT::fillHistograms(
 {
     for (auto& chance_node : (*n))
     {
-        histograms[node_depth][chance_node._action->index()] += chance_node.visited();
+        histograms[node_depth][std::stoi(chance_node._action->index())] += chance_node.visited();
 
         for (auto& action_node : chance_node)
         { fillHistograms(histograms, action_node.second, node_depth + 1); }

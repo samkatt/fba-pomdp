@@ -18,13 +18,13 @@ Action const* LinearDummyDomain::generateRandomAction(State const* s) const
 {
     assert(s != nullptr);
 
-    if (s->index() > 0)
+    if (std::stoi(s->index()) > 0)
     {
         // returns action 0 or 1
-        return (rnd::boolean()) ? new IndexAction(0) : new IndexAction(1);
+        return (rnd::boolean()) ? new IndexAction(std::to_string(0)) : new IndexAction(std::to_string(1));
     }
 
-    return new IndexAction(Actions::FORWARD);
+    return new IndexAction(std::to_string(Actions::FORWARD));
 }
 
 void LinearDummyDomain::addLegalActions(State const* s, std::vector<Action const*>* actions) const
@@ -32,32 +32,32 @@ void LinearDummyDomain::addLegalActions(State const* s, std::vector<Action const
     assert(actions->empty());
     assert(s != nullptr);
 
-    actions->emplace_back(new IndexAction(Actions::FORWARD));
-    if (s->index() != 0)
+    actions->emplace_back(new IndexAction(std::to_string(Actions::FORWARD)));
+    if (std::stoi(s->index()) != 0)
     {
-        actions->emplace_back(new IndexAction(Actions::BACKWARD));
+        actions->emplace_back(new IndexAction(std::to_string(Actions::BACKWARD)));
     }
 }
 
 Terminal LinearDummyDomain::step(State const** s, Action const* a, Observation const** o, Reward* r)
     const
 {
-    assert(a->index() < 2);
+    assert(std::stoi(a->index()) < 2);
     auto state = const_cast<State*>(*s);
 
     // do traditional dummy step
     auto const t = DummyDomain::step(s, a, o, r);
 
     // increment or decrement depending on action
-    if (a->index() == Actions::BACKWARD)
+    if (std::stoi(a->index()) == Actions::BACKWARD)
     {
-        state->index(state->index() - 1);
+        state->index(std::to_string(std::stoi(state->index()) - 1));
     } else
     {
-        state->index(state->index() + 1);
+        state->index(std::to_string(std::stoi(state->index()) + 1));
     }
 
-    assert(state->index() >= 0);
+    assert(std::stoi(state->index()) >= 0);
     return t;
 }
 

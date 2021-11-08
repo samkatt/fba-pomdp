@@ -109,7 +109,7 @@ SCENARIO("fbapomdpstate initiation", "[bayes-adaptive][factored]")
             {
                 for (auto a = 0; a < action_size; ++a)
                 {
-                    auto action = IndexAction(a);
+                    auto action = IndexAction(std::to_string(a));
                     REQUIRE(model.transitionNode(&action, 0).range() == 2);
                     REQUIRE(model.transitionNode(&action, 0).numParams() == 2);
 

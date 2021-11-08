@@ -9,7 +9,7 @@ BAState* BAPOMDPState::copy(State const* s) const
     return new BAPOMDPState(s, _model);
 }
 
-int BAPOMDPState::sampleStateIndex(
+std::string BAPOMDPState::sampleStateIndex(
     State const* s,
     Action const* a,
     rnd::sample::Dir::sampleMethod m) const

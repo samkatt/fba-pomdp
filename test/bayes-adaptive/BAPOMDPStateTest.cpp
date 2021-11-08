@@ -40,7 +40,7 @@ SCENARIO("sample from BAPODMP states", "[bayes-adaptive][flat]")
                 THEN("Sampling states and observations always return 0")
                 {
                     auto s = IndexState(0);
-                    auto a = IndexAction(0);
+                    auto a = IndexAction(std::to_string(0));
 
                     for (auto i = 0; i < 10; ++i)
                     {
@@ -153,8 +153,8 @@ SCENARIO("updating BAPOMDPState", "[bayes-adaptive][flat]")
                                 auto observation = IndexObservation(o_i);
                                 auto new_state   = IndexState(new_s_i);
 
-                                if (s_i != s->index() || a_i != a->index()
-                                    || new_s_i != new_s->index())
+                                if (s_i !=std::stoi(s->index())|| a_i != std::stoi(a->index())
+                                    || new_s_i !=std::stoi(new_s->index()))
                                 {
                                     REQUIRE(
                                         ba_state->model()->count(&state, &action, &new_state)
@@ -170,8 +170,8 @@ SCENARIO("updating BAPOMDPState", "[bayes-adaptive][flat]")
                                                - 1));
                                 }
 
-                                if (a_i != a->index() || o_i != o->index()
-                                    || new_s_i != new_s->index())
+                                if (a_i != std::stoi(a->index()) || o_i != std::stoi(o->index())
+                                    || new_s_i !=std::stoi(new_s->index()))
                                 {
                                     REQUIRE(
                                         ba_state->model()->count(&action, &new_state, &observation)

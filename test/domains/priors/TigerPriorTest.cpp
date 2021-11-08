@@ -427,7 +427,7 @@ SCENARIO("factored tiger FBAPOMDPPrior", "[bayes-adaptive][factored][tiger]")
                                 "the observation node for opening door " + std::to_string(a)
                                 + " has no parents")
                             {
-                                auto open_door = IndexAction(a);
+                                auto open_door = IndexAction(std::to_string(a));
 
                                 auto node = ba_s->model()->observationNode(&open_door, 0);
 
@@ -518,7 +518,7 @@ SCENARIO("factored tiger FBAPOMDPPrior", "[bayes-adaptive][factored][tiger]")
                                     "node for feature " + std::to_string(f) + " when opening door "
                                     + std::to_string(a) + " are independent of any parent")
                                 {
-                                    auto open_door = IndexAction(a);
+                                    auto open_door = IndexAction(std::to_string(a));
 
                                     auto node = ba_s->model()->transitionNode(&open_door, f);
 

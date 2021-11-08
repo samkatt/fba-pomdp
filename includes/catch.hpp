@@ -6304,7 +6304,7 @@ namespace TestCaseTracking {
             return *tracker;
         }
 
-        int index() const { return m_index; }
+        std::string index() const { return m_index; }
 
         void moveNext() {
             m_index++;

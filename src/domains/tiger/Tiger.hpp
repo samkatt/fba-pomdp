@@ -34,6 +34,7 @@ public:
     void releaseAction(Action const* a) const final;
     void releaseObservation(Observation const* o) const final;
     void releaseState(State const* s) const final;
+    void clearCache() const final;
 
     Action const* copyAction(Action const* a) const final;
     Observation const* copyObservation(Observation const* o) const final;
@@ -49,10 +50,10 @@ public:
 private:
     TigerType const _type;
 
-    IndexState const _tiger_left{Literal::LEFT}, _tiger_right{Literal::RIGHT};
-    IndexAction const _open_left{Literal::LEFT}, _open_right{Literal::RIGHT},
-        _listen{Literal::OBSERVE};
-    IndexObservation const _hear_left{Literal::LEFT}, _hear_right{Literal::RIGHT};
+    IndexState const _tiger_left{std::to_string(Literal::LEFT)}, _tiger_right{std::to_string(Literal::RIGHT)};
+    IndexAction const _open_left{std::to_string(Literal::LEFT)}, _open_right{std::to_string(Literal::RIGHT)},
+        _listen{std::to_string(Literal::OBSERVE)};
+    IndexObservation const _hear_left{std::to_string(Literal::LEFT)}, _hear_right{std::to_string(Literal::RIGHT)};
 
     utils::DiscreteSpace<IndexAction> _actions{3};
     utils::DiscreteSpace<IndexState> _states{2};

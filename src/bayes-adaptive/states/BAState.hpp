@@ -42,7 +42,7 @@ public:
     /**
      * @brief samples a state index for <s,a>
      **/
-    virtual int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
+    virtual std::string sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
         const = 0;
 
     /**
@@ -69,8 +69,9 @@ public:
     virtual void logCounts() const = 0;
 
     /*** state interface ***/
-    int index() const final;
-    void index(int) final;
+    std::string index() const final;
+    void index(std::string) final;
+    std::vector<int> getFeatureValues() const final;
 };
 
 #endif // BASTATE_HPP

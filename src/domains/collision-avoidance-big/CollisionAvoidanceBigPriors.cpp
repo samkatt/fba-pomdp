@@ -95,13 +95,13 @@ CollisionAvoidanceBigTablePrior::CollisionAvoidanceBigTablePrior(
                                 auto const s = d.getState(x, y, speed, traffic, timeofday, obstacles);
 
                                 for (auto a = 0; a < _NUM_ACTIONS; ++a) {
-                                    IndexAction const action(a);
+                                    IndexAction const action(std::to_string(a));
 
                                     // loop over position of obstacles
                                     std::vector<int> new_obstacles(_num_obstacles);
                                     auto count = 0;
                                     do {
-                                        IndexObservation const o(count);
+                                        IndexObservation const o(std::to_string(count));
 
                                         /***** transition counts ****/
                                         setTransitionCounts(x, y, a, obstacles, new_obstacles, d);
@@ -200,7 +200,7 @@ void CollisionAvoidanceBigTablePrior::setTransitionCounts(
 
     auto const s      = d.getState(x, y, 0, 0, 0, obstacles); // TODO change if I need this
     auto const new_s  = d.getState(new_x, new_y, 0, 0, 0, new_obstacles); // TODO change if I need this
-    auto const action = IndexAction(a);
+    auto const action = IndexAction(std::to_string(a));
 
     _prior.count(s, &action, new_s) = static_cast<float>(prob * _total_counts);
 }
@@ -255,7 +255,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
     /*** set known part of the transition function (how agent transitions) ***/
     for (auto a = 0; a < _NUM_ACTIONS; a++)
     {
-        auto action = IndexAction(a);
+        auto action = IndexAction(std::to_string(a));
 
         // set agent x feature [0] for each action
         model.resetTransitionNode(&action, _AGENT_X_FEATURE, {_AGENT_X_FEATURE});
@@ -270,7 +270,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
 
     /*** new transitions for speed, traffic and timeofday, when known ***/
     for (auto a = 0; a < _NUM_ACTIONS; a++) {
-        auto action = IndexAction(a);
+        auto action = IndexAction(std::to_string(a));
 
         // set speed feature for each action
         model.resetTransitionNode(&action, _SPEED_FEATURE, {_SPEED_FEATURE, _TRAFFIC_FEATURE});
@@ -305,7 +305,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
     for (auto a = 0; a < _NUM_ACTIONS; a++) {
         // set block y features for each action
         for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f) {
-            auto action = IndexAction(a);
+            auto action = IndexAction(std::to_string(a));
             model.resetTransitionNode(&action, f, {f, _SPEED_FEATURE});
             for (auto y = 0; y < _height; ++y) {
                 for (auto speed = 0; speed < _num_speeds; ++speed) {
@@ -325,7 +325,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
 
         for (auto f = 0; f < _num_obstacles; ++f)
         {
-            auto action = IndexAction(a);
+            auto action = IndexAction(std::to_string(a));
             model.resetObservationNode(&action, f, {f + _first_obstacle});
 
             for (auto y = 0; y < _height; ++y)
@@ -356,7 +356,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
 
     for (auto a = 0; a < _NUM_ACTIONS; ++a)
     {
-        auto action = IndexAction(a);
+        auto action = IndexAction(std::to_string(a));
 
         for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f)
         {
@@ -420,7 +420,7 @@ void CollisionAvoidanceBigFactoredPrior::setAgentYTransition(Action const& a, in
 {
     // move directly (and deterministically) determines
     // the new y -- just making sure it stays on the grid here
-    auto new_y = std::max(0, std::min(_height - 1, y + a.index() - 1));
+    auto new_y = std::max(0, std::min(_height - 1, y + std::stoi(a.index()) - 1));
 
     node.increment({y}, new_y);
 }
@@ -667,7 +667,7 @@ void CollisionAvoidanceBigFactoredPrior::sampleBlockTModel(
 {
     // populate node according to its parents
     for (auto a = 0; a < _NUM_ACTIONS; ++a) {
-        auto const action = IndexAction(a);
+        auto const action = IndexAction(std::to_string(a));
 
         // extract some info from parents
         auto parent_values = std::vector<int>();

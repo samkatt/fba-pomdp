@@ -101,6 +101,7 @@ public:
     void releaseAction(Action const* a) const final;
     void releaseObservation(Observation const* o) const final;
     void releaseState(State const* s) const final;
+    void clearCache() const final;
 
     Action const* copyAction(Action const* a) const final;
     Observation const* copyObservation(Observation const* o) const final;
@@ -122,8 +123,8 @@ private:
     int const _A_size = 2 * _size, _S_size = 0x1 << _size, _O_size = 2;
     std::vector<int> const _S_space = std::vector<int>(_size, 2);
 
-    IndexObservation const _failing{FAILING};
-    IndexObservation const _operational{OPERATIONAL};
+    IndexObservation const _failing{std::to_string(FAILING)};
+    IndexObservation const _operational{std::to_string(OPERATIONAL)};
 
     utils::DiscreteSpace<IndexAction> _actions{_A_size};
     std::vector<SysAdminState> _states;

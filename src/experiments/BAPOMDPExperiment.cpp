@@ -54,9 +54,10 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
     Domain_Feature_Size test = *fbapomdp.domainFeatureSize();
 //    VLOG(1) << "Test " << test._S;
 
-    boost::timer timer;
+    boost::timer::cpu_timer timer;
     for (auto run = 0; run < conf.num_runs; ++run)
     {
+        env->clearCache();
         belief->initiate(*bapomdp);
 
         if (VLOG_IS_ON(3))
@@ -95,11 +96,11 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
 
 
             // time excluding resetDomainState
-            timer.restart();
+            timer.start();
             auto const r = episode::run(*planner, *belief, *env, *bapomdp, h, discount);
             learning_results.r[episode].simulations.add((float) r.simulations / (float) r.length);
             learning_results.r[episode].ret.add(r.ret.toDouble());
-            learning_results.r[episode].duration.add(timer.elapsed() / r.length);
+            learning_results.r[episode].duration.add(timer.elapsed().wall / r.length);
             if(useAbstraction) {
                 abstraction->addReturn(selectedAbstraction, r.ret.toDouble());
             }
@@ -110,7 +111,6 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
             VLOG(3) << "Example BA counts at end of run " << run << ":";
             dynamic_cast<BAState const*>(belief->sample())->logCounts();
         }
-
         belief->free(*bapomdp);
     }
 

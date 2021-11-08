@@ -219,13 +219,13 @@ Return POUCT::traverseChanceNode(
     if (!terminal.terminated())
     {
         // continue in tree if node exists
-        if (n.hasChild(o->index()))
+        if (n.hasChild(std::stoi(o->index())))
         {
-            delayed_return = traverseActionNode(n.child(o->index()), s, simulator, depth_to_go - 1);
+            delayed_return = traverseActionNode(n.child(std::stoi(o->index())), s, simulator, depth_to_go - 1);
         } else // else create leaf and end with rollout
         {
             simulator.addLegalActions(s, &_actions);
-            n.addChild(o->index(), createActionNode(_actions));
+            n.addChild(std::stoi(o->index()), createActionNode(_actions));
 
             // does not leak memory, actions stored in nodes
             _actions.clear();
@@ -251,7 +251,7 @@ void POUCT::fillHistograms(std::vector<std::vector<int>>& histograms, ActionNode
 {
     for (auto& chance_node : (*n))
     {
-        histograms[node_depth][chance_node._action->index()] += chance_node.visited();
+        histograms[node_depth][std::stoi(chance_node._action->index())] += chance_node.visited();
 
         for (auto& action_node : chance_node)
         { fillHistograms(histograms, action_node.second, node_depth + 1); }

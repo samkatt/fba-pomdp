@@ -72,8 +72,8 @@ std::string FlatFilter<T>::toString() const
 {
     auto n = _particles.size();
 
-    std::map<int, int> state_count;
-    std::map<int, T> state_map;
+    std::map<std::string, int> state_count;
+    std::map<std::string, T> state_map;
 
     // count how many states there are of each type, and save their strings
     for (auto const s : _particles)

@@ -78,7 +78,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
 
                     auto tmp_s  = d.breakComputer(bapomdp_state->_domain_state, 1);
                     auto new_s  = d.breakComputer(tmp_s, 2);
-                    auto action = IndexAction(a);
+                    auto action = IndexAction(std::to_string(a));
 
                     REQUIRE(
                         bapomdp_state->model()->count(bapomdp_state, &action, new_s)
@@ -97,7 +97,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
             {
                 for (auto a = size; a < 2 * size; ++a)
                 {
-                    auto action = IndexAction(a);
+                    auto action = IndexAction(std::to_string(a));
                     REQUIRE(
                         bapomdp_state->model()->count(bapomdp_state, &action, bapomdp_state)
                         == Approx(
@@ -118,7 +118,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
             {
                 for (auto a = 0; a < size; ++a)
                 {
-                    auto action = IndexAction(a);
+                    auto action = IndexAction(std::to_string(a));
                     REQUIRE(
                         bapomdp_state->model()->count(bapomdp_state, &action, bapomdp_state)
                         == total_counts);
@@ -131,7 +131,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
             {
                 for (auto a = size; a < 2 * size; ++a)
                 {
-                    auto action = IndexAction(a);
+                    auto action = IndexAction(std::to_string(a));
                     REQUIRE(
                         bapomdp_state->model()->count(bapomdp_state, &action, bapomdp_state)
                         == Approx(total_counts * (1 - d.params()->_reboot_success_rate)));
@@ -160,7 +160,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
 
                 for (auto const& a : legal_actions)
                 {
-                    if (a->index() == size + fixed_computer)
+                    if (std::stoi(a->index()) == size + fixed_computer)
                     {
                         REQUIRE(
                             bapomdp_state->model()->count(&failing_state, a, new_s)
@@ -215,7 +215,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
 
             THEN("the transition into and out of are exactly right")
             {
-                auto observe = IndexAction(0);
+                auto observe = IndexAction(std::to_string(0));
                 REQUIRE(
                     bapomdp_state->model()->count(s_init, &observe, s_compl)
                     == Approx(

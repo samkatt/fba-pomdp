@@ -72,14 +72,14 @@ TEST_CASE("Manager initiate and update tests", "[state estimation][flat filter]"
             auto o = IndexObservation(0); // generated observation SHOULD BE 0
 
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() == s->index() + 1);
+            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 1);
 
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() == s->index() + 2);
+            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 2);
 
             a = IndexAction(domains::LinearDummyDomain::Actions::BACKWARD);
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() == s->index() + 1);
+            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 1);
         }
 
         b.free(d);

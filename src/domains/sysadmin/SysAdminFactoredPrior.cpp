@@ -56,7 +56,7 @@ bayes_adaptive::factored::BABNModel::Structure
 
 FBAPOMDPState* SysAdminFactoredPrior::sampleFullyConnectedState(State const* domain_state) const
 {
-    assert(domain_state != nullptr && domain_state->index() < _domain_size._S);
+    assert(domain_state != nullptr && std::stoi(domain_state->index()) < _domain_size._S);
 
     return new FBAPOMDPState(
         domain_state,
@@ -83,7 +83,7 @@ FBAPOMDPState* SysAdminFactoredPrior::sampleCorrectGraphState(State const* domai
 
 FBAPOMDPState* SysAdminFactoredPrior::sampleFBAPOMDPState(State const* domain_state) const
 {
-    assert(domain_state != nullptr && domain_state->index() < _domain_size._S);
+    assert(domain_state != nullptr && std::stoi(domain_state->index()) < _domain_size._S);
 
     return new FBAPOMDPState(
         domain_state,
@@ -107,7 +107,7 @@ bayes_adaptive::factored::BABNModel SysAdminFactoredPrior::computePriorModel(
 
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction action(a);
+        IndexAction action(std::to_string(a));
 
         for (size_t c = 0; c < _domain_feature_size._S.size(); ++c)
         {
@@ -169,8 +169,8 @@ void SysAdminFactoredPrior::precomputeFactoredPrior(domains::SysAdmin const& d)
 
     for (auto a = 0; a < (int)_domain_feature_size._S.size(); ++a)
     {
-        auto reboot  = IndexAction(a + (int)_domain_feature_size._S.size());
-        auto observe = IndexAction(a);
+        auto reboot  = IndexAction(std::to_string(a + (int)_domain_feature_size._S.size()));
+        auto observe = IndexAction(std::to_string(a));
 
         model.resetObservationNode(&reboot, 0, std::vector<int>{a});
         model.resetObservationNode(&observe, 0, std::vector<int>{a});
@@ -201,7 +201,7 @@ std::vector<DBNNode> SysAdminFactoredPrior::disconnectedTransitions()
 
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction const action(a);
+        IndexAction const action(std::to_string(a));
 
         for (auto c = 0; c < static_cast<int>(_domain_feature_size._S.size()); ++c)
         {
@@ -233,7 +233,7 @@ std::vector<DBNNode> SysAdminFactoredPrior::linearTransitions()
     // set factored T counts
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction const action(a);
+        IndexAction const action(std::to_string(a));
 
         for (auto c = 0; c < static_cast<int>(_domain_feature_size._S.size()); ++c)
         {
@@ -280,7 +280,7 @@ std::vector<DBNNode> SysAdminFactoredPrior::fullyConnectedT(domains::SysAdmin co
 
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction action(a);
+        IndexAction action(std::to_string(a));
 
         for (auto c = 0; c < n; ++c)
         {
@@ -309,12 +309,12 @@ float SysAdminFactoredPrior::computeFailureProbability(
 {
     assert(
         parents != nullptr && parent_values != nullptr && parents->size() == parent_values->size());
-    assert(a != nullptr && a->index() >= 0 && a->index() < _domain_size._A);
+    assert(a != nullptr && std::stoi(a->index()) >= 0 && std::stoi(a->index()) < _domain_size._A);
     assert(computer >= 0 && computer < static_cast<int>(_domain_feature_size._S.size()));
 
     auto const it = std::find(parents->begin(), parents->end(), computer);
     auto const is_rebooting =
-        a->index() == static_cast<int>(_domain_feature_size._S.size() + computer);
+        std::stoi(a->index()) == static_cast<int>(_domain_feature_size._S.size() + computer);
 
     // special case: computer is not working currently
     if (it != parents->end() && parent_values->at(it - parents->begin()) == 0)

@@ -22,13 +22,13 @@ TigerBAPrior::TigerBAPrior(configurations::BAConf const& c) :
         throw "noise has to be between -.15 and .3";
     }
 
-    auto s_right = IndexState(domains::Tiger::Literal::RIGHT);
-    auto s_left  = IndexState(domains::Tiger::Literal::LEFT);
+    auto s_right = IndexState(std::to_string(domains::Tiger::Literal::RIGHT));
+    auto s_left  = IndexState(std::to_string(domains::Tiger::Literal::LEFT));
 
-    auto a_listen = IndexAction(domains::Tiger::Literal::OBSERVE);
+    auto a_listen = IndexAction(std::to_string(domains::Tiger::Literal::OBSERVE));
 
-    auto o_left  = IndexObservation(domains::Tiger::Literal::LEFT);
-    auto o_right = IndexObservation(domains::Tiger::Literal::RIGHT);
+    auto o_left  = IndexObservation(std::to_string(domains::Tiger::Literal::LEFT));
+    auto o_right = IndexObservation(std::to_string(domains::Tiger::Literal::RIGHT));
 
     _prior.count(&s_right, &a_listen, &s_left) = 0;
     _prior.count(&s_left, &a_listen, &s_right) = 0;

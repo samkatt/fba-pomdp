@@ -28,7 +28,7 @@ double Tiger::computeObservationProbability(Observation const* o, Action const* 
     const
 {
     // when opening door, there is a 50/50 % for each observation
-    if (a->index() != OBSERVE)
+    if (std::stoi(a->index()) != OBSERVE)
     {
         return .5;
     }
@@ -44,9 +44,9 @@ Terminal Tiger::step(State const** s, Action const* a, Observation const** o, Re
     assert(o != nullptr);
     assert(r != nullptr);
 
-    auto const tiger_is_left = (*s)->index() == Literal::LEFT;
+    auto const tiger_is_left = std::stoi((*s)->index()) == Literal::LEFT;
 
-    if (a->index() == Literal::OBSERVE)
+    if (std::stoi(a->index()) == Literal::OBSERVE)
     // listening does not change the state
     // and return correct observation by some probability
     {
@@ -78,7 +78,7 @@ Terminal Tiger::step(State const** s, Action const* a, Observation const** o, Re
     legalStateCheck(*s);
     assert(r->toDouble() == -1 || r->toDouble() == 10 || r->toDouble() == -100);
 
-    return Terminal(_type == EPISODIC && a->index() != OBSERVE);
+    return Terminal(_type == EPISODIC && std::stoi(a->index()) != OBSERVE);
 }
 
 void Tiger::addLegalActions(State const* s, std::vector<Action const*>* actions) const
@@ -129,17 +129,21 @@ State const* Tiger::copyState(State const* s) const
 
 void Tiger::legalActionCheck(Action const* a) const
 {
-    assert(a != nullptr && a->index() >= 0 && a->index() < 3);
+    assert(a != nullptr && std::stoi(a->index()) >= 0 && std::stoi(a->index()) < 3);
 }
 
 void Tiger::legalObservationCheck(Observation const* o) const
 {
-    assert(o != nullptr && o->index() >= 0 && o->index() < 2);
+    assert(o != nullptr && std::stoi(o->index()) >= 0 && std::stoi(o->index()) < 2);
 }
 
 void Tiger::legalStateCheck(State const* s) const
 {
-    assert(s != nullptr && s->index() >= 0 && s->index() < 2);
+    assert(s != nullptr &&std::stoi(s->index())>= 0 &&std::stoi(s->index())< 2);
 }
+
+    void Tiger::clearCache() const {
+
+    }
 
 } // namespace domains

@@ -27,7 +27,7 @@ GridWorldFBAExtension::GridWorldFBAExtension(size_t size) :
         {
             auto const* s = domain.getState(agent, goal);
 
-            _state_prior.setRawValue(s->index(), start_prob);
+            _state_prior.setRawValue(std::stoi(s->index()), start_prob);
 
             domain.releaseState(s);
         }

@@ -1,7 +1,7 @@
 #ifndef BAPOMDPEXPERIMENT_HPP
 #define BAPOMDPEXPERIMENT_HPP
 
-#include "boost/timer.hpp"
+#include "boost/timer/timer.hpp"
 #include <vector>
 
 #include "easylogging++.h"

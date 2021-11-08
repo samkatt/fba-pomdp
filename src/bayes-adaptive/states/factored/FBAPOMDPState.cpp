@@ -25,7 +25,7 @@ BAState* FBAPOMDPState::copy(State const* domain_state) const
     return new FBAPOMDPState(domain_state, _model);
 }
 
-int FBAPOMDPState::sampleStateIndex(
+std::string FBAPOMDPState::sampleStateIndex(
     State const* s,
     Action const* a,
     rnd::sample::Dir::sampleMethod m) const

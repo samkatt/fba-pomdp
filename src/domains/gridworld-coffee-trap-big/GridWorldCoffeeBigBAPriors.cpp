@@ -23,7 +23,7 @@ bool correctStructurePrior = false;
 namespace priors {
 
 GridWorldCoffeeBigFlatBAPrior::GridWorldCoffeeBigFlatBAPrior(
-    GridWorldCoffeeBig const& domain,
+    domains::GridWorldCoffeeBig const& domain,
     configurations::BAConf const& c) :
         _size(5),
         _abstraction(c.domain_conf.abstraction),
@@ -33,7 +33,7 @@ GridWorldCoffeeBigFlatBAPrior::GridWorldCoffeeBigFlatBAPrior(
         _prior_model()
 {
 
-    bayes_adaptive::domain_extensions::GridWorldCoffeeBigBAExtension ba_ext(_extra_features);
+    bayes_adaptive::domain_extensions::GridWorldCoffeeBigBAExtension ba_ext(_extra_features, domain);
 
     _domain_size = ba_ext.domainSize();
     _prior_model = bayes_adaptive::table::BAFlatModel(&_domain_size);
@@ -45,7 +45,8 @@ GridWorldCoffeeBigFlatBAPrior::GridWorldCoffeeBigFlatBAPrior(
 
         for (auto s = 0; s < _domain_size._S; ++s)
         {
-            auto state = static_cast<GridWorldCoffeeBigState const*>(ba_ext.getState(s));
+            // TODO change...
+            auto state = static_cast<GridWorldCoffeeBigState const*>(ba_ext.getState(std::to_string(s)));
 
             setPriorTransitionProbabilities(state, &action, domain);
 
@@ -60,16 +61,16 @@ GridWorldCoffeeBigFlatBAPrior::GridWorldCoffeeBigFlatBAPrior(
 void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
     GridWorldCoffeeBigState const* s,
     GridWorldCoffeeBigAction const* a,
-    GridWorldCoffeeBig const& domain)
+    domains::GridWorldCoffeeBig const& domain)
 {
 
     double acc_prob = 0;
 
     float success_prob;
-
     if (correctBigPrior) {
-        if ((s->_agent_position.x == 0 && s->_agent_position.y == 3) || (s->_agent_position.x == 1 && s->_agent_position.y == 3)
-        || (s->_agent_position.x == 2 && s->_agent_position.y == 1)) {
+        if ((s->_state_vector[_x_feature] == 0 && s->_state_vector[_y_feature] == 3)
+        || (s->_state_vector[_x_feature] == 1 && s->_state_vector[_y_feature] == 3)
+        || (s->_state_vector[_x_feature] == 2 && s->_state_vector[_y_feature] == 1)) {
             success_prob = GridWorldCoffeeBig::slow_move_prob;
         }
         else {
@@ -77,18 +78,24 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
         }
     }
     else {
-        success_prob = domain.believedTransitionProb(domain.agentOnCarpet(s->_agent_position, s->_feature_config), s->_rain);
+        // TODO change
+        success_prob = domain.believedTransitionProb(domain.agentOnCarpet(
+                {static_cast<unsigned int>(s->_state_vector[_x_feature]),
+                 static_cast<unsigned int>(s->_state_vector[_y_feature])},
+                0), s->_state_vector[_rain_feature]);
     }
 
     /*** fail move ***/
-    if (GridWorldCoffeeBig::goal_location == s->_agent_position)
+    if (GridWorldCoffeeBig::goal_location == GridWorldCoffeeBigState::pos({static_cast<unsigned int>(s->_state_vector[_x_feature]),
+                                              static_cast<unsigned int>(s->_state_vector[_y_feature])}))
     {
         auto const prob = (1 - success_prob);
         for (auto const& rain : rain_values)
         {
-            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
-
-            auto new_s = domain.getState(s->_agent_position, rain, s->_feature_config);
+            auto const rain_prob = (s->_state_vector[_rain_feature] == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
+            auto state_vector = s->getFeatureValues();
+            state_vector[_rain_feature] = rain;
+            auto new_s = domain.getState(state_vector);
 
             _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total;
             acc_prob += prob * rain_prob;
@@ -100,9 +107,10 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
         auto const prob = 1 - success_prob;
         for (auto const& rain : rain_values)
         {
-            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
-
-            auto new_s = domain.getState(s->_agent_position, rain, s->_feature_config);
+            auto const rain_prob = (s->_state_vector[_rain_feature] == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
+            auto state_vector = s->getFeatureValues();
+            state_vector[_rain_feature] = rain;
+            auto new_s = domain.getState(state_vector);
 
             _prior_model.count(s, a, new_s) += prob * rain_prob * _unknown_counts_total;
             acc_prob += prob * rain_prob;
@@ -112,27 +120,35 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
     }
 
     /*** move succeeds ***/
-    auto const new_agent_pos = domain.applyMove(s->_agent_position, a);
-    if (GridWorldCoffeeBig::goal_location == s->_agent_position)
+    auto const new_agent_pos = domain.applyMove({static_cast<unsigned int>(s->_state_vector[_x_feature]),
+                                                 static_cast<unsigned int>(s->_state_vector[_y_feature])}, a);
+    if (GridWorldCoffeeBig::goal_location == GridWorldCoffeeBigState::pos({static_cast<unsigned int>(s->_state_vector[_x_feature]),
+                                              static_cast<unsigned int>(s->_state_vector[_y_feature])}))
     {
         for (auto const& rain : rain_values)
         {
-            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
-
-            auto new_s = domain.getState(new_agent_pos, rain, s->_feature_config);
+            auto const rain_prob = (s->_state_vector[_rain_feature] == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
+            auto state_vector = s->getFeatureValues();
+            state_vector[_x_feature] = new_agent_pos.x;
+            state_vector[_y_feature] = new_agent_pos.y;
+            state_vector[_rain_feature] = rain;
+            auto new_s = domain.getState(state_vector);
 
             _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total;
             acc_prob += success_prob * rain_prob;
 
             domain.releaseState(new_s);
         }
-    } else // not on top of goal
+    } else // not on top of goal TODO what is the difference here?
     {
         for (auto const& rain : rain_values)
         {
-            auto const rain_prob = (s->_rain == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
-
-            auto new_s = domain.getState(new_agent_pos, rain, s->_feature_config);
+            auto const rain_prob = (s->_state_vector[_rain_feature] == rain) ? GridWorldCoffeeBig::same_weather_prob : 1 - GridWorldCoffeeBig::same_weather_prob;
+            auto state_vector = s->getFeatureValues();
+            state_vector[_x_feature] = new_agent_pos.x;
+            state_vector[_y_feature] = new_agent_pos.y;
+            state_vector[_rain_feature] = rain;
+            auto new_s = domain.getState(state_vector);
 
             _prior_model.count(s, a, new_s) += success_prob * rain_prob * _unknown_counts_total;
             acc_prob += success_prob * rain_prob;
@@ -148,7 +164,7 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
 void GridWorldCoffeeBigFlatBAPrior::setPriorObservationProbabilities(
     GridWorldCoffeeBigAction const* a,
     GridWorldCoffeeBigState const* new_s,
-    GridWorldCoffeeBig const& domain)
+    domains::GridWorldCoffeeBig const& domain)
 {
     double acc_prob = 0;
     for (unsigned int x = 0; x < _size; ++x)
@@ -177,7 +193,7 @@ BAPOMDPState* GridWorldCoffeeBigFlatBAPrior::sampleBAPOMDPState(State const* s) 
  * FACTORED STUFF
  */
 GridWorldCoffeeBigFactBAPrior::GridWorldCoffeeBigFactBAPrior(
-    GridWorldCoffeeBig const& domain,
+    domains::GridWorldCoffeeBig const& domain,
     configurations::FBAConf const& c) :
     FBAPOMDPPrior(c),
 //    _num_abstractions(),
@@ -191,10 +207,10 @@ GridWorldCoffeeBigFactBAPrior::GridWorldCoffeeBigFactBAPrior(
     _domain_feature_size({}, {}), // initialized below
     _indexing_steps({}, {}), // initialized below
     _correct_struct_prior(), // initialized below
-    _domain(domain)
+    _domain(std::move(domain))
 {
 
-    bayes_adaptive::domain_extensions::GridWorldCoffeeBigBAExtension ba_ext(_carpet_tiles);
+    bayes_adaptive::domain_extensions::GridWorldCoffeeBigBAExtension ba_ext(_carpet_tiles, domain);
     bayes_adaptive::domain_extensions::GridWorldCoffeeBigFBAExtension fba_ext(_carpet_tiles);
 
     _domain_size         = ba_ext.domainSize();
@@ -256,7 +272,7 @@ bayes_adaptive::factored::BABNModel GridWorldCoffeeBigFactBAPrior::computePriorM
 
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction const action(a);
+        IndexAction const action(std::to_string(a));
 
         auto const& agent_x_parents = structure.T[a][_agent_x_feature];
         auto const& agent_y_parents = structure.T[a][_agent_y_feature];
@@ -361,7 +377,7 @@ void GridWorldCoffeeBigFactBAPrior::preComputePrior()
 {
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction const action(a);
+        IndexAction const action(std::to_string(a));
 
         /*** O (known) ***/
         // observe agent location, depends on state feature and observation probabilities
@@ -470,7 +486,7 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
     /*** noisy struct prior ****/
     auto structure = _correct_struct_prior.structure();
 
-    if (rnd::slowRandomInt(1,100) <= 35) // randomly add rain to parents of x and y
+    if (rnd::slowRandomInt(1,100) <=10) // randomly add rain to parents of x and y
     {
         for (auto a = 0; a < _domain_size._A; ++a) {
             structure.T[a][_agent_x_feature].emplace_back(_rain_feature);
@@ -481,7 +497,7 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
     // uniformly add any extra binary feature as parent
     for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
     {
-        if (rnd::slowRandomInt(1,100) <= 35) // randomly add binary feature to parents of x and y
+        if (rnd::slowRandomInt(1,100) <= 10) // randomly add binary feature to parents of x and y
         {
             for (auto a = 0; a < _domain_size._A; ++a) {
                 structure.T[a][_agent_x_feature].emplace_back(f);

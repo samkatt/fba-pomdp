@@ -38,6 +38,11 @@ public:
     template<typename Deallocator>
     void replace(int i, T s, Deallocator const& d);
 
+    template<typename Deallocator>
+    void free(const Deallocator &d, int index);
+
+    void free();
+
     /**
      * @brief replaces element i with provided s with weight w
      **/
@@ -94,6 +99,8 @@ public:
      * @brief samples an element according to their weights
      **/
     T sample() const;
+
+    int sampleIndex() const;
 
 private:
     double _total_weight = 0;

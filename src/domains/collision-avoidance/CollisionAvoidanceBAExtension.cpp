@@ -50,14 +50,22 @@ Domain_Size CollisionAvoidanceBAExtension::domainSize() const
     return _domain_size;
 }
 
-State const* CollisionAvoidanceBAExtension::getState(int index) const
+State const* CollisionAvoidanceBAExtension::getState(std::string index) const
 {
     auto features = indexing::projectUsingDimensions(
-        index,
+        std::stoi(index),
         {_grid_width, _grid_height, static_cast<int>(std::pow(_grid_height, _num_obstacles))});
 
     return _states[features[0]][features[1]][features[2]];
 }
+
+//Observation const* CollisionAvoidanceBAExtension::getObservation(std::string index) const {
+//    // TODO implement
+//    if (index == "0") {
+//        return nullptr;
+//    }
+//    return nullptr;
+//}
 
 Terminal CollisionAvoidanceBAExtension::terminal(
     State const* /*s*/,
@@ -76,7 +84,7 @@ Reward CollisionAvoidanceBAExtension::reward(
     Action const* a,
     State const* new_s) const
 {
-    auto r = a->index() == domains::CollisionAvoidance::STAY
+    auto r = std::stoi(a->index()) == domains::CollisionAvoidance::STAY
                  ? 0
                  : -domains::CollisionAvoidance::MOVE_PENALTY;
 

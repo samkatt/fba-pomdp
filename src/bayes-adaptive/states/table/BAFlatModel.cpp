@@ -53,7 +53,7 @@ float& BAFlatModel::count(State const* s, Action const* a, State const* new_s)
     assertLegal(a);
     assertLegal(new_s);
 
-    return phi(s->index(), a->index(), new_s->index());
+    return phi(std::stoi(s->index()), std::stoi(a->index()), std::stoi(new_s->index()));
 }
 
 float& BAFlatModel::count(Action const* a, State const* new_s, Observation const* o)
@@ -63,7 +63,7 @@ float& BAFlatModel::count(Action const* a, State const* new_s, Observation const
     assertLegal(a);
     assertLegal(new_s);
 
-    return psi(a->index(), new_s->index(), o->index());
+    return psi(std::stoi(a->index()), std::stoi(new_s->index()), std::stoi(o->index()));
 }
 
 std::vector<float> BAFlatModel::transitionExpectation(State const* s, Action const* a) const
@@ -71,7 +71,7 @@ std::vector<float> BAFlatModel::transitionExpectation(State const* s, Action con
     assertLegal(s);
     assertLegal(a);
 
-    return rnd::sample::Dir::expectedMult(&phi(s->index(), a->index(), 0), _domain_size->_S);
+    return rnd::sample::Dir::expectedMult(&phi(std::stoi(s->index()), std::stoi(a->index()), 0), _domain_size->_S);
 }
 
 std::vector<float> BAFlatModel::observationExpectation(Action const* a, State const* new_s) const
@@ -79,17 +79,17 @@ std::vector<float> BAFlatModel::observationExpectation(Action const* a, State co
     assertLegal(a);
     assertLegal(new_s);
 
-    return rnd::sample::Dir::expectedMult(&psi(a->index(), new_s->index(), 0), _domain_size->_O);
+    return rnd::sample::Dir::expectedMult(&psi(std::stoi(a->index()), std::stoi(new_s->index()), 0), _domain_size->_O);
 }
 
-int BAFlatModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
+std::string BAFlatModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
     const
 {
 
     assertLegal(s);
     assertLegal(a);
-
-    return m(&phi(s->index(), a->index(), 0), _domain_size->_S);
+    // TODO need to change? maybe not?
+    return std::to_string(m(&phi(std::stoi(s->index()), std::stoi(a->index()), 0), _domain_size->_S));
 }
 
 int BAFlatModel::sampleObservationIndex(
@@ -101,7 +101,7 @@ int BAFlatModel::sampleObservationIndex(
     assertLegal(a);
     assertLegal(new_s);
 
-    return m(&psi(a->index(), new_s->index(), 0), _domain_size->_O);
+    return m(&psi(std::stoi(a->index()),std::stoi(new_s->index()), 0), _domain_size->_O);
 }
 
 double BAFlatModel::computeObservationProbability(
@@ -122,7 +122,7 @@ double BAFlatModel::computeObservationProbability(
     }
 
     // samples multinominal & returns the correct index
-    return m(&psi(a->index(), new_s->index(), 0), _domain_size->_O)[o->index()];
+    return m(&psi(std::stoi(a->index()),std::stoi(new_s->index()), 0), _domain_size->_O)[std::stoi(o->index())];
 }
 
 void BAFlatModel::incrementCountsOf(
@@ -261,17 +261,17 @@ unsigned int BAFlatModel::psi_cache_index(int a, int new_s) const
 
 void BAFlatModel::assertLegal(State const* s) const
 {
-    assert(s && s->index() >= 0 && s->index() < _domain_size->_S);
+    assert(s &&std::stoi(s->index())>= 0 &&std::stoi(s->index())< _domain_size->_S);
 }
 
 void BAFlatModel::assertLegal(Action const* a) const
 {
-    assert(a && a->index() >= 0 && a->index() < _domain_size->_A);
+    assert(a && std::stoi(a->index()) >= 0 && std::stoi(a->index()) < _domain_size->_A);
 }
 
 void BAFlatModel::assertLegal(Observation const* o) const
 {
-    assert(o && o->index() >= 0 && o->index() < _domain_size->_O);
+    assert(o && std::stoi(o->index()) >= 0 && std::stoi(o->index()) < _domain_size->_O);
 }
 
 BAFlatModel::BAFlatModel(BAFlatModel const& other) : _domain_size()

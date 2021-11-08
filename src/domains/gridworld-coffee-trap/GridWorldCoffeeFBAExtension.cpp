@@ -24,7 +24,7 @@ GridWorldCoffeeFBAExtension::GridWorldCoffeeFBAExtension() :
     _state_prior = utils::categoricalDistr(static_cast<int>(_size * _size * 2 * _carpet_configurations));
 
     auto const* s = domain.getState(domains::GridWorldCoffee::start_location, 0, 0);
-    _state_prior.setRawValue(s->index(), 1);
+    _state_prior.setRawValue(std::stoi(s->index()), 1);
 
     domain.releaseState(s);
 }

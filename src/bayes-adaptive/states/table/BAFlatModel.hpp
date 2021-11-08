@@ -66,7 +66,7 @@ public:
      */
     std::vector<float> observationExpectation(Action const* a, State const* new_s) const;
 
-    int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m) const;
+    std::string sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m) const;
 
     int sampleObservationIndex(
         Action const* a,

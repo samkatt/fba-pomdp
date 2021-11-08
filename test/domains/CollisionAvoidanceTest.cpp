@@ -204,7 +204,7 @@ SCENARIO("generating random collision-avoidance actions", "[domain][collision-av
 
     auto a = d.generateRandomAction(s);
 
-    REQUIRE(a->index() < 3);
+    REQUIRE(std::stoi(a->index()) < 3);
 
     d.releaseState(s);
     d.releaseAction(a);

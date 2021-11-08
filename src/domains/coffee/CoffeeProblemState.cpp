@@ -4,42 +4,42 @@
 
 namespace domains {
 
-CoffeeProblemState::CoffeeProblemState(int i) : _s(i)
+CoffeeProblemState::CoffeeProblemState(std::basic_string<char> i) : _s(i)
 {
-    assert(i < 32);
+    assert(std::stoi(i) < 32);
 }
 
 bool CoffeeProblemState::wet() const
 {
-    return (index() & WET) != 0;
+    return (std::stoi(index()) & WET) != 0;
 }
 
 bool CoffeeProblemState::umbrella() const
 {
-    return (index() & UMBRELLA) != 0;
+    return (std::stoi(index()) & UMBRELLA) != 0;
 }
 
 bool CoffeeProblemState::hasCoffee() const
 {
-    return (index() & HAS_COFEE) != 0;
+    return (std::stoi(index()) & HAS_COFEE) != 0;
 }
 
 bool CoffeeProblemState::wantsCoffee() const
 {
-    return (index() & WANTS_COFFEE) != 0;
+    return (std::stoi(index()) & WANTS_COFFEE) != 0;
 }
 
 bool CoffeeProblemState::rains() const
 {
-    return (index() & RAINS) != 0;
+    return (std::stoi(index()) & RAINS) != 0;
 }
 
-void CoffeeProblemState::index(int i)
+void CoffeeProblemState::index(std::string i)
 {
     _s.index(i);
 }
 
-int CoffeeProblemState::index() const
+std::string CoffeeProblemState::index() const
 {
     return _s.index();
 }
@@ -74,6 +74,11 @@ std::string CoffeeProblemState::toString() const
     }
 
     return result + ")";
+}
+
+std::vector<int> CoffeeProblemState::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
 }
 
 } // namespace domains

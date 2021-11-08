@@ -58,6 +58,7 @@ public:
 
     Observation const* copyObservation(Observation const* o) const final;
     State const* copyState(State const* s) const final;
+    void clearCache() const final;
 
 private:
     FactoredTigerDomainType const _type;
@@ -66,7 +67,7 @@ private:
     utils::DiscreteSpace<IndexState> _states{_S_size};
     utils::DiscreteSpace<IndexAction> _actions{_A_size};
 
-    IndexObservation const _hear_left{TigerLocation::LEFT}, _hear_right{TigerLocation::RIGHT};
+    IndexObservation const _hear_left{std::to_string(TigerLocation::LEFT)}, _hear_right{std::to_string(TigerLocation::RIGHT)};
     std::vector<IndexObservation> _observations{_hear_left, _hear_right};
 
     // used to sample states uniformly

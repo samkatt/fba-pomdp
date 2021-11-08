@@ -14,7 +14,7 @@ void assertLegal(domains::GridWorld::GridWorldState::pos const& position, size_t
 void assertLegal(State const* s, size_t grid_size, size_t state_space_size)
 {
     assert(s != nullptr);
-    assert(s->index() >= 0 && s->index() < static_cast<int>(state_space_size));
+    assert(std::stoi(s->index()) >= 0 &&std::stoi(s->index())< static_cast<int>(state_space_size));
     assertLegal(
         static_cast<domains::GridWorld::GridWorldState const*>(s)->_agent_position, grid_size);
     assertLegal(
@@ -24,7 +24,7 @@ void assertLegal(State const* s, size_t grid_size, size_t state_space_size)
 void assertLegal(Action const* a, size_t action_space_size)
 {
     assert(a != nullptr);
-    assert(a->index() >= 0 && a->index() < static_cast<int>(action_space_size));
+    assert(std::stoi(a->index()) >= 0 && std::stoi(a->index()) < static_cast<int>(action_space_size));
 }
 
 GridWorldBAExtension::GridWorldBAExtension(size_t size) :
@@ -65,10 +65,10 @@ Domain_Size GridWorldBAExtension::domainSize() const
     return _domain_size;
 }
 
-State const* GridWorldBAExtension::getState(int index) const
+State const* GridWorldBAExtension::getState(std::string index) const
 {
-    assert(index < _domain_size._S);
-    return &_states[index];
+    assert(std::stoi(index) < _domain_size._S);
+    return &_states[std::stoi(index)];
 }
 
 Terminal GridWorldBAExtension::terminal(State const* s, Action const* a, State const* new_s) const

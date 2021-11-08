@@ -79,7 +79,7 @@ abstractions::CollisionAvoidanceBigAbstraction::constructAbstractModel(bayes_ada
     } else if (k >= 1 && k < 4) {
         // We assume the same model for each action here
         // TODO Could make one abstraction_set per action?
-        auto action = IndexAction(0);
+        auto action = IndexAction(std::to_string(0));
         std::set_union(_minimum_abstraction.begin(),
                        _minimum_abstraction.end(),
                        model.transitionNode(&action, 2).parents()->begin(),

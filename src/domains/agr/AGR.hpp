@@ -24,8 +24,9 @@ public:
     AGRState(int n_in, int target_pos_in, int target_goal_in);
 
     static int indexOf(int n_in, int target_pos_in, int target_goal_in);
-    void index(int i) override;
-    int index() const override;
+    void index(std::string i) override;
+    std::string index() const override;
+    std::vector<int> getFeatureValues() const override;
 
     std::string toString() const override;
 
@@ -43,10 +44,12 @@ public:
     AGRAction(int n_in, std::string type_in, int help_pos_in = -1);
 
     static int indexOf(int n, std::string const& type, int help_pos = -1);
-    void index(int i) override;
-    int index() const override;
+    void index(std::string i) override;
+    std::string index() const override;
 
     std::string toString() const override;
+
+    std::vector<int> getFeatureValues() const override;
 
     std::string type;
     int help_pos;
@@ -62,8 +65,9 @@ public:
     AGRObservation(int n_in, std::string type_in, int target_pos_in = -1);
 
     static int indexOf(int n, std::string const& type, int target_pos = -1);
-    void index(int i) override;
-    int index() const override;
+    void index(std::string i) override;
+    std::string index() const override;
+    std::vector<int> getFeatureValues() const override;
 
     std::string toString() const override;
 
@@ -118,6 +122,7 @@ public:
     void releaseAction(Action const* a) const override;
     void releaseObservation(Observation const* o) const override;
     void releaseState(State const* s) const override;
+    void clearCache() const final;
 
     Action const* copyAction(Action const* a) const override;
     Observation const* copyObservation(Observation const* o) const override;

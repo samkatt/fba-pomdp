@@ -94,7 +94,7 @@ SCENARIO("Coffee problem", "[domain][coffee]")
             }
 
             THEN("The robot observes the person wants coffee")
-            REQUIRE(o->index() == 0);
+            REQUIRE(std::stoi(o->index()) == 0);
 
             d.releaseObservation(o);
             d.releaseState(s);
@@ -210,7 +210,7 @@ SCENARIO("Boutilier coffee problem", "[domain][coffee]")
             }
 
             THEN("The robot observes the person wants coffee")
-            REQUIRE(o->index() == 0);
+            REQUIRE(std::stoi(o->index()) == 0);
 
             d.releaseObservation(o);
             d.releaseState(s);

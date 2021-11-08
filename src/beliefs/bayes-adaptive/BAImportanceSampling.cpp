@@ -14,7 +14,7 @@ namespace beliefs {
 
 std::string stateToString(State const* s)
 {
-    return std::to_string(s->index());
+    return s->index();
 }
 
 BAImportanceSampling::BAImportanceSampling(size_t n, bool abstraction, bool remake_abstract_model, bool update_abstract_model, bool update_abstract_model_normalized) :
@@ -114,18 +114,45 @@ void BAImportanceSampling::resetDomainStateDistribution(const BAPOMDP &bapomdp)
 
     auto new_filter = WeightedFilter<State const*>();
 
-    // fill up the new filter
-    // by sampling models from our current belief
-    while (new_filter.size() != _n)
-    {
-        auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
-        bapomdp.resetDomainState(s);
+    // more memory efficient way
+    auto sampled_samples = std::vector<int>(_n, 0);
 
-        new_filter.add(s, 1.0 / static_cast<double>(_n));
+    for (auto i = 0; i < (int) _n; i++) {
+        sampled_samples[_filter.sampleIndex()] += 1;
+    }
+    // First free unused particles from memory
+    for (int i = 0; i < (int) _n; i++) {
+        if (sampled_samples[i] == 0) {
+            _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); }, i);
+        }
+    }
+    // Then build new belief, and free remaining particles while doing so
+    for (int i = 0; i < (int) _n; i++) {
+        if (sampled_samples[i] > 0) {
+            for (int j = 0; j < sampled_samples[i]; j++) {
+                auto s = dynamic_cast<BAState const*>(bapomdp.copyState(_filter.particle(i)->particle));
+                bapomdp.resetDomainState(s);
+                new_filter.add(s, 1.0 / static_cast<double>(_n));
+            }
+            _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); }, i);
+        }
     }
 
-    _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); });
+    _filter.free();
     _filter = std::move(new_filter);
+
+//
+    // fill up the new filter
+    // by sampling models from our current belief
+//    while (new_filter.size() != _n)
+//    {
+//        auto s = dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
+//        bapomdp.resetDomainState(s);
+//        new_filter.add(s, 1.0 / static_cast<double>(_n));
+//    }
+//
+//    _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); });
+//    _filter = std::move(new_filter);
 
     VLOG(3) << "Status of importance sampling filter after initiating while keeping counts:\n"
             << _filter.toString(stateToString);

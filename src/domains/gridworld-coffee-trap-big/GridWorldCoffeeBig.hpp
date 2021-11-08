@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "environment/Action.hpp"
 #include "environment/Observation.hpp"
@@ -70,28 +71,43 @@ public:
             }
         };
 
-        GridWorldCoffeeBigState(pos agent_pos, unsigned int rain, unsigned int feature_config, int i) :
-            _agent_position(agent_pos),
-            _rain(rain),
-            _feature_config(feature_config),
-            _index(i)
+//        GridWorldCoffeeBigState(pos agent_pos, unsigned int rain, std::vector<int> feature_config, int i) :
+//            _state_vector(),
+//            _index(i)
+//        {
+//            _state_vector = std::vector<int>(3 + feature_config.size());
+//            _state_vector[0] = agent_pos.x;
+//            _state_vector[1] = agent_pos.y;
+//            _state_vector[2] = rain;
+//            for (auto k=0; k < (int) feature_config.size(); ++k) {
+//                _state_vector[k+3] = feature_config[k];
+//            }
+//        }
+
+        GridWorldCoffeeBigState(std::vector<int> state_vector, std::string i) :
+                _state_vector(std::move(state_vector)),
+                _index(std::move(i))
         {
         }
 
         /***** state implementation *****/
-        void index(int) final { throw "do not change GridWorldCoffeeBig states"; };
-        int index() const final { return _index; }
+        void index(std::string) final { throw "do not change GridWorldCoffeeBig states"; };
+        std::string index() const final { return _index; }
         std::string toString() const final
         {
-            return "agent" + _agent_position.toString() + " rain " + std::to_string(_rain) + " carpet configuration " + std::to_string(_feature_config);
+            return "agent" + pos({static_cast<unsigned int>(_state_vector[0]),
+                                  static_cast<unsigned int>(_state_vector[1])}).toString()
+                                  + " rain " + std::to_string(_state_vector[2]) + " carpet configuration ";
         }
 
-        pos const _agent_position;
-        unsigned int const _rain;
-        unsigned int const _feature_config;
+        std::vector<int> getFeatureValues() const final;
+        std::vector<int> const _state_vector;
+//        pos const _agent_position;
+//        unsigned int const _rain;
+//        unsigned int const _feature_config;
 
     private:
-        int const _index;
+        std::string const _index;
     };
 
     /**
@@ -103,17 +119,22 @@ public:
         GridWorldCoffeeBigObservation(
             ::domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos agent_pos,
             int i) :
-            _agent_pos(agent_pos),
+            _observation_vector({static_cast<int>(agent_pos.x), static_cast<int>(agent_pos.y)}),
             _index(i)
         {
         }
 
         /**** observation interface ***/
-        void index(int /*i*/) final { throw "GridWorldCoffeeBigObservation::index(i) not allowed"; }
-        int index() const final { return _index; };
-        std::string toString() const final { return _agent_pos.toString(); }
+        void index(std::string /*i*/) final { throw "GridWorldCoffeeBigObservation::index(i) not allowed"; }
+        std::string index() const final { return std::to_string(_index); };
+        std::string toString() const final { return
+                                GridWorldCoffeeBigState::pos({static_cast<unsigned int>(_observation_vector[0]),
+                                              static_cast<unsigned int>(_observation_vector[1])}).toString(); }
 
-        ::domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const _agent_pos;
+        std::vector<int> getFeatureValues() const final;
+        std::vector<int> const _observation_vector;
+
+//        ::domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const _agent_pos;
 
     private:
         int const _index;
@@ -131,15 +152,16 @@ public:
         static std::vector<std::string> const action_descriptions; // initialized in cpp
 
         /*** action interface ***/
-        void index(int /*i*/) final { throw "GridWorldCoffeeBigAction should not edit index"; }
-        int index() const final { return _index; }
+        void index(std::string /*i*/) final { throw "GridWorldCoffeeBigAction should not edit index"; }
+        std::string index() const final { return std::to_string(_index); }
         std::string toString() const final { return action_descriptions[_index]; }
+        std::vector<int> getFeatureValues() const final { return {_index}; };
 
     private:
         int const _index;
     };
 
-    explicit GridWorldCoffeeBig(size_t extra_features);
+    explicit GridWorldCoffeeBig(size_t extra_features, bool store_statespace);
 
     static std::vector<GridWorldCoffeeBigState::pos> const slow_locations;
 
@@ -162,7 +184,9 @@ public:
     bool foundGoal(GridWorldCoffeeBigState const* s) const;
 
     GridWorldCoffeeBigState const*
-        getState(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const;
+        getState(std::vector<int> const& state_vector) const;
+    GridWorldCoffeeBigState const*
+    getState(std::string index) const;
     GridWorldCoffeeBigObservation const* getObservation(GridWorldCoffeeBigState::pos const& agent_pos) const;
 
     /**
@@ -184,12 +208,21 @@ public:
     void releaseState(State const* s) const final;
     Observation const* copyObservation(Observation const* o) const final;
     State const* copyState(State const* s) const final;
+    void clearCache() const final;
 
 private:
     // problem settings
     size_t const _size = 5;
     size_t const _extra_features;
     std::vector<int> _stepSizes = indexing::stepSize(std::vector<int>(_extra_features, 2));
+
+    int _x_feature = 0;
+    int _y_feature = 1;
+    int _rain_feature = 2;
+
+    bool _store_statespace;
+    std::vector<int> _extrafeatures_space;
+    std::vector<int> _feature_space;
 
     // initiated in constructor
     int _A_size = 4;
@@ -202,14 +235,17 @@ private:
 
     std::vector<GridWorldCoffeeBigState> _S       = {};
     std::vector<GridWorldCoffeeBigObservation> _O = {};
+    mutable std::unordered_map<std::string, GridWorldCoffeeBigState> _S_cache = {};
+    mutable std::unordered_map<std::string, GridWorldCoffeeBigObservation> _O_cache = {};
 
     /**
      * @brief returns an observation from position agent_pos and rain
      **/
     Observation const* generateObservation(GridWorldCoffeeBigState::pos const& agent_pos) const;
 
-    int positionsToIndex(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, unsigned int const& feature_config)
-        const;
+//    int positionsToIndex(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& rain, std::vector<int> const& feature_config)
+//        const;
+    std::string positionsToIndex(std::vector<int> state_vector) const;
     int positionsToObservationIndex(GridWorldCoffeeBigState::pos const& agent_pos) const;
 
 
@@ -218,6 +254,8 @@ private:
     void assertLegal(Observation const* o) const;
     void assertLegal(State const* s) const;
     void assertLegal(GridWorldCoffeeBigState::pos const& position) const;
+
+    std::vector<int> getStateVectorFromIndex(std::string index) const;
 };
 
 } // namespace domains

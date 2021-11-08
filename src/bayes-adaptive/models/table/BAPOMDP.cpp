@@ -29,7 +29,7 @@ BAPOMDP::BAPOMDP(
         _update_abstract_model(update_abstract_model)
 {
     assert(_domain != nullptr);
-    assert(_domain_size._A > 0 && _domain_size._O > 0 && _domain_size._S > 0);
+    assert(_domain_size._A > 0 && _domain_size._O > 0); // && _domain_size._S > 0);
 
     VLOG(1) << "Initiated BAPOMDP with (S:" << _domain_size._S << ", A:" << _domain_size._A
             << ", O:" << _domain_size._O << ")";
@@ -50,14 +50,18 @@ Domain_Size const* BAPOMDP::domainSize() const
     return &_domain_size;
 }
 
+void BAPOMDP::clearCache() const {
+    _domain->clearCache();
+}
+
 State const* BAPOMDP::sampleDomainState() const
 {
     return _domain->sampleStartState();
 }
 
-State const* BAPOMDP::domainState(int i) const
+State const* BAPOMDP::domainState(std::string i) const
 {
-    return _ba_domain_ext->getState(i);
+    return _ba_domain_ext->getState(std::move(i));
 }
 
 void BAPOMDP::releaseDomainState(State const* s) const
@@ -130,8 +134,8 @@ Terminal BAPOMDP::step(
     StepType step_type,
     SampleType sample_type) const
 {
-    assert(s != nullptr && *s != nullptr && (*s)->index() >= 0);
-    assert(a != nullptr && a->index() >= 0);
+    assert(s != nullptr && *s != nullptr); // && std::stoi((*s)->index()) >= 0);
+    assert(a != nullptr && std::stoi(a->index()) >= 0);
     assert(o != nullptr);
     assert(r != nullptr);
 
@@ -139,11 +143,19 @@ Terminal BAPOMDP::step(
     auto const domain_state = ba_s->_domain_state;
 
     // sample state
-    auto const new_s = (sample_type == SampleType::Abstract) ?
-            _ba_domain_ext->getState(static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method)) :
-            _ba_domain_ext->getState(ba_s->sampleStateIndex(domain_state, a, _sample_method));
+    std::string test1;
+    if (sample_type == SampleType::Abstract) {
+        test1 = static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method);
+    } else {
+        test1 = ba_s->sampleStateIndex(domain_state, a, _sample_method);
+    }
+    auto const new_s = _ba_domain_ext->getState(test1);
+//    auto const new_s = (sample_type == SampleType::Abstract) ?
+//            _ba_domain_ext->getState(static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method)) :
+//            _ba_domain_ext->getState(ba_s->sampleStateIndex(domain_state, a, _sample_method));
 
-    *o = _observations.get(ba_s->sampleObservationIndex(a, new_s, _sample_method));
+    auto test2 = ba_s->sampleObservationIndex(a, new_s, _sample_method);
+    *o = _observations.get(test2); // ba_s->getObservation(test2); // _observations.get(test2);
 
     auto const t = _ba_domain_ext->terminal(domain_state, a, new_s);
     *r           = _ba_domain_ext->reward(domain_state, a, new_s);
@@ -170,7 +182,7 @@ void BAPOMDP::releaseAction(Action const* a) const
 
 void BAPOMDP::releaseObservation(Observation const* o) const
 {
-    assert(o != nullptr && o->index() >= 0 && o->index() < _domain_size._O);
+    assert(o != nullptr && std::stoi(o->index()) >= 0 && std::stoi(o->index()) < _domain_size._O);
     // all stored in _observations
 }
 
@@ -190,7 +202,7 @@ Action const* BAPOMDP::copyAction(Action const* a) const
 
 Observation const* BAPOMDP::copyObservation(Observation const* o) const
 {
-    assert(o != nullptr && o->index() >= 0 && o->index() < _domain_size._O);
+    assert(o != nullptr && std::stoi(o->index()) >= 0 && std::stoi(o->index()) < _domain_size._O);
 
     // all stored in _observations
     return o;
@@ -198,7 +210,7 @@ Observation const* BAPOMDP::copyObservation(Observation const* o) const
 
 State const* BAPOMDP::copyState(State const* s) const
 {
-    assert(s != nullptr && s->index() >= 0 && s->index() < _domain_size._S);
+    assert(s != nullptr); // &&std::stoi(s->index())>= 0); //  && s->index()); // < _domain_size._S);
 
     auto ba_s = static_cast<BAState const*>(s);
 
@@ -212,7 +224,7 @@ std::unique_ptr<BAPOMDP> makeTBAPOMDP(configurations::BAConf const& c)
 
     auto domain = dynamic_cast<POMDP*>(factory::makeEnvironment(c.domain_conf).release());
 
-    auto ba_domain_ext = factory::makeBADomainExtension(c);
+    auto ba_domain_ext = factory::makeBADomainExtension(c, *domain);
     auto prior         = makeTBAPOMDPPrior(*domain, c);
 
     auto const sample_method = (c.bayes_sample_method == 0)

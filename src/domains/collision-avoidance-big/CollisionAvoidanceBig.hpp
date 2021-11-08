@@ -46,12 +46,12 @@ struct CollisionAvoidanceBigState : public State
     {
     }
 
-    void index(int /*i*/) final
+    void index(std::string /*i*/) final
     {
         throw "CollisionAvoidanceBigState::index(i) should not be called...?";
     }
 
-    int index() const final { return _index; }
+    std::string index() const final { return std::to_string(_index); }
 
     std::string toString() const final
     {
@@ -65,6 +65,8 @@ struct CollisionAvoidanceBigState : public State
               + std::to_string(timeofday) + ", "+ obsts + std::to_string(obstacles_pos.back())
                + "})";
     }
+
+    std::vector<int> getFeatureValues() const override;
 
     int x_agent, y_agent, _index;
     int speed, traffic, timeofday;
@@ -154,6 +156,7 @@ public:
     void releaseState(State const* s) const final;
     Observation const* copyObservation(Observation const* o) const final;
     State const* copyState(State const* s) const final;
+    void clearCache() const final;
 
 private:
     int const _grid_width;

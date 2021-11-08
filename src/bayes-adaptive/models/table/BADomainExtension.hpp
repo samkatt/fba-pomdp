@@ -2,6 +2,7 @@
 #define BADOMAINEXTENSION_HPP
 
 #include <memory>
+#include <domains/POMDP.hpp>
 
 #include "bayes-adaptive/models/Domain_Size.hpp"
 #include "environment/Reward.hpp"
@@ -33,7 +34,12 @@ public:
     /**
      * @brief returns state i
      **/
-    virtual State const* getState(int index) const = 0;
+    virtual State const* getState(std::string index) const = 0;
+
+    /**
+    * @brief returns observation i
+    **/
+//    virtual Observation const* getObservation(std::string index) const = 0;
 
     /**
      * @brief returns terminality of <s,a,s'> transition
@@ -55,7 +61,7 @@ namespace factory {
  *
  * @return the bayes-adaptive extended functionality to make a domain work in BA-POMDP
  */
-std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf const& c);
+std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf const& c, POMDP const& domain);
 
 } // namespace factory
 

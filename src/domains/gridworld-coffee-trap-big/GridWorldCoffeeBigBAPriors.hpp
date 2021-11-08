@@ -35,10 +35,14 @@ private:
     size_t const _size;
     bool const _abstraction;
     size_t const _extra_features;
-    std::vector<unsigned int> const rain_values = {0,1};
+    std::vector<int> const rain_values = {0,1};
 
     float const _unknown_counts_total;
     float const _static_total_count = 100000;
+
+    int const _x_feature = 0;
+    int const _y_feature = 0;
+    int const _rain_feature = 0;
 
     Domain_Size _domain_size;
 

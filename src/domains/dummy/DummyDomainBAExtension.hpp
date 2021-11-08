@@ -20,7 +20,7 @@ class DummyDomainBAExtension : public BADomainExtension
 public:
     /*** BADomainExtension interface implementation ****/
     Domain_Size domainSize() const final;
-    State const* getState(int index) const final;
+    State const* getState(std::string index) const final;
     Terminal terminal(State const* s, Action const* a, State const* new_s) const final;
     Reward reward(State const* s, Action const* a, State const* new_s) const final;
 

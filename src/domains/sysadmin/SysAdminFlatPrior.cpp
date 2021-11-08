@@ -58,10 +58,10 @@ void SysAdminFlatPrior::precomputeFlatPrior(domains::SysAdmin const& d)
         for (auto c = 0; c < num_computers; ++c)
         {
             auto high_prob_observation =
-                new_state.isOperational(c) ? IndexObservation(1) : IndexObservation(0);
-            auto low_prob_observation = IndexObservation(1 - high_prob_observation.index());
+                new_state.isOperational(c) ? IndexObservation("1") : IndexObservation("0");
+            auto low_prob_observation = IndexObservation(std::to_string(1 - std::stoi(high_prob_observation.index())));
 
-            auto observe = IndexAction(c), reboot = IndexAction(c + num_computers);
+            auto observe = IndexAction(std::to_string(c)), reboot = IndexAction(std::to_string(c + num_computers));
 
             _prior.count(&observe, &new_state, &high_prob_observation) = high_prob_counts;
             _prior.count(&observe, &new_state, &low_prob_observation)  = low_prob_counts;
@@ -91,7 +91,7 @@ void SysAdminFlatPrior::setTrueTCountsRecur(
     } else
     {
 
-        auto s_fail = domains::SysAdminState(new_s.index() & ~(0x1 << computer), d.size());
+        auto s_fail = domains::SysAdminState(std::stoi(new_s.index()) & ~(0x1 << computer), d.size());
 
         // recursive call
         if (!s.isOperational(computer))
@@ -146,14 +146,14 @@ void SysAdminFlatPrior::setTrueTCounts(
     // probabilities of next state when listening
     for (auto a = 0; a < d.size(); ++a)
     {
-        auto action                       = IndexAction(a);
+        auto action                       = IndexAction(std::to_string(a));
         _prior.count(&s, &action, &new_s) = (float)prob * _known_total_counts;
     }
 
     // probabilities of next state when rebooting
     for (auto a = d.size(); a < 2 * d.size(); ++a)
     {
-        auto action = IndexAction(a);
+        auto action = IndexAction(std::to_string(a));
 
         if (new_s.isOperational(a - d.size()))
         {
@@ -197,7 +197,7 @@ void SysAdminFlatPrior::setTrueTCountsRecur(
             s, new_s, accumulated_probability, rebooting_computer, d);
     } else // recursive call
     {
-        auto s_fail = domains::SysAdminState(new_s.index() & ~(0x1 << computer), d.size());
+        auto s_fail = domains::SysAdminState(std::stoi(new_s.index()) & ~(0x1 << computer), d.size());
 
         if (!s.isOperational(computer))
         {
@@ -238,7 +238,7 @@ void SysAdminFlatPrior::setTrueTCountsForRebootingComputer(
     assert(prob > 0 && prob <= 1);
     assert(rebooting_computer >= 0 && rebooting_computer < d.size());
 
-    auto const a                 = IndexAction(d.size() + rebooting_computer);
+    auto const a                 = IndexAction(std::to_string(d.size() + rebooting_computer));
     _prior.count(&s, &a, &new_s) = (float)prob * _known_total_counts;
 }
 

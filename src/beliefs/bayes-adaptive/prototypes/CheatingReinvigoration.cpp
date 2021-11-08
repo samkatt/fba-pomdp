@@ -19,7 +19,7 @@
 namespace {
 std::string printStateIndex(FBAPOMDPState const* s)
 {
-    return std::to_string(s->index());
+    return s->index();
 }
 } // namespace
 

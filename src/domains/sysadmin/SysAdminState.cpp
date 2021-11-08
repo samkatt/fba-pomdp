@@ -21,13 +21,13 @@ namespace domains {
 SysAdminState::SysAdminState(int i, int num_computers) :
         _num_computers(num_computers),
         _num_operational_computers(countSetBits(i)),
-        _index(i)
+        _index(std::to_string(i))
 {
 }
 
 bool SysAdminState::isOperational(int n) const
 {
-    return ((index() >> n) & 0x1) != 0;
+    return ((std::stoi(index()) >> n) & 0x1) != 0;
 }
 
 int SysAdminState::numOperationalComputers() const
@@ -35,12 +35,12 @@ int SysAdminState::numOperationalComputers() const
     return _num_operational_computers;
 }
 
-void SysAdminState::index(int i)
+void SysAdminState::index(std::string i)
 {
     _index.index(i);
 }
 
-int SysAdminState::index() const
+std::string SysAdminState::index() const
 {
     return _index.index();
 }
@@ -60,6 +60,11 @@ std::string SysAdminState::toString() const
     }
 
     return result;
+}
+
+std::vector<int> SysAdminState::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
 }
 
 } // namespace domains

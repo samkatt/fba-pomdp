@@ -7,7 +7,7 @@
 #include <string>
 #include <utility>
 #include <bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 #include <bayes-adaptive/abstractions/Abstraction.hpp>
 
 #include "easylogging++.h"
@@ -30,7 +30,7 @@ namespace {
 
 std::string printStateIndex(FBAPOMDPState const* s)
 {
-    return std::to_string(s->index());
+    return s->index();
 }
 } // namespace
 
@@ -67,7 +67,7 @@ std::vector<IndexState> rejectionSampleStateHistory(
                 model.sampleStateIndex(&episode_state_sequence.back(), step.action, sampleMethod));
 
             auto const o =
-                IndexObservation(model.sampleObservationIndex(step.action, &new_s, sampleMethod));
+                IndexObservation(std::to_string(model.sampleObservationIndex(step.action, &new_s, sampleMethod)));
 
             // reject episode if observation not correct
             if (o.index() != step.observation->index())
@@ -122,7 +122,7 @@ std::vector<IndexState> msgSampleStateHistory(
         for (auto state = 0; state < s->_S; ++state)
         {
             message.back()[state] =
-                O[episode.back().action->index()][state][episode.back().observation->index()];
+                O[std::stoi(episode.back().action->index())][state][std::stoi(episode.back().observation->index())];
         }
 
         double tot = 0;
@@ -139,13 +139,13 @@ std::vector<IndexState> msgSampleStateHistory(
 
                 // p(t_t+1^T | s_t)
                 message[step][state] = std::inner_product(
-                    T[state][a].begin(), T[state][a].end(), message[step + 1].begin(), 0.0);
+                    T[state][std::stoi(a)].begin(), T[state][std::stoi(a)].end(), message[step + 1].begin(), 0.0);
 
                 if (step != 0) // t != 0: multiply with probability of observation
                 {
 
-                    message[step][state] *= O[episode[step - 1].action->index()][state]
-                                             [episode[step - 1].observation->index()];
+                    message[step][state] *= O[std::stoi(episode[step - 1].action->index())][state]
+                                             [std::stoi(episode[step - 1].observation->index())];
 
                 } else // p(s0) *= prior
                 {
@@ -170,7 +170,7 @@ std::vector<IndexState> msgSampleStateHistory(
 
         // s_0
         auto state = rnd::sample::Dir::sampleFromMult(message[0].data(), s->_S, 1);
-        result.emplace_back(IndexState(state));
+        result.emplace_back(IndexState(std::to_string(state)));
 
         std::vector<double> probs(s->_S);
         // s=1..T
@@ -181,14 +181,14 @@ std::vector<IndexState> msgSampleStateHistory(
             for (auto new_state = 0; new_state < s->_S; ++new_state)
             {
 
-                probs[new_state] = T[state][episode[step].action->index()][new_state]
+                probs[new_state] = T[state][std::stoi(episode[step].action->index())][new_state]
                                    * message[step + 1][new_state];
 
                 tot += probs[new_state];
             }
 
             state = rnd::sample::Dir::sampleFromMult(probs.data(), s->_S, tot);
-            result.emplace_back(IndexState(state));
+            result.emplace_back(IndexState(std::to_string(state)));
         }
     }
 
@@ -339,9 +339,6 @@ void MHwithinGibbs::updateEstimation(Action const* a, Observation const* o, POMD
 void MHwithinGibbs::reinvigorate(POMDP const& domain)
 {
     VLOG(1) << "Initiating reinvigoration after ll dropped to " << _log_likelihood;
-    boost::timer timer1;
-    boost::timer timer2;
-    timer2.restart();
     auto old_belief      = std::move(_belief);
     auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(domain);
 
@@ -363,8 +360,6 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
     // gibbs loob
     while (_belief.size() < _size)
     {
-        timer1.restart();
-
         // 2: mh within gibbs to sample p(model | states)
         prior_model = fbapomdp.prior()->computePriorModel(fbapomdp.mutate(model.structure()));
 
@@ -398,7 +393,6 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
             numAccepted++;
             VLOG(5) << "Sample " << i << " accepted";
             VLOG(1) << "Reinvigoration accepted: " << numAccepted;
-            VLOG(1) << "Took time: " << timer1.elapsed();
         } else
         {
             VLOG(5) << "Sample " << i << " rejected";
@@ -408,7 +402,6 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
 
     old_belief.free([&domain](State const* s) { domain.releaseState(s); });
     _log_likelihood = 0;
-    VLOG(1) << "Reinvigoration took time: " << timer2.elapsed();
 }
 
 ::bayes_adaptive::factored::BABNModel MHwithinGibbs::computePosteriorCounts(
@@ -452,24 +445,24 @@ void MHwithinGibbs::reinvigorate(POMDP const& domain)
     return result;
 }
 
-            void MHwithinGibbs::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
-                                                                              Abstraction &abstraction, int k) {
+void MHwithinGibbs::resetDomainStateDistributionAndAddAbstraction(const BAPOMDP &bapomdp,
+                                                                  Abstraction &abstraction, int k) {
 
-                assert(_belief.size() == _size);
+    assert(_belief.size() == _size);
 
-                auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(bapomdp);
+    auto const& fbapomdp = dynamic_cast<::bayes_adaptive::factored::FBAPOMDP const&>(bapomdp);
 
-                for (size_t i = 0; i < _size; ++i) { fbapomdp.resetDomainState(_belief.particle(i)->particle); }
+    for (size_t i = 0; i < _size; ++i) { fbapomdp.resetDomainState(_belief.particle(i)->particle); }
 
-                VLOG(4) << "Reset domain state, current state belief:\n" << _belief.toString(printStateIndex);
+    VLOG(4) << "Reset domain state, current state belief:\n" << _belief.toString(printStateIndex);
 
-                if (_history.back().length() != 0)
-                {
-                    _history.emplace_back();
-                }
-                VLOG( 3) << abstraction.printSomething();
-                VLOG( 3) << k;
+    if (_history.back().length() != 0)
+    {
+        _history.emplace_back();
+    }
+    VLOG( 3) << abstraction.printSomething();
+    VLOG( 3) << k;
 
-            }
+}
 
-        }}} // namespace beliefs::bayes_adaptive::factored
+}}} // namespace beliefs::bayes_adaptive::factored

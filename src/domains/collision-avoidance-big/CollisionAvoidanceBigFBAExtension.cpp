@@ -33,7 +33,7 @@ CollisionAvoidanceBigFBAExtension::CollisionAvoidanceBigFBAExtension(
                         std::vector<int> obstacles(num_obstacles);
                         do {
                             _state_prior.setRawValue(
-                                    domain.getState(grid_width - 1, agent_y, speed, traffic, timeofday, obstacles)->index(), init_state_prob);
+                                    std::stoi(domain.getState(grid_width - 1, agent_y, speed, traffic, timeofday, obstacles)->index()), init_state_prob);
                         } while (!indexing::increment(obstacles, _domain_feature_size._O));
                     }
                 }
@@ -49,7 +49,7 @@ CollisionAvoidanceBigFBAExtension::CollisionAvoidanceBigFBAExtension(
             for (auto traffic = 0; traffic < _num_traffics; ++traffic) {
                 for (auto timeofday = 0; timeofday < _num_timeofdays; ++timeofday) {
                     _state_prior.setRawValue(
-                            domain.getState(grid_width - 1, grid_height / 2, speed, traffic, timeofday, obstacles)->index(), init_state_prob);
+                            std::stoi(domain.getState(grid_width - 1, grid_height / 2, speed, traffic, timeofday, obstacles)->index()), init_state_prob);
                 }
             }
         }

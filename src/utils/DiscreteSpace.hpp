@@ -27,7 +27,7 @@ public:
 
         // generated n elements with values 0...n
         _elements.reserve(n);
-        for (auto i = 0; i < n; ++i) { _elements.emplace_back(new T(i)); }
+        for (auto i = 0; i < n; ++i) { _elements.emplace_back(new T(std::to_string(i))); }
     }
 
     ~DiscreteSpace()

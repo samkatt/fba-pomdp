@@ -510,7 +510,7 @@ SCENARIO(
         {
             for (auto a = 0; a < ext.domainSize()._A; ++a)
             {
-                auto const action = IndexAction(a);
+                auto const action = IndexAction(std::to_string(a));
                 for (auto feature = 0;
                      feature < static_cast<int>(f_ext.domainFeatureSize()._S.size());
                      ++feature)
@@ -526,7 +526,7 @@ SCENARIO(
         {
             for (auto a = 0; a < ext.domainSize()._A; ++a)
             {
-                auto const action = IndexAction(a);
+                auto const action = IndexAction(std::to_string(a));
                 REQUIRE(*model->observationNode(&action, 0).parents() == std::vector<int>({2}));
             }
         }

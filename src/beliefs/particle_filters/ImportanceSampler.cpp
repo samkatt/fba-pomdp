@@ -4,7 +4,7 @@ namespace {
 
 std::string stateToString(State const* s)
 {
-    return std::to_string(s->index());
+    return s->index();
 }
 
 } // namespace

@@ -35,7 +35,7 @@ CollisionAvoidanceFBAExtension::CollisionAvoidanceFBAExtension(
             {
 
                 _state_prior.setRawValue(
-                    domain.getState(grid_width - 1, agent_y, obstacles)->index(), init_state_prob);
+                    std::stoi(domain.getState(grid_width - 1, agent_y, obstacles)->index()), init_state_prob);
 
             } while (!indexing::increment(obstacles, _domain_feature_size._O));
         }
@@ -46,7 +46,7 @@ CollisionAvoidanceFBAExtension::CollisionAvoidanceFBAExtension(
         std::vector<int> obstacles(num_obstacles, grid_height / 2);
 
         _state_prior.setRawValue(
-            domain.getState(grid_width - 1, grid_height / 2, obstacles)->index(), 1);
+                std::stoi(domain.getState(grid_width - 1, grid_height / 2, obstacles)->index()), 1);
     }
 }
 

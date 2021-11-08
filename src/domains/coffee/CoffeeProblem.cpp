@@ -50,7 +50,7 @@ double CoffeeProblem::computeObservationProbability(
 {
     LOG(WARNING) << "CoffeeProblem::computeObservationProbability has not been tested";
 
-    if (a->index() == GetCoffee)
+    if (std::stoi(a->index()) == GetCoffee)
     {
         return (o == _observations.get(Want_Coffee)) ? 1 : 0;
     }
@@ -82,7 +82,7 @@ Terminal
 
     double reward = -.5;
     // reward function
-    if (a->index() == GetCoffee)
+    if (std::stoi(a->index()) == GetCoffee)
     {
         reward = -.5;
     }
@@ -98,46 +98,46 @@ Terminal
     }
 
     // transition function
-    if (a->index() == GetCoffee)
+    if (std::stoi(a->index()) == GetCoffee)
     {
         // robot becomes wet if raining & no umbrella
         if (s_coffee->rains() && !s_coffee->umbrella())
         {
-            new_state = new_state | WET;
+            new_state = std::to_string(std::stoi(new_state) | WET);
         }
 
         // agent has coffee if action succeeds
         if (rnd::uniform_rand01() < _fetch_coffee_success_rate)
         {
-            new_state = new_state | HAS_COFEE;
+            new_state = std::to_string(std::stoi(new_state) | HAS_COFEE);
         }
 
         // there's a change the desire for coffee stays
         if (rnd::uniform_rand01() < _fetch_coffee_lose_desire_chance)
         {
-            new_state = new_state & ~WANTS_COFFEE;
+            new_state = std::to_string(std::stoi(new_state) & ~WANTS_COFFEE);
         }
 
     } else // test coffee
     {
         if (rnd::uniform_rand01() < _coffee_is_drinked)
         {
-            new_state = new_state & ~HAS_COFEE;
+            new_state = std::to_string(std::stoi(new_state) & ~HAS_COFEE);
         }
 
         if (rnd::uniform_rand01() < _acquire_coffee_desire)
         {
-            new_state = new_state | WANTS_COFFEE;
+            new_state = std::to_string(std::stoi(new_state) | WANTS_COFFEE);
         }
     }
 
-    assert(new_state < _S);
+    assert(std::stoi(new_state) < _S);
 
-    *s       = _states.get(new_state);
+    *s       = _states.get(std::stoi(new_state));
     s_coffee = static_cast<CoffeeProblemState const*>(*s);
 
     // observation function
-    if (a->index() == GetCoffee)
+    if (std::stoi(a->index()) == GetCoffee)
     {
         *o = _observations.get(Want_Coffee);
     } else
@@ -196,19 +196,23 @@ State const* CoffeeProblem::copyState(State const* s) const
 void CoffeeProblem::assertLegal(State const* s) const
 {
     assert(s != nullptr);
-    assert(s->index() < _S);
+    assert(std::stoi(s->index()) < _S);
 }
 
 void CoffeeProblem::assertLegal(Action const* a) const
 {
     assert(a != nullptr);
-    assert(a->index() < _A);
+    assert(std::stoi(a->index()) < _A);
 }
 
 void CoffeeProblem::assertLegal(Observation const* o) const
 {
     assert(o != nullptr);
-    assert(o->index() < _O);
+    assert(std::stoi(o->index()) < _O);
 }
+
+    void CoffeeProblem::clearCache() const {
+
+    }
 
 } // namespace domains

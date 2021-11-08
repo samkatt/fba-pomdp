@@ -18,7 +18,7 @@ namespace domains {
 
 AGRState::AGRState(int n, int i) : target_pos(0), target_goal(0), _n(n)
 {
-    index(i); // stupid way to get initialization working
+    index(std::to_string(i)); // stupid way to get initialization working
 }
 
 AGRState::AGRState(int n_in, int target_pos_in, int target_goal_in) :
@@ -33,15 +33,15 @@ int AGRState::indexOf(int n_in, int target_pos_in, int target_goal_in)
     return (2 * n_in + 1) * (target_goal_in + n_in) + target_pos_in + n_in;
 }
 
-int AGRState::index() const
+std::string AGRState::index() const
 {
-    return AGRState::indexOf(_n, target_pos, target_goal);
+    return std::to_string(AGRState::indexOf(_n, target_pos, target_goal));
 }
 
-void AGRState::index(int i)
+void AGRState::index(std::string i)
 {
-    target_goal = i / (2 * _n + 1) - _n;
-    target_pos  = i % (2 * _n + 1) - _n;
+    target_goal = std::stoi(i) / (2 * _n + 1) - _n;
+    target_pos  = std::stoi(i) % (2 * _n + 1) - _n;
 }
 
 std::string AGRState::toString() const
@@ -49,6 +49,11 @@ std::string AGRState::toString() const
     std::stringstream ss;
     ss << "S(target_pos=" << target_pos << ", target_goal=" << target_goal << ")";
     return ss.str();
+}
+
+std::vector<int> AGRState::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
 }
 
 // Action indices
@@ -65,7 +70,7 @@ std::string AGRState::toString() const
 
 AGRAction::AGRAction(int n, int i) : type(""), help_pos(), _n(n)
 {
-    index(i); // stupid way to get initialization working
+    index(std::to_string(i)); // stupid way to get initialization working
 }
 
 // cppcheck-suppress passedByValue
@@ -92,15 +97,16 @@ int AGRAction::indexOf(int n, std::string const& type, int help_pos)
     }
 }
 
-int AGRAction::index() const
+std::string AGRAction::index() const
 {
-    return AGRAction::indexOf(_n, type, help_pos);
+    return std::to_string(AGRAction::indexOf(_n, type, help_pos));
 }
 
-void AGRAction::index(int i)
+void AGRAction::index(std::string j)
 {
-    assert(i <= 2 * _n + 2);
+    int i = std::stoi(j);
 
+    assert(i <= 2 * _n + 2);
     if (i <= 2 * _n)
     {
         type     = "help";
@@ -129,6 +135,11 @@ std::string AGRAction::toString() const
     return ss.str();
 }
 
+std::vector<int> AGRAction::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
+
 // Observation indices
 // ===================
 //
@@ -142,7 +153,7 @@ std::string AGRAction::toString() const
 
 AGRObservation::AGRObservation(int n, int i) : type(""), target_pos(0), _n(n)
 {
-    index(i); // stupid way to get initialization working
+    index(std::to_string(i)); // stupid way to get initialization working
 }
 
 // cppcheck-suppress passedByValue
@@ -166,13 +177,14 @@ int AGRObservation::indexOf(int n, std::string const& type, int target_pos)
     }
 }
 
-int AGRObservation::index() const
+std::string AGRObservation::index() const
 {
-    return AGRObservation::indexOf(_n, type, target_pos);
+    return std::to_string(AGRObservation::indexOf(_n, type, target_pos));
 }
 
-void AGRObservation::index(int i)
+void AGRObservation::index(std::string j)
 {
+    int i = std::stoi(j);
     if (i <= 2 * _n)
     {
         type       = "target_pos";
@@ -200,7 +212,12 @@ std::string AGRObservation::toString() const
     return ss.str();
 }
 
-AGR::AGR(int n) :
+std::vector<int> AGRObservation::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
+
+    AGR::AGR(int n) :
         _n(n),
         _nstates((2 * _n + 1) * (2 * _n + 1)),
         _states(new const AGRState*[_nstates]),
@@ -288,7 +305,7 @@ Terminal AGR::step(State const** s, Action const* a, Observation const** o, Rewa
     int target_step = target_diff > 1 ? 1 : target_diff;
     target_step     = target_step < -1 ? -1 : target_step;
     AGRState s_next(_n, agr_s->target_pos + target_step, agr_s->target_goal);
-    *s = _states[s_next.index()];
+    *s = _states[std::stoi(s_next.index())];
 
     // computing observation
     std::string o_next_type = "none";
@@ -299,7 +316,7 @@ Terminal AGR::step(State const** s, Action const* a, Observation const** o, Rewa
         o_next_pos  = s_next.target_pos;
     }
     AGRObservation o_next(_n, o_next_type, o_next_pos);
-    *o = _observations[o_next.index()];
+    *o = _observations[std::stoi(o_next.index())];
 
     legalObservationCheck(*o);
     legalStateCheck(*s);
@@ -358,17 +375,25 @@ State const* AGR::copyState(State const* s) const
 
 void AGR::legalActionCheck(Action const* a) const
 {
-    assert(a != 0 && a->index() >= 0 && a->index() < _nactions);
+    assert(a != 0);
+    int aindex = std::stoi(a->index());
+    assert(aindex >= 0 && aindex < _nactions);
 }
 
 void AGR::legalObservationCheck(Observation const* o) const
 {
-    assert(o != 0 && o->index() >= 0 && o->index() < _nobservations);
+    assert(o != 0);
+    int oindex = std::stoi(o->index());
+    assert(oindex >= 0 && oindex < _nobservations);
 }
 
 void AGR::legalStateCheck(State const* s) const
 {
-    assert(s != 0 && s->index() >= 0 && s->index() < _nstates);
+    assert(s != 0 && std::stoi(s->index()) >= 0 && std::stoi(s->index()) < _nstates);
+}
+
+void AGR::clearCache() const {
+
 }
 
 } // namespace domains

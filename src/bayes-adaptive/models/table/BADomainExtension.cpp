@@ -14,7 +14,7 @@
 
 namespace factory {
 
-std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf const& c)
+std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf const& c, POMDP const& domain)
 {
 
     auto const d = c.domain_conf.domain;
@@ -60,7 +60,7 @@ std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf 
 
     if (d == "gridworldcoffeebig")
         return std::unique_ptr<BADomainExtension>(
-                new ext::GridWorldCoffeeBigBAExtension(c.domain_conf.size));
+                new ext::GridWorldCoffeeBigBAExtension(c.domain_conf.size, static_cast<domains::GridWorldCoffeeBig const&>(domain)));
 
     if (d == "random-collision-avoidance" || d == "centered-collision-avoidance")
         return std::unique_ptr<BADomainExtension>(new ext::CollisionAvoidanceBAExtension(

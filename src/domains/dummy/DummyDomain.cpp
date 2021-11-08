@@ -21,13 +21,13 @@ State const* DummyDomain::sampleStartState() const
 
 Action const* DummyDomain::generateRandomAction(State const* /*s*/) const
 {
-    return new IndexAction(0);
+    return new IndexAction(std::to_string(0));
 }
 
 void DummyDomain::addLegalActions(State const* /*s*/, std::vector<Action const*>* actions) const
 {
     assert(actions->empty());
-    actions->emplace_back(new IndexAction(0));
+    actions->emplace_back(new IndexAction(std::to_string(0)));
 }
 
 double DummyDomain::computeObservationProbability(
@@ -84,5 +84,9 @@ State const* DummyDomain::copyState(State const* s) const
     assert(s != nullptr);
     return new IndexState(s->index());
 }
+
+    void DummyDomain::clearCache() const {
+
+    }
 
 } // namespace domains

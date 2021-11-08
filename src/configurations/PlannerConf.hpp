@@ -14,7 +14,7 @@ struct PlannerConf
 {
 
     int mcts_simulation_amount    = 1000;
-    int milliseconds_thinking     = 10;
+    int milliseconds_thinking     = 0;
     int mcts_max_depth            = -1;
     double mcts_exploration_const = 100;
     int remake_abstract_model     = 0;

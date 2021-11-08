@@ -93,7 +93,7 @@ std::vector<std::vector<std::vector<float>>> BABNModel::flattenT() const
     for (auto a = 0; a < _domain_size->_A; ++a)
     {
 
-        IndexAction action(a);
+        IndexAction action(std::to_string(a));
 
         std::vector<int> features(_domain_feature_size->_S.size());
         auto s = 0;
@@ -139,7 +139,7 @@ std::vector<std::vector<std::vector<float>>> BABNModel::flattenO() const
     for (auto a = 0; a < _domain_size->_A; ++a)
     {
 
-        IndexAction action(a);
+        IndexAction action(std::to_string(a));
 
         // loop over new_s
         std::vector<int> state_features(_domain_feature_size->_S.size());
@@ -207,10 +207,10 @@ BABNModel BABNModel::marginalizeOut(Structure new_structure) const
 {
     std::vector<DBNNode> T_marginalized, O_marginalized;
 
-    auto action = IndexAction(0);
+    auto action = IndexAction(std::to_string(0));
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
-        action.index(a);
+        action.index(std::to_string(a));
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
         {
@@ -253,10 +253,10 @@ BABNModel::abstract(std::vector<int> abstraction_set, Structure structure, const
     // marginalize and reduce
     std::vector<DBNNode> T_marginalized, O_marginalized;
 
-    auto action = IndexAction(0);
+    auto action = IndexAction(std::to_string(0));
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
-        action.index(a);
+        action.index(std::to_string(a));
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
         {
@@ -288,10 +288,10 @@ BABNModel::abstract(std::vector<int> abstraction_set, Structure structure, const
 
 void BABNModel::abstractionNormalizeCounts(BABNModel prior, BABNModel prior_normalized)
 {
-    auto action = IndexAction(0);
+    auto action = IndexAction(std::to_string(0));
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
-        action.index(a);
+        action.index(std::to_string(a));
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
         {
@@ -305,7 +305,7 @@ DBNNode& BABNModel::transitionNode(Action const* a, int feature)
     assertLegal(a);
     assertLegalStateFeature(feature);
     return _transition_nodes[indexing::twoToOne(
-        a->index(), feature, (int)_domain_feature_size->_S.size())];
+        std::stoi(a->index()), feature, (int)_domain_feature_size->_S.size())];
 }
 
 DBNNode const& BABNModel::transitionNode(Action const* a, int feature) const
@@ -313,7 +313,7 @@ DBNNode const& BABNModel::transitionNode(Action const* a, int feature) const
     assertLegal(a);
     assertLegalStateFeature(feature);
     return _transition_nodes[indexing::twoToOne(
-        a->index(), feature, (int)_domain_feature_size->_S.size())];
+        std::stoi(a->index()), feature, (int)_domain_feature_size->_S.size())];
 }
 
 DBNNode& BABNModel::observationNode(Action const* a, int feature)
@@ -321,7 +321,7 @@ DBNNode& BABNModel::observationNode(Action const* a, int feature)
     assertLegal(a);
     assertLegalObservationFeature(feature);
     return _observation_nodes[indexing::twoToOne(
-        a->index(), feature, (int)_domain_feature_size->_O.size())];
+        std::stoi(a->index()), feature, (int)_domain_feature_size->_O.size())];
 }
 
 DBNNode const& BABNModel::observationNode(Action const* a, int feature) const
@@ -329,21 +329,21 @@ DBNNode const& BABNModel::observationNode(Action const* a, int feature) const
     assertLegal(a);
     assertLegalObservationFeature(feature);
     return _observation_nodes[indexing::twoToOne(
-        a->index(), feature, (int)_domain_feature_size->_O.size())];
+        std::stoi(a->index()), feature, (int)_domain_feature_size->_O.size())];
 }
 
 bayes_adaptive::factored::BABNModel::Structure BABNModel::structure() const
 {
 
     auto res    = bayes_adaptive::factored::BABNModel::Structure();
-    auto action = IndexAction(0);
+    auto action = IndexAction(std::to_string(0));
 
     res.O = std::vector<std::vector<std::vector<int>>>(_domain_size->_A);
     res.T = std::vector<std::vector<std::vector<int>>>(_domain_size->_A);
     for (auto a = 0; a < static_cast<int>(_domain_size->_A); ++a)
     {
 
-        action.index(a);
+        action.index(std::to_string(a));
 
         res.O[a] = std::vector<std::vector<int>>(_domain_feature_size->_O.size());
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)
@@ -357,28 +357,44 @@ bayes_adaptive::factored::BABNModel::Structure BABNModel::structure() const
     return res;
 }
 
-int BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
+// From https://www.delftstack.com/howto/cpp/how-to-determine-if-a-string-is-number-cpp/
+// TODO add parameter to BABNModel that tells if an index is a string or number?
+bool isNumber(const std::string& str)
+{
+    return !std::any_of(&str[0], &str[str.size()-1], [] (char c) { return !std::isdigit(c); });
+}
+
+std::string BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
     const
 {
     assertLegal(s);
     assertLegal(a);
 
-    auto parent_values = stateFeatureValues(s);
+    auto parent_values = s->getFeatureValues(); // stateFeatureValues(s);
 
     //create a vector for the next-stage variables - XXX: this is a memory allocation... expensive!?
     auto feature_values = std::vector<int>(_domain_feature_size->_S.size());
     //fill the vector by sampling next stage feature 1 by 1
-    for (auto n = 0; n < (int)_domain_feature_size->_S.size(); ++n)
+    for (auto n = 0; n < (int) _domain_feature_size->_S.size(); ++n)
     { feature_values[n] = transitionNode(a, n).sample(parent_values, m); }
 
-    return indexing::project(feature_values, _domain_feature_size->_S);
+    if (!isNumber(s->index())) { // TODO should be better way
+        std::string index;
+        for (int i=0; i < (int) feature_values.size() - 1; i++){
+            index += std::to_string(feature_values[i]);
+            index += '+';
+        }
+        index += std::to_string(feature_values[feature_values.size() - 1]);
+
+        return index;
+    }
+
+    return std::to_string(indexing::project(feature_values, _domain_feature_size->_S));
 }
 
-int BABNModel::sampleStateIndexThroughAbstraction(const State *s, const Action *a, const std::vector<int>& newfeature_values) const {
-    assertLegal(s);
-    assertLegal(a);
-
-    return indexing::project(newfeature_values, _domain_feature_size->_S);
+std::string BABNModel::sampleStateIndexThroughAbstraction(const std::vector<int> *newfeature_values) const {
+    // If we call this function we already should now that the index is a number
+    return std::to_string(indexing::project(*newfeature_values, _domain_feature_size->_S));
 }
 
 int BABNModel::sampleObservationIndex(
@@ -389,7 +405,7 @@ int BABNModel::sampleObservationIndex(
     assertLegal(a);
     assertLegal(new_s);
 
-    auto parent_values = stateFeatureValues(new_s);
+    auto parent_values = new_s->getFeatureValues(); // stateFeatureValues(new_s);
 
     auto feature_values = std::vector<int>(_domain_feature_size->_O.size());
     for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
@@ -408,8 +424,8 @@ double BABNModel::computeObservationProbability(
     assertLegal(o);
     assertLegal(s);
 
-    auto nodes_input    = stateFeatureValues(s);
-    auto feature_values = observationFeatureValues(o);
+    auto nodes_input    = s->getFeatureValues(); // stateFeatureValues(s);
+    auto feature_values = observationFeatureValues(o); // o->getFeatureValues(); // observationFeatureValues(o);
 
     double prob = 1;
 
@@ -449,15 +465,15 @@ void BABNModel::incrementCountsOf(
     assertLegal(o);
     assertLegal(new_s);
 
-    auto parent_values = stateFeatureValues(s);
+    auto parent_values = s->getFeatureValues(); // stateFeatureValues(s);
 
-    auto state_feature_values = stateFeatureValues(new_s);
+    auto state_feature_values = new_s->getFeatureValues(); // stateFeatureValues(new_s);
 
     // update transition DBN
     for (auto n = 0; n < (int)_domain_feature_size->_S.size(); ++n)
     { transitionNode(a, n).increment(parent_values, state_feature_values[n], amount); }
 
-    auto observation_feature_values = observationFeatureValues(o);
+    auto observation_feature_values = observationFeatureValues(o); // o->getFeatureValues(); // observationFeatureValues(o);
     // update observation DBN
     for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
     { observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
@@ -468,12 +484,12 @@ void BABNModel::log() const
     LOG(INFO) << "CPTs for FBAPOMDP state:";
     LOG(INFO) << "Transition:";
 
-    auto action = IndexAction(0);
+    auto action = IndexAction(std::to_string(0));
     for (auto f = 0; f < (int)_domain_feature_size->_S.size(); ++f)
     {
         for (auto a = 0; a < _domain_size->_A; ++a)
         {
-            action.index(a);
+            action.index(std::to_string(a));
             LOG(INFO) << "Feature " << f << ", Action " << a;
             transitionNode(&action, f).logCPTs();
         }
@@ -484,7 +500,7 @@ void BABNModel::log() const
     {
         for (auto a = 0; a < _domain_size->_A; ++a)
         {
-            action.index(a);
+            action.index(std::to_string(a));
             LOG(INFO) << "Feature " << f << ", Action " << a;
             observationNode(&action, f).logCPTs();
         }
@@ -494,30 +510,52 @@ void BABNModel::log() const
 std::vector<int> BABNModel::stateFeatureValues(State const* s) const
 {
     assertLegal(s);
-
-    return indexing::projectUsingStepSize(s->index(), _step_sizes->T);
+    // W
+    // TODO unnecessary if we can get it from the state directly?
+    return s->getFeatureValues();
+//    if (_step_sizes->T[0] <= 0) { // This happens when the state space is too large, the int overflows
+//        auto state_vector = std::vector<int>(_step_sizes->T.size());
+//        std::string value;
+//        int entry = 0;
+//        for (char const &c: s->index()) {
+//            if (c == '+') {
+//                state_vector[entry] = std::stoi(value);
+//                value.clear();
+//                entry++;
+//            } else {
+//                value += c;
+//            }
+//        }
+//        state_vector[state_vector.size()-1] = std::stoi(value);
+//
+//        return state_vector;
+//    } else {
+//        return indexing::projectUsingStepSize(std::stoi(s->index()), _step_sizes->T);
+//    }
+//    return s->getFeatureValues();
 }
 
 std::vector<int> BABNModel::observationFeatureValues(Observation const* o) const
 {
     assertLegal(o);
-
-    return indexing::projectUsingStepSize(o->index(), _step_sizes->O);
+//    return o->getFeatureValues();
+    // TODO needs to be changed?
+    return indexing::projectUsingStepSize(std::stoi(o->index()), _step_sizes->O);
 }
 
 void BABNModel::assertLegal(State const* s) const
 {
-    assert(s != nullptr && s->index() < _domain_size->_S);
+    assert(s != nullptr); // &&std::stoi(s->index())< _domain_size->_S);
 }
 
 void BABNModel::assertLegal(Action const* a) const
 {
-    assert(a != nullptr && a->index() < _domain_size->_A);
+    assert(a != nullptr && std::stoi(a->index()) < _domain_size->_A);
 }
 
 void BABNModel::assertLegal(Observation const* o) const
 {
-    assert(o != nullptr && o->index() < _domain_size->_O);
+    assert(o != nullptr && std::stoi(o->index()) < _domain_size->_O);
 }
 
 void BABNModel::assertLegalStateFeature(int f) const
@@ -537,13 +575,13 @@ double BABNModel::LogBDScore(BABNModel const& prior) const
 
     double bd_score = 0;
 
-    auto action      = IndexAction(0);
-    auto state       = IndexState(0);
-    auto observation = IndexObservation(0);
+    auto action      = IndexAction(std::to_string(0));
+    auto state       = IndexState(std::to_string(0));
+    auto observation = IndexObservation(std::to_string(0));
 
     for (auto a = 0; a < _domain_size->_A; ++a)
     {
-        action.index(a);
+        action.index(std::to_string(a));
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
         { bd_score += transitionNode(&action, f).LogBDScore(prior.transitionNode(&action, f)); }

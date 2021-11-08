@@ -68,12 +68,13 @@ public:
         }
 
         /***** state implementation *****/
-        void index(int) final { throw "do not change gridworld states"; };
-        int index() const final { return _index; }
+        void index(std::string) final { throw "do not change gridworld states"; };
+        std::string index() const final { return std::to_string(_index); }
         std::string toString() const final
         {
             return "agent" + _agent_position.toString() + ", goal" + _goal_position.toString();
         }
+        std::vector<int> getFeatureValues() const override;
 
         pos const _agent_position, _goal_position;
 
@@ -98,14 +99,16 @@ public:
         }
 
         /**** observation interface ***/
-        void index(int /*i*/) final { throw "GridWorldObservation::index(i) not allowed"; }
-        int index() const final { return _index; };
+        void index(std::string /*i*/) final { throw "GridWorldObservation::index(i) not allowed"; }
+        std::string index() const final { return std::to_string(_index); };
         std::string toString() const final { return _agent_pos.toString(); }
 
         ::domains::GridWorld::GridWorldState::pos const _agent_pos, _goal_pos;
 
     private:
         int const _index;
+
+        std::vector<int> getFeatureValues() const;
     };
 
     /**
@@ -120,9 +123,10 @@ public:
         static std::vector<std::string> const action_descriptions; // initialized in cpp
 
         /*** action interface ***/
-        void index(int /*i*/) final { throw "GridWorldAction should not edit index"; }
-        int index() const final { return _index; }
+        void index(std::string /*i*/) final { throw "GridWorldAction should not edit index"; }
+        std::string index() const final { return std::to_string(_index); }
         std::string toString() const final { return action_descriptions[_index]; }
+        std::vector<int> getFeatureValues() const final { return {_index}; };
 
     private:
         int const _index;
@@ -175,6 +179,7 @@ public:
     void releaseState(State const* s) const final;
     Observation const* copyObservation(Observation const* o) const final;
     State const* copyState(State const* s) const final;
+    void clearCache() const final;
 
 private:
     // problem settings

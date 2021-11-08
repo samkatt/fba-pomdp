@@ -255,7 +255,7 @@ void GridWorld::releaseAction(Action const* a) const
 Action const* GridWorld::copyAction(Action const* a) const
 {
     assertLegal(a);
-    return new GridWorldAction(a->index());
+    return new GridWorldAction(std::stoi(a->index()));
 }
 
 State const* GridWorld::sampleStartState() const
@@ -347,7 +347,7 @@ GridWorld::GridWorldState::pos
     auto y = old_pos.y;
 
     // move according to action
-    switch (a->index())
+    switch (std::stoi(a->index()))
     {
         case GridWorldAction::ACTION::UP:
             y = (old_pos.y == _size - 1) ? old_pos.y : old_pos.y + 1;
@@ -397,13 +397,13 @@ Observation const* GridWorld::generateObservation(
 void GridWorld::assertLegal(Action const* a) const
 {
     assert(a != nullptr);
-    assert(a->index() >= 0 && a->index() < _A_size);
+    assert(std::stoi(a->index()) >= 0 && std::stoi(a->index()) < _A_size);
 }
 
 void GridWorld::assertLegal(Observation const* o) const
 {
     assert(o != nullptr);
-    assert(o->index() >= 0 && o->index() < _S_size);
+    assert(std::stoi(o->index()) >= 0 && std::stoi(o->index()) < _S_size);
     assertLegal(static_cast<GridWorldObservation const*>(o)->_agent_pos);
     assertLegal(static_cast<GridWorldObservation const*>(o)->_goal_pos);
 }
@@ -411,7 +411,7 @@ void GridWorld::assertLegal(Observation const* o) const
 void GridWorld::assertLegal(State const* s) const
 {
     assert(s != nullptr);
-    assert(s->index() >= 0 && s->index() < _S_size);
+    assert(std::stoi(s->index()) >= 0 &&std::stoi(s->index())< _S_size);
     assertLegal(static_cast<GridWorldState const*>(s)->_agent_position);
     assertLegal(static_cast<GridWorldState const*>(s)->_goal_position);
 }
@@ -429,4 +429,17 @@ void GridWorld::assertLegalGoal(GridWorld::GridWorldState::pos const& position) 
         != _goal_locations.end());
 }
 
+    void GridWorld::clearCache() const {
+
+    }
+
+std::vector<int> GridWorld::GridWorldState::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
+
+std::vector<int> GridWorld::GridWorldObservation::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
 } // namespace domains

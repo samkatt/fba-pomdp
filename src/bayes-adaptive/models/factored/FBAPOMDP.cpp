@@ -83,7 +83,7 @@ std::unique_ptr<BAPOMDP> makeFBAPOMDP(configurations::FBAConf const& c)
 
     auto domain = dynamic_cast<POMDP*>(factory::makeEnvironment(c.domain_conf).release());
 
-    auto ba_domain_ext  = makeBADomainExtension(c);
+    auto ba_domain_ext  = makeBADomainExtension(c, *domain);
     auto fba_domain_ext = makeFBADomainExtension(c);
     auto prior          = makeFBAPOMDPPrior(*domain, c);
 

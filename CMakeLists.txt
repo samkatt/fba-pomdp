@@ -198,5 +198,5 @@ add_custom_target(docs
 find_package(Boost REQUIRED COMPONENTS program_options)
 target_link_libraries(planning ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(bapomdp ${Boost_PROGRAM_OPTIONS_LIBRARY})
-target_link_libraries(fbapomdp ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(fbapomdp ${Boost_PROGRAM_OPTIONS_LIBRARY} boost_timer)
 target_link_libraries(tests ${Boost_PROGRAM_OPTIONS_LIBRARY})

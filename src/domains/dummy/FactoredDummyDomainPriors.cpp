@@ -42,7 +42,7 @@ FactoredDummyPrior::FactoredDummyPrior(configurations::FBAConf const& c, size_t 
 
 BAPOMDPState* FactoredDummyPrior::sampleBAPOMDPState(State const* domain_state) const
 {
-    assert(domain_state != nullptr && domain_state->index() < _domain_size._S);
+    assert(domain_state != nullptr && std::stoi(domain_state->index()) < _domain_size._S);
 
     // we simply set the counts that we pre computed, since
     // the prior counts are the same for each state
@@ -51,14 +51,14 @@ BAPOMDPState* FactoredDummyPrior::sampleBAPOMDPState(State const* domain_state) 
 
 FBAPOMDPState* FactoredDummyPrior::sampleFBAPOMDPState(State const* domain_state) const
 {
-    assert(domain_state != nullptr && domain_state->index() < _domain_size._S);
+    assert(domain_state != nullptr && std::stoi(domain_state->index()) < _domain_size._S);
 
     return new FBAPOMDPState(domain_state, _factored_prior);
 }
 
 FBAPOMDPState* FactoredDummyPrior::sampleFullyConnectedState(State const* domain_state) const
 {
-    assert(domain_state != nullptr && domain_state->index() < _domain_size._S);
+    assert(domain_state != nullptr && std::stoi(domain_state->index()) < _domain_size._S);
 
     return new FBAPOMDPState(domain_state, _fully_connected_prior);
 }
@@ -87,10 +87,10 @@ void FactoredDummyPrior::precomputePrior()
      * we do this for the factored and flat case simultaneously */
 
     // tmp variables used to increment the counts
-    auto temp_state = IndexState(0), temp_next_state = IndexState(0);
-    auto up        = IndexAction(domains::FactoredDummyDomain::UP),
-         right     = IndexAction(domains::FactoredDummyDomain::RIGHT);
-    auto o         = IndexObservation(0);
+    auto temp_state = IndexState(std::to_string(0)), temp_next_state = IndexState(std::to_string(0));
+    auto up        = IndexAction(std::to_string(domains::FactoredDummyDomain::UP)),
+         right     = IndexAction(std::to_string(domains::FactoredDummyDomain::RIGHT));
+    auto o         = IndexObservation(std::to_string(0));
     int num_states = static_cast<int>(_size * _size);
 
     auto x_feature = 1, y_feature = 0;
@@ -113,10 +113,10 @@ void FactoredDummyPrior::precomputePrior()
 
     for (auto i = 0; i < num_states; ++i)
     {
-        temp_state.index(i);
+        temp_state.index(std::to_string(i));
 
         // going up gets +1 unless on top edge already
-        temp_next_state.index(i + ((((i + 1) % _size) != 0u) ? 1 : 0));
+        temp_next_state.index(std::to_string(i + ((((i + 1) % _size) != 0u) ? 1 : 0)));
         s.model()->count(&temp_state, &up, &temp_next_state)++;
         s.model()->count(&up, &temp_next_state, &o)++;
 
@@ -124,8 +124,8 @@ void FactoredDummyPrior::precomputePrior()
         s_fact_fully_connected.incrementCountsOf(&temp_state, &up, &o, &temp_next_state);
 
         // going right +_size unless on right edge already
-        temp_next_state.index(
-            i + ((i < static_cast<int>((_size - 1) * _size)) ? static_cast<int>(_size) : 0));
+        temp_next_state.index(std::to_string(
+            i + ((i < static_cast<int>((_size - 1) * _size)) ? static_cast<int>(_size) : 0)));
         s.model()->count(&temp_state, &right, &temp_next_state)++;
         s.model()->count(&right, &temp_next_state, &o)++;
 

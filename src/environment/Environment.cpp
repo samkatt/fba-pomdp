@@ -55,7 +55,7 @@ std::unique_ptr<Environment> makeEnvironment(configurations::DomainConf const& c
     if (c.domain == "gridworldcoffee")
         return std::unique_ptr<Environment>(new domains::GridWorldCoffee());
     if (c.domain == "gridworldcoffeebig")
-        return std::unique_ptr<Environment>(new domains::GridWorldCoffeeBig(c.size));
+        return std::unique_ptr<Environment>(new domains::GridWorldCoffeeBig(c.size, c.store_statespace));
     if (c.domain == "random-collision-avoidance")
     {
 

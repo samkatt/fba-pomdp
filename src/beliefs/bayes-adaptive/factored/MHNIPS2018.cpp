@@ -25,7 +25,7 @@
 namespace {
 std::string printStateIndex(FBAPOMDPState const* s)
 {
-    return std::to_string(s->index());
+    return s->index();
 }
 } // namespace
 
@@ -38,7 +38,7 @@ namespace {
  *
  * Returns the state index of the last step
  **/
-int computePosterior(
+std::string computePosterior(
     ::bayes_adaptive::factored::BABNModel* model,
     ::bayes_adaptive::factored::FBAPOMDP const& fbapomdp,
     std::vector<History> const& history)
@@ -47,10 +47,10 @@ int computePosterior(
 
     std::vector<std::pair<int, int>> state_transitions;
 
-    auto s      = IndexState(0);
-    auto temp_a = IndexAction(0);
-    auto new_s  = IndexState(0);
-    auto o      = IndexObservation(0);
+    auto s      = IndexState("0");
+    auto temp_a = IndexAction("0");
+    auto new_s  = IndexState("0");
+    auto o      = IndexObservation("0");
 
     // go through whole history
     for (size_t episode = 0; episode < history.size(); ++episode)
@@ -68,7 +68,7 @@ int computePosterior(
             // update step
             new_s.index(model->sampleStateIndex(&s, step.action, sampleMethod));
 
-            o.index(model->sampleObservationIndex(step.action, &new_s, sampleMethod));
+            o.index(std::to_string(model->sampleObservationIndex(step.action, &new_s, sampleMethod)));
 
             // reject episode if observation not correct
             if (o.index() != step.observation->index())
@@ -79,7 +79,7 @@ int computePosterior(
             model->incrementCountsOf(&s, step.action, &o, &new_s);
 
             // register applied transitions
-            state_transitions.emplace_back(std::pair<int, int>(s.index(), new_s.index()));
+            state_transitions.emplace_back(std::pair<int, int>(std::stoi(s.index()), std::stoi(new_s.index())));
             s.index(new_s.index());
         }
 
@@ -91,8 +91,8 @@ int computePosterior(
             {
                 auto const& trans = state_transitions[t];
 
-                s.index(trans.first);
-                new_s.index(trans.second);
+                s.index(std::to_string(trans.first));
+                new_s.index(std::to_string(trans.second));
 
                 model->incrementCountsOf(&s, steps[t].action, steps[t].observation, &new_s, -1);
             }

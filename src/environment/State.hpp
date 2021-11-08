@@ -2,7 +2,7 @@
 #define STATE_HPP
 
 #include <cassert>
-
+#include <vector>
 #include <string>
 
 /**
@@ -13,14 +13,14 @@ class State
 public:
     virtual ~State() = default;
 
-    virtual void index(int i) = 0;
+    virtual void index(std::string i) = 0;
 
     /**
      * @brief gets the index of the state
      *
      * May be overridden by derived classes if calculated on the spot
      **/
-    virtual int index() const = 0;
+    virtual std::string index() const = 0;
 
     /**
      * @brief gets state information in string form
@@ -29,6 +29,8 @@ public:
      * Returns index string by default.
      **/
     virtual std::string toString() const = 0;
+
+    virtual std::vector<int> getFeatureValues() const = 0;
 };
 
 #include "utils/IndexedElements.hpp"

@@ -49,22 +49,22 @@ Terminal
     assertLegal(*s);
     assertLegal(a);
 
-    auto state_index = (*s)->index();
+    auto state_index = std::stoi((*s)->index());
 
-    if (a->index() == UP)
+    if (std::stoi(a->index()) == UP)
     {
         // +1 unless on top edge already
         state_index += (((state_index + 1) % _size) != 0u) ? 1 : 0;
     }
 
-    if (a->index() == RIGHT)
+    if (std::stoi(a->index()) == RIGHT)
     {
         // + _size unless on right edge already
         state_index +=
             (state_index < static_cast<int>((_size - 1) * _size)) ? static_cast<int>(_size) : 0;
     }
 
-    const_cast<State*>(*s)->index(state_index);
+    const_cast<State*>(*s)->index(std::to_string(state_index));
 
     *o = &_observation;
     r->set((state_index < static_cast<int>(_num_states) - 1) ? -1 : 0);
@@ -105,17 +105,21 @@ State const* FactoredDummyDomain::copyState(State const* s) const
 
 void FactoredDummyDomain::assertLegal(State const* s) const
 {
-    assert(s != nullptr && s->index() < static_cast<int>(_num_states));
+    assert(s != nullptr &&std::stoi(s->index()) < static_cast<int>(_num_states));
 }
 
 void FactoredDummyDomain::assertLegal(Action const* a) const
 {
-    assert(a != nullptr && a->index() < 2);
+    assert(a != nullptr && std::stoi(a->index()) < 2);
 }
 
 void FactoredDummyDomain::assertLegal(Observation const* o) const
 {
     assert(o == &_observation);
+}
+
+void FactoredDummyDomain::clearCache() const {
+
 }
 
 } // namespace domains

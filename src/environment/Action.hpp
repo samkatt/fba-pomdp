@@ -2,7 +2,7 @@
 #define ACTION_HPP
 
 #include <string>
-
+#include <vector>
 #include <cassert>
 
 /**
@@ -12,14 +12,14 @@ class Action
 {
 public:
     virtual ~Action()         = default;
-    virtual void index(int i) = 0;
+    virtual void index(std::string i) = 0;
 
     /**
      * @brief gets the index
      *
      * May be overriden by derived class if calculated on spot
      **/
-    virtual int index() const = 0;
+    virtual std::string index() const = 0;
 
     /**
      * @brief gets state information in string form
@@ -28,6 +28,8 @@ public:
      * Returns index string by default.
      **/
     virtual std::string toString() const = 0;
+
+    virtual std::vector<int> getFeatureValues() const = 0;
 };
 
 #include "utils/IndexedElements.hpp"

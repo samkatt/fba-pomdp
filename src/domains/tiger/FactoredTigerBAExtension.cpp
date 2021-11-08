@@ -18,42 +18,42 @@ Domain_Size FactoredTigerBAExtension::domainSize() const
     return _domain_size;
 }
 
-State const* FactoredTigerBAExtension::getState(int index) const
+State const* FactoredTigerBAExtension::getState(std::string index) const
 {
-    assert(index < _domain_size._S && index >= 0);
+    assert(std::stoi(index) < _domain_size._S && std::stoi(index) >= 0);
 
-    return _states.get(index);
+    return _states.get(std::stoi(index));
 }
 
 Terminal
     FactoredTigerBAExtension::terminal(State const* s, Action const* a, State const* new_s) const
 {
-    assert(s != nullptr && s->index() >= 0 && s->index() < _domain_size._S);
-    assert(new_s != nullptr && new_s->index() >= 0 && new_s->index() < _domain_size._S);
-    assert(a != nullptr && a->index() >= 0 && a->index() <= _domain_size._A);
+    assert(s != nullptr &&std::stoi(s->index())>= 0 &&std::stoi(s->index())< _domain_size._S);
+    assert(new_s != nullptr &&std::stoi(new_s->index()) >= 0 &&std::stoi(new_s->index()) < _domain_size._S);
+    assert(a != nullptr && std::stoi(a->index()) >= 0 && std::stoi(a->index()) <= _domain_size._A);
 
     // its terminal if we are dealing with episodic and if action is to not observe
     return Terminal(
         _type == domains::FactoredTiger::FactoredTigerDomainType::EPISODIC
-        && a->index() != domains::FactoredTiger::TigerAction::OBSERVE);
+        && std::stoi(a->index()) != domains::FactoredTiger::TigerAction::OBSERVE);
 }
 
 Reward FactoredTigerBAExtension::reward(State const* s, Action const* a, State const* new_s) const
 {
 
-    assert(s != nullptr && s->index() >= 0 && s->index() < _domain_size._S);
-    assert(new_s != nullptr && new_s->index() >= 0 && new_s->index() < _domain_size._S);
-    assert(a != nullptr && a->index() >= 0 && a->index() <= _domain_size._A);
+    assert(s != nullptr &&std::stoi(s->index())>= 0 &&std::stoi(s->index())< _domain_size._S);
+    assert(new_s != nullptr &&std::stoi(new_s->index()) >= 0 &&std::stoi(new_s->index()) < _domain_size._S);
+    assert(a != nullptr && std::stoi(a->index()) >= 0 && std::stoi(a->index()) <= _domain_size._A);
 
-    if (a->index() == domains::FactoredTiger::TigerAction::OBSERVE)
+    if (std::stoi(a->index()) == domains::FactoredTiger::TigerAction::OBSERVE)
     {
         return Reward(-1);
     }
 
-    auto const tiger_location = (s->index() < _domain_size._S / 2) ? domains::FactoredTiger::LEFT
+    auto const tiger_location = (std::stoi(s->index()) < _domain_size._S / 2) ? domains::FactoredTiger::LEFT
                                                                    : domains::FactoredTiger::RIGHT;
 
-    return (a->index() == tiger_location) ? Reward(10) : Reward(-100);
+    return (std::stoi(a->index()) == tiger_location) ? Reward(10) : Reward(-100);
 }
 
 }} // namespace bayes_adaptive::domain_extensions

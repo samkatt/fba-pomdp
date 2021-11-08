@@ -225,7 +225,7 @@ void GridWorldCoffee::releaseAction(Action const* a) const
 Action const* GridWorldCoffee::copyAction(Action const* a) const
 {
     assertLegal(a);
-    return new GridWorldCoffeeAction(a->index());
+    return new GridWorldCoffeeAction(std::stoi(a->index()));
 }
 
 State const* GridWorldCoffee::sampleStartState() const
@@ -329,7 +329,7 @@ GridWorldCoffee::applyMove(GridWorldCoffeeState::pos const& old_pos, Action cons
     auto y = old_pos.y;
 
     // move according to action
-    switch (a->index())
+    switch (std::stoi(a->index()))
     {
         case GridWorldCoffeeAction::ACTION::UP:
             y = (old_pos.y == _size - 1) ? old_pos.y : old_pos.y + 1;
@@ -379,13 +379,13 @@ Observation const* GridWorldCoffee::generateObservation(
 void GridWorldCoffee::assertLegal(Action const* a) const
 {
     assert(a != nullptr);
-    assert(a->index() >= 0 && a->index() < _A_size);
+    assert(std::stoi(a->index()) >= 0 && std::stoi(a->index()) < _A_size);
 }
 
 void GridWorldCoffee::assertLegal(Observation const* o) const
 {
     assert(o != nullptr);
-    assert(o->index() >= 0 && o->index() < _O_size);
+    assert(std::stoi(o->index()) >= 0 && std::stoi(o->index()) < _O_size);
     assertLegal(static_cast<GridWorldCoffeeObservation const*>(o)->_agent_pos);
 //    assert((static_cast<GridWorldCoffeeObservation const*>(o)->_rain == 0) || (static_cast<GridWorldCoffeeObservation const*>(o)->_rain == 1));
 //    assert(static_cast<GridWorldCoffeeObservation const*>(o)->_carpet_config < _carpet_configurations);
@@ -394,7 +394,7 @@ void GridWorldCoffee::assertLegal(Observation const* o) const
 void GridWorldCoffee::assertLegal(State const* s) const
 {
     assert(s != nullptr);
-    assert(s->index() >= 0 && s->index() < _S_size);
+    assert(std::stoi(s->index()) >= 0 &&std::stoi(s->index())< _S_size);
     assertLegal(static_cast<GridWorldCoffeeState const*>(s)->_agent_position);
     assert((static_cast<GridWorldCoffeeState const*>(s)->_rain == 0) || (static_cast<GridWorldCoffeeState const*>(s)->_rain == 1));
     assert(static_cast<GridWorldCoffeeState const*>(s)->_carpet_config < _carpet_configurations);
@@ -406,4 +406,17 @@ void GridWorldCoffee::assertLegal(GridWorldCoffeeState::pos const& position) con
     assert(position.y < _size);
 }
 
+void GridWorldCoffee::clearCache() const {
+
+}
+
+std::vector<int> GridWorldCoffee::GridWorldCoffeeObservation::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
+
+std::vector<int> GridWorldCoffee::GridWorldCoffeeState::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
 } // namespace domains

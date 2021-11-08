@@ -48,6 +48,8 @@ public:
 
     virtual Observation const* copyObservation(Observation const* o) const = 0;
     virtual State const* copyState(State const* s) const                   = 0;
+
+    virtual void clearCache() const = 0;
 };
 
 namespace factory {

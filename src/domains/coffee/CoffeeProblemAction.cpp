@@ -4,21 +4,29 @@
 
 namespace domains {
 
-CoffeeProblemAction::CoffeeProblemAction(int i) : _a(i) {}
+CoffeeProblemAction::CoffeeProblemAction(std::basic_string<char> i) : _a(i) {}
 
-void CoffeeProblemAction::index(int i)
+void CoffeeProblemAction::index(std::string i)
 {
-    _a.index(i);
+    _a = i;
+    //_a.index(i);
 }
 
-int CoffeeProblemAction::index() const
+std::string CoffeeProblemAction::index() const
 {
-    return _a.index();
+    return _a; //.index();
 }
 
 std::string CoffeeProblemAction::toString() const
 {
-    return (index() == GetCoffee) ? "get coffee" : "check";
+    // TODO fix
+    return "get cofee";
+//    return (index() == GetCoffee) ? "get coffee" : "check";
+}
+
+std::vector<int> CoffeeProblemAction::getFeatureValues() const {
+    // TODO Fix
+    return std::vector<int>();
 }
 
 } // namespace domains

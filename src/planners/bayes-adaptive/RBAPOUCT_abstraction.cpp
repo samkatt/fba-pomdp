@@ -8,7 +8,7 @@
 #include <cmath>
 #include <limits>
 #include <bayes-adaptive/states/factored/AbstractFBAPOMDPState.hpp>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 
 #include "easylogging++.h"
 #include "utils/random.hpp"
@@ -79,6 +79,8 @@ Action const* RBAPOUCT_abstraction::selectAction(
     auto const _nactions = _actions.size();
     auto const root      = createActionNode(_actions);
 
+    boost::timer::nanosecond_type const one_millisecond(1000000LL);
+
     // does not leak memory: actions stored in root node
     _actions.clear();
 
@@ -94,9 +96,8 @@ Action const* RBAPOUCT_abstraction::selectAction(
 //    }
 
     // perform simulations
-    boost::timer timer;
     int sims_done = 0;
-    if (_n < 5000) {
+    if (_milliseconds_thinking <= 0.01) {
         while (sims_done < _n) {
 //        VLOG(1) << "Elapsed time " << timer.elapsed();
 
@@ -104,7 +105,7 @@ Action const* RBAPOUCT_abstraction::selectAction(
 //        for (auto i = 0; i < (extra + _n / _sims_per_sample); ++i) {
             // hier particle aanpassen?
             // do not copy!!
-            auto particle = (AbstractFBAPOMDPState *) static_cast<BAState const *>(belief.sample());
+            auto particle = static_cast<AbstractFBAPOMDPState const *>(belief.sample());
 
             // Adding abstraction, if it's not there yet.
 //        if (*static_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction() != 0) {
@@ -114,7 +115,7 @@ Action const* RBAPOUCT_abstraction::selectAction(
             // but safe old state, so that we can reset the particle (counts are not modified)
             auto const old_domain_state = simulator.copyDomainState(
                     particle->_domain_state); // domain_state = pomdp state
-            particle->_domain_state = simulator.copyDomainState(old_domain_state);
+            const_cast<AbstractFBAPOMDPState *>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
 
 //            int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample * i);
 //            for (auto j = 0; j < sims_to_do; ++j) {
@@ -128,44 +129,46 @@ Action const* RBAPOUCT_abstraction::selectAction(
 
             // return particle in correct state
             simulator.releaseDomainState(particle->_domain_state);
-            particle->_domain_state = old_domain_state;
+            const_cast<AbstractFBAPOMDPState *>(particle)->_domain_state = old_domain_state;
 //            }
         }
     } else{
-        while (timer.elapsed() < ((float) _milliseconds_thinking/1000)) {
-//        VLOG(1) << "Elapsed time " << timer.elapsed();
+        boost::timer::cpu_timer timer;
+        boost::timer::cpu_times elapsed_time; // = timer.elapsed();
+        do {
+
 
 //    }
 //        for (auto i = 0; i < (extra + _n / _sims_per_sample); ++i) {
             // hier particle aanpassen?
+            for (auto i = 0; i < 100; ++i) {
+
             // do not copy!!
-            auto particle = (AbstractFBAPOMDPState *) static_cast<BAState const *>(belief.sample());
+                auto particle = static_cast<AbstractFBAPOMDPState const *>(belief.sample());
 
-            // Adding abstraction, if it's not there yet.
-//        if (*static_cast<AbstractFBAPOMDPState*>(particle)->getAbstraction() != 0) {
-//            static_cast<AbstractFBAPOMDPState*>(particle)->setAbstraction(0);
-//        }
+                // but safe old state, so that we can reset the particle (counts are not modified)
+                auto const old_domain_state = simulator.copyDomainState(
+                        particle->_domain_state); // domain_state = pomdp state
+                const_cast<AbstractFBAPOMDPState *>(particle)->_domain_state = simulator.copyDomainState(old_domain_state);
 
-            // but safe old state, so that we can reset the particle (counts are not modified)
-            auto const old_domain_state = simulator.copyDomainState(
-                    particle->_domain_state); // domain_state = pomdp state
-            particle->_domain_state = simulator.copyDomainState(old_domain_state);
+                sims_done++;
+    //                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
 
-//            int sims_to_do = std::min(_sims_per_sample, _n - _sims_per_sample * i);
-//            for (auto j = 0; j < sims_to_do; ++j) {
-            sims_done++;
-//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << ": s_0=" << particle->toString();
+    //                auto r =
+                traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
 
-//                auto r =
-            traverseActionNode(root, particle, simulator, _stats.max_tree_depth);
+    //                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
 
-//                VLOG(4) << "RBAPOUCT sim " << i + 1 << "/" << _n << "returned :" << r.toDouble();
-
-            // return particle in correct state
-            simulator.releaseDomainState(particle->_domain_state);
-            particle->_domain_state = old_domain_state;
+                // return particle in correct state
+                simulator.releaseDomainState(particle->_domain_state);
+                const_cast<AbstractFBAPOMDPState *>(particle)->_domain_state = old_domain_state;
+            }
 //            }
-        }
+            elapsed_time = timer.elapsed();
+//            VLOG(1) << "Elapsed time " << (elapsed_time.user + elapsed_time.system);
+
+        } while ((elapsed_time.user + elapsed_time.system) < (_milliseconds_thinking*one_millisecond));
+//        } while ((elapsed_time.wall) < (_milliseconds_thinking*one_millisecond));
     }
 
 //    }
@@ -318,13 +321,13 @@ Return RBAPOUCT_abstraction::traverseChanceNode(
     if (!terminal.terminated())
     {
         // continue in tree if node exists
-        if (n.hasChild(o->index()))
+        if (n.hasChild(std::stoi(o->index())))
         {
-            delayed_return = traverseActionNode(n.child(o->index()), s, simulator, depth_to_go - 1);
+            delayed_return = traverseActionNode(n.child(std::stoi(o->index())), s, simulator, depth_to_go - 1);
         } else // else create leaf and end with rollout
         {
             simulator.addLegalActions(s, &_actions);
-            n.addChild(o->index(), createActionNode(_actions));
+            n.addChild(std::stoi(o->index()), createActionNode(_actions));
 
             // does not leak memory, actions stored in nodes
             _actions.clear();
@@ -349,7 +352,7 @@ void RBAPOUCT_abstraction::fillHistograms(
 {
     for (auto& chance_node : (*n))
     {
-        histograms[node_depth][chance_node._action->index()] += chance_node.visited();
+        histograms[node_depth][std::stoi(chance_node._action->index())] += chance_node.visited();
 
         for (auto& action_node : chance_node)
         { fillHistograms(histograms, action_node.second, node_depth + 1); }

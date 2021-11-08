@@ -34,7 +34,7 @@ abstractions::GridWorldCoffeeBigAbstraction::GridWorldCoffeeBigAbstraction(
                                                                                                      indexing::stepSize(_abstract_domain_feature_sizes[0]._O)));
     // to size + 1 (rain)
     for (unsigned int i = 1; i <= c.domain_conf.size + 1; ++i) {
-        _abstract_domain_sizes[i] = Domain_Size((5*5) << i, 4, 25);
+        _abstract_domain_sizes[i] = Domain_Size((5*5) * std::pow(2, i), 4, 25);
         auto feature_sizes = std::vector<int>(i+2, 2);
         feature_sizes[0] = 5;
         feature_sizes[1] = 5;
@@ -75,7 +75,7 @@ abstractions::GridWorldCoffeeBigAbstraction::constructAbstractModel(bayes_adapti
     } else if (k == 1) {
         // We assume the same model for each action here
         // TODO Could make one abstraction_set per action?
-        auto action = IndexAction(0);
+        auto action = IndexAction(std::to_string(0));
         std::set_union(model.transitionNode(&action, 0).parents()->begin(),
                               model.transitionNode(&action, 0).parents()->end(),
                               model.transitionNode(&action, 1).parents()->begin(),

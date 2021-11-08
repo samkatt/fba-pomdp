@@ -41,7 +41,7 @@ BAState* AbstractFBAPOMDPState::copy(State const* domain_state) const
 }
 
 // this samples a new state
-int AbstractFBAPOMDPState::sampleStateIndex(
+std::string AbstractFBAPOMDPState::sampleStateIndex(
     State const* s,
     Action const* a,
     rnd::sample::Dir::sampleMethod m) const
@@ -49,23 +49,51 @@ int AbstractFBAPOMDPState::sampleStateIndex(
     return model()->sampleStateIndex(s,a,m);
 }
 
+// From https://www.delftstack.com/howto/cpp/how-to-determine-if-a-string-is-number-cpp/
+// TODO add parameter to BABNModel that tells if an index is a string or number?
+bool isNumber(const std::string& str)
+{
+    return !std::any_of(&str[0], &str[str.size()-1], [] (char c) { return !std::isdigit(c); });
+}
+
 // this samples a new state, using the abstract model
-int AbstractFBAPOMDPState::sampleStateIndexAbstract(
+std::string AbstractFBAPOMDPState::sampleStateIndexAbstract(
         State const* s,
         Action const* a,
         rnd::sample::Dir::sampleMethod m) const
 {
     if (_abstraction == 0) {
-        auto parent_values = model()->stateFeatureValues(s);
+        auto parent_values = s->getFeatureValues(); // model()->stateFeatureValues(s);
         auto next_values = std::vector<int>(parent_values.size(), 0);
         for (auto n = 0; n < (int) feature_set.size(); ++n) {
             next_values[feature_set[n]] = _abstract_model.transitionNode(a, n).sample(parent_values, m);
         }
 
-        return model()->sampleStateIndexThroughAbstraction(s,a, next_values);
+        if (!isNumber(s->index())) { // TODO should be better way
+            std::string index;
+            for (int i=0; i < (int) next_values.size() - 1; i++){
+                index += std::to_string(next_values[i]);
+                index += '+';
+            }
+            index += std::to_string(next_values[next_values.size() - 1]);
+
+            return index;
+        }
+
+        return model()->sampleStateIndexThroughAbstraction(&next_values);
     }
     return model()->sampleStateIndex(s,a,m);
 }
+
+//auto parent_values = stateFeatureValues(s);
+//
+////create a vector for the next-stage variables - XXX: this is a memory allocation... expensive!?
+//auto feature_values = std::vector<int>(_domain_feature_size->_S.size());
+////fill the vector by sampling next stage feature 1 by 1
+//for (auto n = 0; n < (int) _domain_feature_size->_S.size(); ++n)
+//{ feature_values[n] = transitionNode(a, n).sample(parent_values, m); }
+//
+//return indexing::project(feature_values, _domain_feature_size->_S);
 
 int AbstractFBAPOMDPState::sampleObservationIndex(
     Action const* a,
@@ -93,8 +121,8 @@ void AbstractFBAPOMDPState::incrementCountsOfAbstract(
     float amount)
 {
     if(_abstraction == 0) {
-        _abstract_model.incrementCountsOfAbstract(a, o, amount, model()->stateFeatureValues(s),
-                                                  model()->stateFeatureValues(new_s), feature_set);
+        _abstract_model.incrementCountsOfAbstract(a, o, amount, s->getFeatureValues(), // model()->stateFeatureValues(s),
+                                                  new_s->getFeatureValues(),feature_set); // model()->stateFeatureValues(new_s), feature_set);
     }
     FBAPOMDPState::model()->incrementCountsOf(s, a, o, new_s, amount);
 }

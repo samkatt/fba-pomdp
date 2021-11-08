@@ -14,7 +14,7 @@ void assertLegalCoffee(domains::GridWorldCoffee::GridWorldCoffeeState::pos const
 void assertLegalCoffee(State const* s, size_t grid_size, size_t state_space_size)
 {
     assert(s != nullptr);
-    assert(s->index() >= 0 && s->index() < static_cast<int>(state_space_size));
+    assert(std::stoi(s->index()) >= 0 &&std::stoi(s->index())< static_cast<int>(state_space_size));
     assert(static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s)->_carpet_config < 2);
     assert(static_cast<domains::GridWorldCoffee::GridWorldCoffeeState const*>(s)->_rain < 2 );
     assertLegalCoffee(
@@ -24,7 +24,7 @@ void assertLegalCoffee(State const* s, size_t grid_size, size_t state_space_size
 void assertLegalCoffee(Action const* a, size_t action_space_size)
 {
     assert(a != nullptr);
-    assert(a->index() >= 0 && a->index() < static_cast<int>(action_space_size));
+    assert(std::stoi(a->index()) >= 0 && std::stoi(a->index()) < static_cast<int>(action_space_size));
 }
 
 GridWorldCoffeeBAExtension::GridWorldCoffeeBAExtension() :
@@ -66,10 +66,10 @@ Domain_Size GridWorldCoffeeBAExtension::domainSize() const
     return _domain_size;
 }
 
-State const* GridWorldCoffeeBAExtension::getState(int index) const
+State const* GridWorldCoffeeBAExtension::getState(std::string index) const
 {
-    assert(index < _domain_size._S);
-    return &_states[index];
+    assert(std::stoi(index) < _domain_size._S);
+    return &_states[std::stoi(index)];
 }
 
 Terminal GridWorldCoffeeBAExtension::terminal(State const* s, Action const* a, State const* new_s) const

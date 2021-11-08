@@ -26,8 +26,9 @@ public:
     int numOperationalComputers() const;
 
     /*** state interface ***/
-    void index(int i) final;
-    int index() const final;
+    void index(std::string i) final;
+    std::string index() const final;
+    std::vector<int> getFeatureValues() const final;
 
     /**
      * @brief {1 0 1 0} depending on whether operating or not

@@ -35,18 +35,18 @@ Result run(configurations::Conf const& conf)
     auto const discount  = Discount(conf.discount);
     auto const h         = Horizon(conf.horizon);
 
-    boost::timer timer;
+    boost::timer::cpu_timer timer;
     for (auto run = 0; run < conf.num_runs; ++run)
     {
         VLOG(1) << "run " << run + 1 << "/" << conf.num_runs;
 
         belief->initiate(*simulator);
 
-        timer.restart();
+        timer.start();
         auto const r = episode::run(*planner, *belief, *env, *simulator, h, discount);
 
         planning_result.episode_return.add(r.ret.toDouble());
-        planning_result.episode_duration.add(timer.elapsed() / r.length);
+        planning_result.episode_duration.add(timer.elapsed().wall / r.length);
 
         belief->free(*simulator);
     }

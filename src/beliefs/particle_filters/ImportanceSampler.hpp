@@ -76,21 +76,56 @@ void resample(WeightedFilter<T>& belief, POMDP const& d, size_t n)
 
     // create new (uniformly weighted) filter
     // by sampling particles from our current belief
-    while (new_belief.size() != n)
-    {
-        new_belief.add(dynamic_cast<T>(d.copyState(belief.sample())), w);
+    // more memory efficient way
+    auto sampled_samples = std::vector<int>(n, 0);
+
+    for (auto i = 0; i < (int) n; i++) {
+        sampled_samples[belief.sampleIndex()] += 1;
+    }
+    // First free unused particles from memory
+    for (int i = 0; i < (int) n; i++) {
+        if (sampled_samples[i] == 0) {
+            belief.free([&d](State const* s) { d.releaseState(s); }, i);
+        }
+    }
+    // Then build new belief, and free remaining particles while doing so
+    for (int i = 0; i < (int) n; i++) {
+        if (sampled_samples[i] > 0) {
+            for (int j = 0; j < sampled_samples[i]; j++) {
+                auto s = dynamic_cast<T>(d.copyState(belief.particle(i)->particle));
+                new_belief.add(s, w);
+            }
+            belief.free([&d](State const* s) { d.releaseState(s); }, i);
+        }
     }
 
     // We do not need to normalize here, since the weights
     // assigned to the particles do not get multipled by their
-    // precious weight (just calculated by computeObservationProbability
+    // previous weight (just calculated by computeObservationProbability
     // and thus do not run into problems of nearing 0
     // new_belief.normalize(total_weight);
 
     VLOG(4) << "Finished resampling " << n << " samples";
 
-    belief.free([&d](State const* s) { d.releaseState(s); });
+    belief.free();
     belief = std::move(new_belief);
+
+
+//    while (new_belief.size() != n)
+//    {
+//        new_belief.add(dynamic_cast<T>(d.copyState(belief.sample())), w);
+//    }
+//
+//    // We do not need to normalize here, since the weights
+//    // assigned to the particles do not get multipled by their
+//    // previous weight (just calculated by computeObservationProbability
+//    // and thus do not run into problems of nearing 0
+//    // new_belief.normalize(total_weight);
+//
+//    VLOG(4) << "Finished resampling " << n << " samples";
+//
+//    belief.free([&d](State const* s) { d.releaseState(s); });
+//    belief = std::move(new_belief);
 }
 
 } // namespace importance_sampling

@@ -54,7 +54,7 @@ public:
     /**
      * @brief returns domain state of index i
      **/
-    State const* domainState(int i) const;
+    State const* domainState(std::string i) const;
 
     /**
      * @brief returns a copy of the provided domain_state
@@ -114,6 +114,7 @@ public:
     Action const* copyAction(Action const* a) const final;
     Observation const* copyObservation(Observation const* o) const final;
     State const* copyState(State const* s) const final;
+    void clearCache() const final; // TODO test
 
 protected:
     friend class beliefs::bayes_adaptive::NestedBelief;

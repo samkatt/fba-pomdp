@@ -19,6 +19,7 @@ struct DomainConf
     size_t width  = 0; // domain specific
 
     bool abstraction = false; // domain specific
+    bool store_statespace = true;
 
     /**
      * /brief adds options in this structure to descr

@@ -27,7 +27,7 @@ public:
     BAState* copy(State const*) const final;
     void logCounts() const final;
 
-    int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
+    std::string sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m)
         const final;
 
     int sampleObservationIndex(

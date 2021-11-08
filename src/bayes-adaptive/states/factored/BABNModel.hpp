@@ -70,8 +70,8 @@ public:
     BABNModel& operator=(BABNModel const&) = default;
     BABNModel& operator=(BABNModel&&) = default;
 
-    int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m) const;
-    int sampleStateIndexThroughAbstraction(State const* s, Action const* a, const std::vector<int>& parent_values) const;
+    std::string sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m) const;
+    std::string sampleStateIndexThroughAbstraction(const std::vector<int> *parent_values) const;
     int sampleObservationIndex(
         Action const* a,
         State const* new_s,

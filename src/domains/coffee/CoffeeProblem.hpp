@@ -64,6 +64,7 @@ public:
     Action const* copyAction(Action const* a) const final;
     Observation const* copyObservation(Observation const* o) const final;
     State const* copyState(State const* s) const final;
+    void clearCache() const final;
 
 private:
     short unsigned int _S = 32, _O = 2, _A = 2;

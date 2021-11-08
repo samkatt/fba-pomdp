@@ -30,7 +30,11 @@ void DomainConf::addOptions(boost::program_options::options_description* descr)
         (
         "abstraction",
         po::value(&abstraction)->default_value(abstraction),
-        "Whether or not we use abstraction: gridworldcoffee, gridworldbuttons, and gridworldcoffeebig");;
+        "Whether or not we use abstraction: gridworldcoffee, gridworldbuttons, and gridworldcoffeebig")
+        (
+        "store_statespace",
+        po::value(&store_statespace)->default_value(store_statespace),
+        "Whether or not the domain stores the state space in memory or uses a cache: gridworldcoffeebig");
     // clang-format on
 }
 

@@ -18,9 +18,9 @@ Domain_Size FactoredDummyDomainBAExtension::domainSize() const
     return {static_cast<int>(_num_states), 2, 1};
 }
 
-State const* FactoredDummyDomainBAExtension::getState(int index) const
+State const* FactoredDummyDomainBAExtension::getState(std::string index) const
 {
-    assert(index < static_cast<int>(_num_states));
+    assert(std::stoi(index) < static_cast<int>(_num_states));
     return new IndexState(index);
 }
 
@@ -29,9 +29,9 @@ Terminal FactoredDummyDomainBAExtension::terminal(
     Action const* a,
     State const* new_s) const
 {
-    assert(s != nullptr && s->index() < static_cast<int>(_num_states));
-    assert(new_s != nullptr && new_s->index() < static_cast<int>(_num_states));
-    assert(a != nullptr && a->index() < 2);
+    assert(s != nullptr &&std::stoi(s->index())< static_cast<int>(_num_states));
+    assert(new_s != nullptr &&std::stoi(new_s->index()) < static_cast<int>(_num_states));
+    assert(a != nullptr && std::stoi(a->index()) < 2);
 
     return Terminal(false); // this problem never terminates
 }
@@ -39,11 +39,11 @@ Terminal FactoredDummyDomainBAExtension::terminal(
 Reward FactoredDummyDomainBAExtension::reward(State const* s, Action const* a, State const* new_s)
     const
 {
-    assert(s != nullptr && s->index() < static_cast<int>(_num_states));
-    assert(new_s != nullptr && new_s->index() < static_cast<int>(_num_states));
-    assert(a != nullptr && a->index() < 2);
+    assert(s != nullptr &&std::stoi(s->index())< static_cast<int>(_num_states));
+    assert(new_s != nullptr &&std::stoi(new_s->index()) < static_cast<int>(_num_states));
+    assert(a != nullptr && std::stoi(a->index()) < 2);
 
-    return (new_s->index() < static_cast<int>(_num_states) - 1) ? Reward(-1) : Reward(0);
+    return (std::stoi(new_s->index()) < static_cast<int>(_num_states) - 1) ? Reward(-1) : Reward(0);
 }
 
 }} // namespace bayes_adaptive::domain_extensions

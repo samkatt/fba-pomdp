@@ -12,26 +12,26 @@ Domain_Size DummyDomainBAExtension::domainSize() const
     return {1, 1, 1};
 }
 
-State const* DummyDomainBAExtension::getState(int index) const
+State const* DummyDomainBAExtension::getState(std::string index) const
 {
-    assert(index == 0);
+    assert(index == "0");
     return new IndexState(index);
 }
 
 Terminal DummyDomainBAExtension::terminal(State const* s, Action const* a, State const* new_s) const
 {
-    assert(s != nullptr && s->index() == 0);
-    assert(a != nullptr && a->index() == 0);
-    assert(new_s != nullptr && new_s->index() == 0);
+    assert(s != nullptr &&std::stoi(s->index())== 0);
+    assert(a != nullptr && std::stoi(a->index()) == 0);
+    assert(new_s != nullptr &&std::stoi(new_s->index()) == 0);
 
     return Terminal(false);
 }
 
 Reward DummyDomainBAExtension::reward(State const* s, Action const* a, State const* new_s) const
 {
-    assert(s != nullptr && s->index() == 0);
-    assert(a != nullptr && a->index() == 0);
-    assert(new_s != nullptr && new_s->index() == 0);
+    assert(s != nullptr &&std::stoi(s->index())== 0);
+    assert(a != nullptr && std::stoi(a->index()) == 0);
+    assert(new_s != nullptr &&std::stoi(new_s->index()) == 0);
 
     return Reward(1);
 }

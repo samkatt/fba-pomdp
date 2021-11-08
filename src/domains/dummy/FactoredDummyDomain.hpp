@@ -48,13 +48,14 @@ public:
     Action const* copyAction(Action const* a) const final;
     Observation const* copyObservation(Observation const* o) const final;
     State const* copyState(State const* s) const final;
+    void clearCache() const final;
 
 private:
     size_t _size;
     size_t _num_states;
 
-    IndexObservation const _observation = IndexObservation(0);
-    IndexAction const _a_up = IndexAction(ACTIONS::UP), _a_right = IndexAction(ACTIONS::RIGHT);
+    IndexObservation const _observation = IndexObservation(std::to_string(0));
+    IndexAction const _a_up = IndexAction(std::to_string(ACTIONS::UP)), _a_right = IndexAction(std::to_string(ACTIONS::RIGHT));
 
     void assertLegal(State const* s) const;
     void assertLegal(Action const* a) const;

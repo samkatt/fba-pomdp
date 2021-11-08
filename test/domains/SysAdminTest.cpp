@@ -317,10 +317,10 @@ SCENARIO("sysadmin domain", "[domain][sysadmin]")
             for (auto i = 0; i < 100; ++i)
             {
                 auto a = d.generateRandomAction(&state);
-                REQUIRE(a->index() < (int)action_is_generated.size());
-                REQUIRE(a->index() >= 0);
+                REQUIRE(std::stoi(a->index()) < (int)action_is_generated.size());
+                REQUIRE(std::stoi(a->index()) >= 0);
 
-                action_is_generated[a->index()] = true;
+                action_is_generated[std::stoi(a->index())] = true;
             }
 
             for (const auto& i : action_is_generated) { REQUIRE(i); }

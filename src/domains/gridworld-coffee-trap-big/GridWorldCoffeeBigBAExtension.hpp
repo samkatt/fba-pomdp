@@ -21,19 +21,24 @@ class GridWorldCoffeeBigBAExtension : public BADomainExtension
 {
 
 public:
-    explicit GridWorldCoffeeBigBAExtension(size_t extra_features);
+    explicit GridWorldCoffeeBigBAExtension(size_t extra_features, domains::GridWorldCoffeeBig const& problem_domain);
 
     /*** BADomainExtension interface implementation ****/
     Domain_Size domainSize() const final;
-    State const* getState(int index) const final;
+    State const* getState(std::string index) const final;
     Terminal terminal(State const* s, Action const* a, State const* new_s) const final;
     Reward reward(State const* s, Action const* a, State const* new_s) const final;
 
 private:
     size_t const _size;
     size_t const _extra_features;
-    std::vector<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState> _states; // initialized in the constructor
+    int const _x_feature = 0;
+    int const _y_feature = 1;
+    int const _rain_feature = 2;
+//    std::vector<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState> _states; // initialized in the constructor
     Domain_Size _domain_size;
+    domains::GridWorldCoffeeBig const& gridworldcoffeebig;
+//    bool _store_statespace;
 };
 
 }} // namespace bayes_adaptive::domain_extensions

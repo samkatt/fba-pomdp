@@ -32,7 +32,7 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
             auto s = d.sampleStartState();
             auto a = d.generateRandomAction(s);
 
-            REQUIRE(a->index() < 2);
+            REQUIRE(std::stoi(a->index()) < 2);
             ;
 
             IndexObservation o(0);
@@ -53,7 +53,7 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
             auto t               = d.step(&s, &a_up, &o, &r);
 
             REQUIRE(s->index() == 1);
-            REQUIRE(o->index() == 0);
+            REQUIRE(std::stoi(o->index()) == 0);
             REQUIRE(r.toDouble() == -1.0);
             REQUIRE(!t.terminated());
 
@@ -67,7 +67,7 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
                 t = d.step(&s, &a_right, &o, &r);
 
                 REQUIRE(s->index() == 4);
-                REQUIRE(o->index() == 0);
+                REQUIRE(std::stoi(o->index()) == 0);
                 REQUIRE(r.toDouble() == -1.0);
                 REQUIRE(!t.terminated());
 

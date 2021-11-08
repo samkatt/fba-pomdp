@@ -25,7 +25,7 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
 {
     auto d = domains::Tiger(domains::Tiger::TigerType::EPISODIC);
     auto s = d.sampleStartState();
-    auto a = IndexAction(0);
+    auto a = IndexAction(std::to_string(0));
 
     Observation const* o;
     Reward r(0);
@@ -46,8 +46,8 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
         auto t = d.step(&s, &a, &o, &r);
 
         REQUIRE(s->index() == initial_state_index);
-        REQUIRE(o->index() < 2);
-        REQUIRE(o->index() > -1);
+        REQUIRE(std::stoi(o->index()) < 2);
+        REQUIRE(std::stoi(o->index()) > -1);
         REQUIRE(r.toDouble() == -1.0);
         REQUIRE(a.index() == domains::Tiger::Literal::OBSERVE);
         REQUIRE(!t.terminated());
@@ -66,8 +66,8 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
         a.index(s->index());
         d.step(&s, &a, &o, &r);
 
-        REQUIRE(o->index() < 2);
-        REQUIRE(o->index() > -1);
+        REQUIRE(std::stoi(o->index()) < 2);
+        REQUIRE(std::stoi(o->index()) > -1);
         REQUIRE(r.toDouble() == 10.0);
 
         auto ob1 = IndexObservation(0), ob2 = IndexObservation(1);
@@ -83,8 +83,8 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
         a.index(1 - s->index());
         d.step(&s, &a, &o, &r);
 
-        REQUIRE(o->index() < 2);
-        REQUIRE(o->index() > -1);
+        REQUIRE(std::stoi(o->index()) < 2);
+        REQUIRE(std::stoi(o->index()) > -1);
         REQUIRE(r.toDouble() == -100.0);
 
         auto ob1 = IndexObservation(0), ob2 = IndexObservation(1);
@@ -201,8 +201,8 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
                 THEN("the observation has a legal index & reward is -1")
                 {
                     REQUIRE(s->index() == start_index);
-                    REQUIRE(o->index() < 2);
-                    REQUIRE(o->index() >= 0);
+                    REQUIRE(std::stoi(o->index()) < 2);
+                    REQUIRE(std::stoi(o->index()) >= 0);
                     REQUIRE(r.toDouble() == -1.0);
                     REQUIRE(!t.terminated());
                 }
@@ -227,8 +227,8 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
                     REQUIRE(s->index() < 2 << num_features);
                     REQUIRE(s->index() >= 0);
 
-                    REQUIRE(o->index() < 2);
-                    REQUIRE(o->index() >= 0);
+                    REQUIRE(std::stoi(o->index()) < 2);
+                    REQUIRE(std::stoi(o->index()) >= 0);
 
                     REQUIRE(r.toDouble() == 10.0);
 
@@ -261,8 +261,8 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
                     REQUIRE(s->index() < 2 << num_features);
                     REQUIRE(s->index() >= 0);
 
-                    REQUIRE(o->index() < 2);
-                    REQUIRE(o->index() >= 0);
+                    REQUIRE(std::stoi(o->index()) < 2);
+                    REQUIRE(std::stoi(o->index()) >= 0);
 
                     REQUIRE(r.toDouble() == -100.0);
 
@@ -306,8 +306,8 @@ SCENARIO("FactoredTiger domain", "[domain][tiger][factored]")
 
                 THEN("it is any of the actions 0,1 & 2")
                 {
-                    REQUIRE(a->index() < 3);
-                    REQUIRE(a->index() >= 0);
+                    REQUIRE(std::stoi(a->index()) < 3);
+                    REQUIRE(std::stoi(a->index()) >= 0);
                 }
 
                 d.releaseAction(a);
@@ -323,7 +323,7 @@ SCENARIO("FactoredTiger domain", "[domain][tiger][factored]")
                     REQUIRE(actions.size() == 3);
 
                     std::vector<bool> action_indices = {false, false, false};
-                    for (auto const& a : actions) { action_indices[a->index()] = true; }
+                    for (auto const& a : actions) { action_indices[std::stoi(a->index())] = true; }
 
                     for (auto i : action_indices) { REQUIRE(i); }
 

@@ -48,7 +48,7 @@ GridWorldCoffeeFlatBAPrior::GridWorldCoffeeFlatBAPrior(
         for (auto s = 0; s < _domain_size._S; ++s)
         {
 
-            auto state = static_cast<GridWorldCoffeeState const*>(ba_ext.getState(s));
+            auto state = static_cast<GridWorldCoffeeState const*>(ba_ext.getState(std::to_string(s)));
 
             setPriorTransitionProbabilities(state, &action, domain);
 
@@ -273,7 +273,7 @@ bayes_adaptive::factored::BABNModel GridWorldCoffeeFactBAPrior::computePriorMode
 
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction const action(a);
+        IndexAction const action(std::to_string(a));
 
         auto const& agent_x_parents = structure.T[a][_agent_x_feature];
         auto const& agent_y_parents = structure.T[a][_agent_y_feature];
@@ -581,7 +581,7 @@ void GridWorldCoffeeFactBAPrior::preComputePrior()
 {
     for (auto a = 0; a < _domain_size._A; ++a)
     {
-        IndexAction const action(a);
+        IndexAction const action(std::to_string(a));
 
         /*** O (known) ***/
         // observe agent location, depends on state feature and observation probabilities

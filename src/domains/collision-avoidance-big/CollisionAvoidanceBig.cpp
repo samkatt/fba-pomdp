@@ -34,12 +34,12 @@ struct CollisionAvoidanceBigObservation : public Observation
 
     /**** observation interface ****/
 
-    void index(int /*i*/) final
+    void index(std::string /*i*/) final
     {
         throw "CollisionAvoidanceBigObservation::index(i) should not be called...?";
     }
 
-    int index() const final { return _index; }
+    std::string index() const final { return std::to_string(_index); }
 
     std::string toString() const final
     {
@@ -53,6 +53,8 @@ struct CollisionAvoidanceBigObservation : public Observation
 
     int const _index;
     std::vector<int> const obstacles_pos;
+
+    std::vector<int> getFeatureValues() const;
 };
 
 CollisionAvoidanceBig::CollisionAvoidanceBig(
@@ -134,8 +136,8 @@ CollisionAvoidanceBig::CollisionAvoidanceBig(
                         auto count = 0;
                         std::vector<int> obstacles(_num_obstacles);
                         do {
-                            _state_prior.setRawValue(
-                                    _states[_grid_width - 1][agent_y][speed][traffic][timeofday][count++]->index(), init_state_prob);
+                            _state_prior.setRawValue(std::stoi(
+                                    _states[_grid_width - 1][agent_y][speed][traffic][timeofday][count++]->index()), init_state_prob);
                         } while (!indexing::increment(obstacles, _obstacles_space));
                     }
                 }
@@ -149,9 +151,9 @@ CollisionAvoidanceBig::CollisionAvoidanceBig(
         std::vector<int> obstacles(_num_obstacles, _grid_height / 2);
 
         _state_prior.setRawValue(
-            _states[_grid_width - 1][_grid_height / 2][1][1][1]
+            std::stoi(_states[_grid_width - 1][_grid_height / 2][1][1][1]
                    [indexing::project(obstacles, _obstacles_space)]
-                       ->index(),
+                       ->index()),
             1);
     }
 
@@ -220,7 +222,7 @@ State const* CollisionAvoidanceBig::getState(int index) const
 
 Reward CollisionAvoidanceBig::reward(Action const* a, State const* new_s) const
 {
-    auto r = a->index() == STAY ? 0 : -MOVE_PENALTY;
+    auto r = std::stoi(a->index()) == STAY ? 0 : -MOVE_PENALTY;
 
     auto const x_agent = xAgent(new_s);
     if (x_agent < _num_obstacles && yAgent(new_s) == yObstacles(new_s)[x_agent])
@@ -310,7 +312,7 @@ Terminal
 
     // move agent
     auto x = collision_state->x_agent - 1;
-    auto y = keepInGrid(collision_state->y_agent + a->index() - 1);
+    auto y = keepInGrid(collision_state->y_agent + std::stoi(a->index()) - 1);
     auto speed = changeSpeed(collision_state->speed, collision_state->traffic);
     auto traffic = changeTraffic(collision_state->traffic, collision_state->timeofday);
     auto timeofday = collision_state->timeofday;
@@ -469,7 +471,7 @@ void CollisionAvoidanceBig::assertLegal(State const* s) const
 
 void CollisionAvoidanceBig::assertLegal(Action const* a) const
 {
-    assert(a != nullptr && a->index() >= 0 && a->index() < NUM_ACTIONS);
+    assert(a != nullptr && std::stoi(a->index()) >= 0 && std::stoi(a->index()) < NUM_ACTIONS);
 }
 
 void CollisionAvoidanceBig::assertLegal(Observation const* o) const
@@ -483,9 +485,21 @@ void CollisionAvoidanceBig::assertLegal(Observation const* o) const
         assert(static_cast<CollisionAvoidanceBigObservation const*>(o)->obstacles_pos[f] >= 0);
     }
 
-    assert(o->index() < static_cast<int>(_observations.size()) && o->index() >= 0);
-    assert(o == _observations[o->index()]);
+    assert(std::stoi(o->index()) < static_cast<int>(_observations.size()) && std::stoi(o->index()) >= 0);
+    assert(o == _observations[std::stoi(o->index())]);
 }
 
+void CollisionAvoidanceBig::clearCache() const {
 
+}
+
+std::vector<int> CollisionAvoidanceBigObservation::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
+
+std::vector<int> CollisionAvoidanceBigState::getFeatureValues() const {
+    // TODO implement
+    return std::vector<int>();
+}
 } // namespace domains

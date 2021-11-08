@@ -96,6 +96,21 @@ void WeightedFilter<T>::free(Deallocator const& d)
 }
 
 template<typename T>
+template<typename Deallocator>
+void WeightedFilter<T>::free(Deallocator const& d, int index)
+{
+    d(_particles[index].particle);
+    _particles[index].particle = nullptr;
+}
+
+template<typename T>
+void WeightedFilter<T>::free()
+{
+    _particles.clear();
+    _total_weight = 0;
+}
+
+template<typename T>
 WeightedParticle<T>* WeightedFilter<T>::particle(size_t i)
 {
     return &_particles[i];
@@ -155,9 +170,9 @@ std::string WeightedFilter<T>::toString(particleDescriptor const& partDescr) con
     return descr;
 }
 
+
 template<typename T>
-T WeightedFilter<T>::sample() const
-{
+int WeightedFilter<T>::sampleIndex() const {
     assert(_total_weight > 0);
     assert(!_particles.empty());
 
@@ -183,7 +198,13 @@ T WeightedFilter<T>::sample() const
     // (i.e. returning last sample (= 0) is correct)
     assert(sample || sample_threshold > remaining_weight - _particles[0].w);
 
-    return _particles[sample].particle;
+    return sample;
+}
+
+template<typename T>
+T WeightedFilter<T>::sample() const
+{
+    return _particles[sampleIndex()].particle;
 }
 
 using queue_elements = std::pair<double, int>;

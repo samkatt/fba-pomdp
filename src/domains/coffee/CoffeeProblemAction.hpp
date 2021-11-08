@@ -16,16 +16,19 @@ class CoffeeProblemAction : public Action
 
 {
 public:
-    explicit CoffeeProblemAction(int i);
+    explicit CoffeeProblemAction(std::basic_string<char> i);
 
     /*** Action interface ***/
-    void index(int i) final;
-    int index() const final;
+    void index(std::string i) final;
+    std::string index() const final;
     std::string toString() const final;
+    std::vector<int> getFeatureValues() const final; // { return {std::stoi(index())}; };
 
 private:
-    IndexAction _a;
-};
+//    IndexAction _a;
+        // TODO fix
+        std::basic_string<char> _a;
+    };
 
 } // namespace domains
 

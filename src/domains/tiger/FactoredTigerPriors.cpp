@@ -45,14 +45,14 @@ FactoredTigerFlatPrior::FactoredTigerFlatPrior(configurations::BAConf const& c) 
     // listening does not alter the state
     // so we set the counts for listening to 0
     // unless the states match
-    auto observe = IndexAction(domains::FactoredTiger::TigerAction::OBSERVE);
+    auto observe = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
     for (auto s = 0; s < _domain_size._S; ++s)
     {
         for (auto new_s = 0; new_s < _domain_size._S; ++new_s)
         {
             if (s != new_s)
             {
-                auto state = IndexState(s), new_state = IndexState(new_s);
+                auto state = IndexState(std::to_string(s)), new_state = IndexState(std::to_string(new_s));
 
                 _prior.count(&state, &observe, &new_state) = 0;
             }
@@ -70,14 +70,14 @@ FactoredTigerFlatPrior::FactoredTigerFlatPrior(configurations::BAConf const& c) 
     // for listening according to the tiger location
     for (auto s = 0; s < _domain_size._S; ++s)
     {
-        auto const state         = IndexState(s);
+        auto const state         = IndexState(std::to_string(s));
         auto const tiger_is_left = s < _domain_size._S / 2;
 
-        auto const acc_o = tiger_is_left ? IndexObservation(domains::FactoredTiger::LEFT)
-                                         : IndexObservation(domains::FactoredTiger::RIGHT);
+        auto const acc_o = tiger_is_left ? IndexObservation(std::to_string(domains::FactoredTiger::LEFT))
+                                         : IndexObservation(std::to_string(domains::FactoredTiger::RIGHT));
 
-        auto const inacc_o = tiger_is_left ? IndexObservation(domains::FactoredTiger::RIGHT)
-                                           : IndexObservation(domains::FactoredTiger::LEFT);
+        auto const inacc_o = tiger_is_left ? IndexObservation(std::to_string(domains::FactoredTiger::RIGHT))
+                                           : IndexObservation(std::to_string(domains::FactoredTiger::LEFT));
 
         _prior.count(&observe, &state, &acc_o)   = acc_o_prior;
         _prior.count(&observe, &state, &inacc_o) = inacc_o_prior;
@@ -131,9 +131,9 @@ FactoredTigerFactoredPrior::FactoredTigerFactoredPrior(configurations::FBAConf c
     auto model = bayes_adaptive::factored::BABNModel(
         &_domain_size, &_domain_feature_size, &_fbapomdp_step_size);
 
-    auto const open_right = IndexAction(domains::FactoredTiger::TigerAction::OPEN_RIGHT);
-    auto const open_left  = IndexAction(domains::FactoredTiger::TigerAction::OPEN_LEFT);
-    auto const listen     = IndexAction(domains::FactoredTiger::TigerAction::OBSERVE);
+    auto const open_right = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OPEN_RIGHT));
+    auto const open_left  = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OPEN_LEFT));
+    auto const listen     = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
 
     /**** correctly known part of the prior *****/
     // new location after listening depends on previous location
@@ -157,7 +157,7 @@ FactoredTigerFactoredPrior::FactoredTigerFactoredPrior(configurations::FBAConf c
     // T: values are uniform for each feature & action
     for (auto a = 0; a < 2; ++a)
     {
-        auto action = IndexAction(a);
+        auto action = IndexAction(std::to_string(a));
 
         for (auto f = 0; f < (int)_domain_feature_size._S.size(); f++)
         {
@@ -219,7 +219,7 @@ void FactoredTigerFactoredPrior::setObservationModel(
     std::vector<int> const& parents) const
 {
 
-    auto listen = IndexAction(domains::FactoredTiger::TigerAction::OBSERVE);
+    auto listen = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
     model->resetObservationNode(&listen, 0, parents);
 
     /*** set count for each parent value ***/

@@ -50,7 +50,7 @@ State const* SysAdmin::breakComputer(State const* s, int computer) const
     assertLegal(s);
     assert(computer >= 0 && computer < _size);
 
-    return &_states[s->index() & ~(0x1 << computer)];
+    return &_states[std::stoi(s->index()) & ~(0x1 << computer)];
 }
 
 State const* SysAdmin::fixComputer(State const* s, int computer) const
@@ -58,7 +58,7 @@ State const* SysAdmin::fixComputer(State const* s, int computer) const
     assertLegal(s);
     assert(computer >= 0 && computer < _size);
 
-    return &_states[s->index() | (0x1 << computer)];
+    return &_states[std::stoi(s->index()) | (0x1 << computer)];
 }
 
 Action const* SysAdmin::observeAction(int comp) const
@@ -112,7 +112,7 @@ Terminal SysAdmin::step(State const** s, Action const* a, Observation const** o,
     assertLegal(a);
 
     auto const rebooting         = isRebootingAction(a);
-    auto const operated_computer = (rebooting) ? a->index() - _size : a->index();
+    auto const operated_computer = (rebooting) ? std::stoi(a->index()) - _size : std::stoi(a->index());
     auto sys_state               = static_cast<SysAdminState const*>(*s);
 
     // step
@@ -126,16 +126,16 @@ Terminal SysAdmin::step(State const** s, Action const* a, Observation const** o,
 
         if (rnd::uniform_rand01() > keeps_running_prob)
         {
-            index = index & ~(0x1 << c); // fail this computer
+            index = std::to_string(std::stoi(index) & ~(0x1 << c)); // fail this computer
         }
     }
 
     if (rebooting && rnd::uniform_rand01() < param._reboot_success_rate)
     {
-        index = index | (0x1 << operated_computer); // make this computer working
+        index = std::to_string(std::stoi(index) | (0x1 << operated_computer)); // make this computer working
     }
 
-    *s        = &_states[index];
+    *s        = &_states[std::stoi(index)];
     sys_state = static_cast<SysAdminState const*>(*s);
 
     // return the correct observation with _observe_prob,
@@ -159,11 +159,11 @@ double SysAdmin::computeObservationProbability(
     State const* new_s) const
 {
 
-    auto const operated_computer = (isRebootingAction(a)) ? a->index() - _size : a->index();
+    auto const operated_computer = (isRebootingAction(a)) ? std::stoi(a->index()) - _size : std::stoi(a->index());
     auto const is_operational =
         static_cast<SysAdminState const*>(new_s)->isOperational(operated_computer);
 
-    return (o->index() == static_cast<int>(is_operational)) ? param._observe_prob
+    return (std::stoi(o->index()) == static_cast<int>(is_operational)) ? param._observe_prob
                                                             : 1 - param._observe_prob;
 }
 
@@ -246,22 +246,26 @@ unsigned int SysAdmin::numFailingNeighbours(int c, State const* state) const
 
 bool SysAdmin::isRebootingAction(Action const* a) const
 {
-    return a->index() >= _size;
+    return std::stoi(a->index()) >= _size;
 }
 
 void SysAdmin::assertLegal(State const* s) const
 {
-    assert(s != nullptr && s->index() >= 0 && s->index() < _S_size);
+    assert(s != nullptr &&std::stoi(s->index())>= 0 &&std::stoi(s->index())< _S_size);
 }
 
 void SysAdmin::assertLegal(Action const* a) const
 {
-    assert(a != nullptr && a->index() >= 0 && a->index() < _A_size);
+    assert(a != nullptr && std::stoi(a->index()) >= 0 && std::stoi(a->index()) < _A_size);
 }
 
 void SysAdmin::assertLegal(Observation const* o) const
 {
-    assert(o != nullptr && o->index() >= 0 && o->index() < _O_size);
+    assert(o != nullptr && std::stoi(o->index()) >= 0 && std::stoi(o->index()) < _O_size);
 }
+
+    void SysAdmin::clearCache() const {
+
+    }
 
 } // namespace domains

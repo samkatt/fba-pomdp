@@ -1,5 +1,5 @@
-#ifndef GRIDWORLDCOFFEE_HPP
-#define GRIDWORLDCOFFEE_HPP
+#ifndef GridWorldButtons_HPP
+#define GridWorldButtons_HPP
 
 #include "domains/POMDP.hpp"
 
@@ -11,6 +11,7 @@
 #include "environment/Observation.hpp"
 #include "environment/State.hpp"
 #include "environment/Terminal.hpp"
+#include "utils/index.hpp"
 class Reward;
 
 namespace domains {
@@ -32,27 +33,32 @@ namespace domains {
  * The goal and starting location are fixed, and at the start it's always dry.
  *
  **/
-class GridWorldCoffee : public POMDP
+class GridWorldButtons : public POMDP
 {
 public:
     // parameters
-    constexpr static double const goal_reward    = 1;
+    constexpr static double const goal_reward_big    = 1000;
+    constexpr static double const goal_reward_small    = 11;
+    constexpr static double const button_press_reward = 50;
     constexpr static double const step_reward    = 0;
-    constexpr static double const same_weather_prob = .7;
     constexpr static double const move_prob      = .95;
-    constexpr static double const slow_move_prob = .1;
+    constexpr static double const door_max_hp = 1;
     constexpr static double const wrong_obs_prob = .1;
+    constexpr static double const button_A_open_prob = 0.9;
+    constexpr static double const button_B_open_prob = 0.9;
+    constexpr static double const button_C_open_prob = 0.9;
 
     /**
      * @brief A state in the grid world problem
      **/
-    class GridWorldCoffeeState : public State
+    class GridWorldButtonsState : public State
     {
 
     public:
         /**
      * @brief A position in the gridworld
-     * x and y are the agent's location, v the "velocity", r the rain, c the carpet
+     * x and y are the agent's location, correct_button the correct button, d1, door 1 open, d2, door 2 open.
+     * d2hp, hit points of door 2
      **/
         struct pos
         {
@@ -67,26 +73,31 @@ public:
             }
         };
 
-        GridWorldCoffeeState(pos agent_pos, unsigned int rain, unsigned int carpet_config, int i) :
+        GridWorldButtonsState(pos agent_pos, unsigned int correct_button, unsigned int d_open, unsigned int d_hp, unsigned int feature_config, int i) :
             _agent_position(agent_pos),
-            _rain(rain),
-            _carpet_config(carpet_config),
+            _correct_button(correct_button),
+            _d_open(d_open),
+            _d_hp(d_hp),
+            _feature_config(feature_config),
             _index(i)
         {
         }
 
         /***** state implementation *****/
-        void index(std::string) final { throw "do not change gridworldcoffee states"; };
+        void index(std::string) final { throw "do not change GridWorldButtons states"; };
         std::string index() const final { return std::to_string(_index); }
         std::string toString() const final
         {
-            return "agent" + _agent_position.toString() + " rain " + std::to_string(_rain) + " carpet configuration " + std::to_string(_carpet_config);
+            return "agent" + _agent_position.toString() + " correct button " + std::to_string(_correct_button)
+            + " door open " + std::to_string(_d_open)
+            + " door hp " + std::to_string(_d_hp);
         }
-        std::vector<int> getFeatureValues() const override;
 
         pos const _agent_position;
-        unsigned int const _rain;
-        unsigned int const _carpet_config;
+        unsigned int const _correct_button;
+        unsigned int const _d_open;
+        unsigned int const _d_hp;
+        unsigned int const _feature_config; // the features we can abstract away for sure. Could also abstract away _d2_hp and _d2_open
 
     private:
         int const _index;
@@ -95,87 +106,76 @@ public:
     /**
      * @brief An observation in the grid world problem (agent x position)
      **/
-    class GridWorldCoffeeObservation : public Observation
+    class GridWorldButtonsObservation : public Observation
     {
     public:
-        GridWorldCoffeeObservation(
-            ::domains::GridWorldCoffee::GridWorldCoffeeState::pos agent_pos,
-//            unsigned int rain,
-//            int carpet_config,
-            int i) :
-            _agent_pos(agent_pos),
-//            _rain(rain),
-//            _carpet_config(carpet_config), // initiated below
+        GridWorldButtonsObservation(
+            ::domains::GridWorldButtons::GridWorldButtonsState::pos agent_pos, unsigned int d_open, int i) :
+            _location_observation(),
+            _d_open(d_open),
             _index(i)
         {
+            _location_observation = locationToObservationLocation(agent_pos);
         }
 
         /**** observation interface ***/
-        void index(std::string /*i*/) final { throw "GridWorldCoffeeObservation::index(i) not allowed"; }
+        void index(std::string /*i*/) final { throw "GridWorldButtonsObservation::index(i) not allowed"; }
         std::string index() const final { return std::to_string(_index); };
-        std::string toString() const final { return _agent_pos.toString(); }
+        std::string toString() const final {
+                return "observation" + std::to_string(_location_observation) + " door1open " + std::to_string(_d_open);
+            }
 
-        ::domains::GridWorldCoffee::GridWorldCoffeeState::pos const _agent_pos;
-//        unsigned int const _rain;
-//        unsigned int const _carpet_config;
+        unsigned int _location_observation;
+        unsigned int const _d_open;
 
     private:
         int const _index;
-
-        std::vector<int> getFeatureValues() const;
     };
 
     /**
      * @brief An action in the grid world problem
      **/
-    class GridWorldCoffeeAction : public Action
+    class GridWorldButtonsAction : public Action
     {
     public:
-        explicit GridWorldCoffeeAction(int i) : _index(i) {}
+        explicit GridWorldButtonsAction(int i) : _index(i) {}
 
-        enum ACTION { UP, RIGHT, DOWN, LEFT };
+        enum ACTION { UP, RIGHT, DOWN, LEFT, PRESS, HIT };
         static std::vector<std::string> const action_descriptions; // initialized in cpp
 
         /*** action interface ***/
-        void index(std::string /*i*/) final { throw "GridWorldCoffeeAction should not edit index"; }
+        void index(std::string /*i*/) final { throw "GridWorldButtonsAction should not edit index"; }
         std::string index() const final { return std::to_string(_index); }
         std::string toString() const final { return action_descriptions[_index]; }
-        std::vector<int> getFeatureValues() const final { return {_index}; };
 
     private:
         int const _index;
     };
 
-    explicit GridWorldCoffee();
+    explicit GridWorldButtons(size_t extra_features);
 
-    static GridWorldCoffeeState::pos const start_location; // = {0,0};
-    static GridWorldCoffeeState::pos const goal_location;
+    static GridWorldButtonsState::pos const start_location; // = {0,0};
+    static std::vector<GridWorldButtons::GridWorldButtonsState::pos> const goal_locations;
+    static std::vector<GridWorldButtons::GridWorldButtonsState::pos> const wall_tiles;
 
     /***** getters of parameters and settings of the domain ****/
-    size_t size() const;
-    double goalReward() const;
-    bool agentOnSlowLocation(GridWorldCoffeeState::pos const& agent_pos) const;
-    bool agentOnCarpet(GridWorldCoffeeState::pos const& agent_pos) const;
-    State const* sampleRandomState() const;
+    size_t size_width() const;
+    size_t size_height() const;
 
-    /**
-     * @brief returns probability of observing a location given the real one (1 dimensional)
-     **/
-    float obsDisplProb(unsigned int loc, unsigned int observed_loc) const;
+    bool foundGoal(GridWorldButtonsState const* s) const;
 
-    bool foundGoal(GridWorldCoffeeState const* s) const;
-
-    GridWorldCoffeeState const*
-        getState(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config) const;
-    GridWorldCoffeeObservation const* getObservation(
-        GridWorldCoffeeState::pos const& agent_pos
-        // , unsigned int const& rain, unsigned int const& carpet_config
-        ) const;
+    GridWorldButtonsState const*
+        getState(GridWorldButtonsState::pos const& agent_pos, unsigned int const& correct_button,
+                 unsigned int const& d_open, unsigned int const& d_hp, unsigned int const& feature_config) const;
+    GridWorldButtonsObservation const* getObservation(GridWorldButtonsState::pos const& agent_pos,
+                                                      unsigned int const& d_open) const;
+    static unsigned int locationToObservationLocation(GridWorldButtons::GridWorldButtonsState::pos agent_pos);
 
     /**
      * @brief applies a move a on the old_pos to get a new pos
      **/
-    GridWorldCoffeeState::pos applyMove(GridWorldCoffeeState::pos const& old_pos, Action const* a) const;
+    GridWorldButtonsState::pos applyMove(GridWorldButtonsState::pos const& old_pos, Action const* a,
+                                         unsigned int const& d_open) const;
 
     /**** POMDP interface ****/
     Action const* generateRandomAction(State const* s) const final;
@@ -195,42 +195,32 @@ public:
 
 private:
     // problem settings
-    size_t const _size = 5;
-    size_t const _carpet_configurations = 2;
+    size_t const _size_width = 3;
+    size_t const _size_height = 6;
+    size_t const _extra_features;
+    std::vector<int> _stepSizes = indexing::stepSize(std::vector<int>(_extra_features, 2));
 
     // initiated in constructor
-    int _A_size = 4;
+    int _A_size = 6;
     int _S_size;
     int _O_size;
 
-    // describes the probability of displacement in our observation in 1 dimension
-    std::vector<float> _obs_displacement_probs = {};
+    std::vector<GridWorldButtonsState> _S       = {};
+    std::vector<GridWorldButtonsObservation> _O = {};
 
-    std::vector<GridWorldCoffeeState> _S       = {};
-    std::vector<GridWorldCoffeeObservation> _O = {};
-
-    /**
-     * @brief returns an observation from position agent_pos and rain
-     **/
-    Observation const* generateObservation(
-        GridWorldCoffeeState::pos const& agent_pos
-//        , unsigned int const& rain, unsigned int const& carpet_config
-        ) const;
-
-    int positionsToIndex(GridWorldCoffeeState::pos const& agent_pos, unsigned int const& rain, unsigned int const& carpet_config)
+    int positionsToIndex(GridWorldButtonsState::pos const& agent_pos, unsigned int const& correct_button,
+                         unsigned int const& d_open, unsigned int const& d_hp, unsigned int const& feature_config)
         const;
-    int positionsToObservationIndex(GridWorldCoffeeState::pos const& agent_pos) const;
-    //, unsigned int const& rain, unsigned int const& carpet_config) const;
-
+    int positionsToObservationIndex(GridWorldButtonsState::pos const& agent_pos, unsigned int const& d_open) const;
 
     /** some functions to check input from system **/
     void assertLegal(Action const* a) const;
     void assertLegal(Observation const* o) const;
     void assertLegal(State const* s) const;
-    void assertLegal(GridWorldCoffeeState::pos const& position) const;
+    void assertLegal(GridWorldButtonsState::pos const& position) const;
 };
 
 } // namespace domains
 
 
-#endif // GRIDWORLDCOFFEE_HPP
+#endif // GridWorldButtons_HPP

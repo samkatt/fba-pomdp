@@ -15,7 +15,7 @@ namespace domains {
 class CoffeeProblemState : public State
 {
 public:
-    explicit CoffeeProblemState(int i);
+    explicit CoffeeProblemState(std::basic_string<char> i);
 
     /*** getters ***/
     bool wet() const;
@@ -25,9 +25,10 @@ public:
     bool rains() const;
 
     /**** State interface ***/
-    void index(int i) final;
-    int index() const final;
+    void index(std::string i) final;
+    std::string index() const final;
     std::string toString() const final;
+    std::vector<int> getFeatureValues() const final;
 
 private:
     IndexState _s;

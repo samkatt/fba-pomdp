@@ -14,12 +14,13 @@ class CoffeeProblemObservation : public Observation
 
 {
 public:
-    explicit CoffeeProblemObservation(int i);
+    explicit CoffeeProblemObservation(std::basic_string<char> i);
 
     /**** Observation interface ***/
-    void index(int i) final;
-    int index() const final;
+    void index(std::string i) final;
+    std::string index() const final;
     std::string toString() const final;
+    std::vector<int> getFeatureValues() const final;
 
 private:
     IndexObservation _o;

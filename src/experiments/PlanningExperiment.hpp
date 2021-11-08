@@ -1,7 +1,7 @@
 #ifndef PLANNINGEXPERIMENT_HPP
 #define PLANNINGEXPERIMENT_HPP
 
-#include "boost/timer.hpp"
+#include "boost/timer/timer.hpp"
 #include <vector>
 
 #include "easylogging++.h"

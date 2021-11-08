@@ -2,6 +2,7 @@
 #define INDEXEDELEMENT_HPP
 
 #include <string>
+#include <vector>
 
 namespace indexing {
 
@@ -12,20 +13,21 @@ template<typename T>
 class IndexedElement : public T
 {
 public:
-    explicit IndexedElement(int i) :
-            _index(i){
-
+    explicit IndexedElement(std::string i) :
+            _index(std::move(i)){
             };
 
     /***** T implementation *****/
-    void index(int i) final { _index = i; };
+    void index(std::string i) final { _index = i; };
 
-    int index() const final { return _index; }
+    std::string index() const final { return _index; }
 
-    std::string toString() const final { return "(" + std::to_string(_index) + ")"; }
+    std::string toString() const final { return "(" + _index + ")"; }
+
+    virtual std::vector<int> getFeatureValues() const final { return {std::stoi(_index)}; };  //{  throw "should not be called here"; };
 
 private:
-    int _index;
+    std::string _index;
 };
 
 } // namespace indexing

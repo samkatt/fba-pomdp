@@ -26,7 +26,7 @@ FactoredTiger::FactoredTiger(FactoredTigerDomainType type, size_t num_irrelevant
 
 FactoredTiger::TigerLocation FactoredTiger::tigerLocation(State const* s) const
 {
-    return (s->index() < _S_size / 2) ? LEFT : RIGHT;
+    return (std::stoi(s->index()) < _S_size / 2) ? LEFT : RIGHT;
 }
 
 Action const* FactoredTiger::generateRandomAction(State const* /*s*/) const
@@ -60,13 +60,13 @@ double FactoredTiger::computeObservationProbability(
     State const* new_s) const
 {
     // when opening door, there is a 50/50 % for each observation
-    if (a->index() != OBSERVE)
+    if (std::stoi(a->index()) != OBSERVE)
     {
         return .5;
     }
 
     // when listening: .85 probability for hearing correctly
-    return (tigerLocation(new_s) == o->index()) ? .85 : .15;
+    return (tigerLocation(new_s) == std::stoi(o->index())) ? .85 : .15;
 }
 
 State const* FactoredTiger::sampleStartState() const
@@ -83,7 +83,7 @@ Terminal
     assert(o != nullptr);
     assert(r != nullptr);
 
-    if (a->index() == TigerAction::OBSERVE)
+    if (std::stoi(a->index()) == TigerAction::OBSERVE)
     // listening does not change the state
     // and return correct observation by some probability
     {
@@ -107,7 +107,7 @@ Terminal
            // and reward associated with the state/action pair
     {
         // if action opens the same door as the state then good, otherwise bad
-        r->set((a->index() == tigerLocation(*s)) ? 10 : -100);
+        r->set((std::stoi(a->index()) == tigerLocation(*s)) ? 10 : -100);
         *o = (rnd::boolean()) ? &_observations[0] : &_observations[1];
         *s = sampleStartState();
     }
@@ -119,7 +119,7 @@ Terminal
 
     // terminated if opening door && episodic type
     return Terminal(
-        a->index() != TigerAction::OBSERVE && _type == FactoredTigerDomainType::EPISODIC);
+        std::stoi(a->index()) != TigerAction::OBSERVE && _type == FactoredTigerDomainType::EPISODIC);
 }
 
 void FactoredTiger::releaseObservation(Observation const* o) const
@@ -150,17 +150,21 @@ State const* FactoredTiger::copyState(State const* s) const
 
 void FactoredTiger::assertLegal(Action const* a) const
 {
-    assert(a != nullptr && a->index() >= 0 && a->index() <= _A_size);
+    assert(a != nullptr && std::stoi(a->index()) >= 0 && std::stoi(a->index()) <= _A_size);
 }
 
 void FactoredTiger::assertLegal(State const* s) const
 {
-    assert(s != nullptr && s->index() >= 0 && s->index() < _S_size);
+    assert(s != nullptr &&std::stoi(s->index())>= 0 &&std::stoi(s->index())< _S_size);
 }
 
 void FactoredTiger::assertLegal(Observation const* o) const
 {
-    assert(o != nullptr && o->index() >= 0 && o->index() < _O_size);
+    assert(o != nullptr && std::stoi(o->index()) >= 0 && std::stoi(o->index()) < _O_size);
 }
+
+    void FactoredTiger::clearCache() const {
+
+    }
 
 } // namespace domains
