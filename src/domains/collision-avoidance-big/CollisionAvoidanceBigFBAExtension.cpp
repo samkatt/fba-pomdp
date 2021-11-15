@@ -13,14 +13,20 @@ CollisionAvoidanceBigFBAExtension::CollisionAvoidanceBigFBAExtension(
     int num_obstacles,
     domains::CollisionAvoidanceBig::VERSION version) :
         _domain_feature_size(
-            std::vector<int>(5 + num_obstacles, grid_height),
+            std::vector<int>(6 + num_obstacles, grid_height),
             std::vector<int>(num_obstacles, grid_height)),
         _state_prior(
-            grid_width * grid_height * 3 * 3 * 2 * static_cast<int>(std::pow(grid_height, num_obstacles)))
+            grid_width * grid_height * 2 * 3 * 2 * 3 * static_cast<int>(std::pow(grid_height, num_obstacles)))
 {
 
     auto const domain =
         domains::CollisionAvoidanceBig(grid_width, grid_height, num_obstacles, version);
+
+    _domain_feature_size._S[0] = grid_width;
+    _domain_feature_size._S[2] = _num_speeds;
+    _domain_feature_size._S[3] = _num_traffics;
+    _domain_feature_size._S[4] = _num_timeofdays;
+    _domain_feature_size._S[5] = _num_obstacletypes;
 
     // set domain state prior
     if (version == domains::CollisionAvoidanceBig::INIT_RANDOM_POSITION) {
@@ -30,11 +36,14 @@ CollisionAvoidanceBigFBAExtension::CollisionAvoidanceBigFBAExtension(
             for (auto speed = 0; speed < _num_speeds; ++speed) {
                 for (auto traffic = 0; traffic < _num_traffics; ++traffic) {
                     for (auto timeofday = 0; timeofday < _num_timeofdays; ++timeofday) {
-                        std::vector<int> obstacles(num_obstacles);
-                        do {
-                            _state_prior.setRawValue(
-                                    std::stoi(domain.getState(grid_width - 1, agent_y, speed, traffic, timeofday, obstacles)->index()), init_state_prob);
-                        } while (!indexing::increment(obstacles, _domain_feature_size._O));
+                        for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) {
+                            std::vector<int> obstacles(num_obstacles);
+                            do {
+                                auto const state_prob = init_state_prob* _obstacletype_probs[obstacletype + _num_obstacletypes*timeofday];
+                                _state_prior.setRawValue(
+                                        std::stoi(domain.getState(grid_width - 1, agent_y, speed, traffic, timeofday, obstacletype, obstacles)->index()), state_prob);
+                            } while (!indexing::increment(obstacles, _domain_feature_size._O));
+                        }
                     }
                 }
             }
@@ -48,8 +57,12 @@ CollisionAvoidanceBigFBAExtension::CollisionAvoidanceBigFBAExtension(
         for (auto speed = 0; speed < _num_speeds; ++speed) {
             for (auto traffic = 0; traffic < _num_traffics; ++traffic) {
                 for (auto timeofday = 0; timeofday < _num_timeofdays; ++timeofday) {
-                    _state_prior.setRawValue(
-                            std::stoi(domain.getState(grid_width - 1, grid_height / 2, speed, traffic, timeofday, obstacles)->index()), init_state_prob);
+                    for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) {
+                        auto const state_prob = init_state_prob* _obstacletype_probs[obstacletype + _num_obstacletypes*timeofday];
+                        _state_prior.setRawValue(
+                                std::stoi(domain.getState(grid_width - 1, grid_height / 2, speed, traffic, timeofday, obstacletype,
+                                                          obstacles)->index()), state_prob);
+                    }
                 }
             }
         }

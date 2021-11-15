@@ -36,12 +36,6 @@ GridWorldCoffeeBig::GridWorldCoffeeBig(size_t extra_features, bool store_statesp
     _feature_space[0] = _size;
     _feature_space[1] = _size;
 
-    if (_extra_features < 5) {
-        _store_statespace = true;
-    } else {
-        _store_statespace = false;
-    }
-
     // Number of states, 5x5 grid, rain/no rain, carpet on tile (0 or 1, 1 per tile).
     if (_store_statespace) {
         _S_size = (_size * _size * 2) * std::pow(2, _extra_features); //, _S.reserve(_S_size);
@@ -123,7 +117,7 @@ float GridWorldCoffeeBig::obsDisplProb(unsigned int loc, unsigned int observed_l
 
 float GridWorldCoffeeBig::believedTransitionProb(bool const& rain, int const& features_on) {
     return rain ? rain_move_prob*pow(move_prob_reduction, features_on)  // rain
-    : move_prob*pow(move_prob_reduction, features_on);; // no rain
+    : move_prob*pow(move_prob_reduction, features_on); // no rain
 }
 
 // Todo: change for the new carpet tiles? CHECK IF WORKS

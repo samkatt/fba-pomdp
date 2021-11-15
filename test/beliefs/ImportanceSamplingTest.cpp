@@ -21,7 +21,7 @@ SCENARIO("weighted filter", "[state estimation][weighted filter]")
     GIVEN("a weighted filter of size 1")
     {
         auto filter = WeightedFilter<State const*>();
-        auto s      = IndexState(0);
+        auto s      = IndexState("0");
 
         THEN("sampling from 1 particle should return the same state")
         {
@@ -49,7 +49,7 @@ SCENARIO("weighted filter", "[state estimation][weighted filter]")
         WHEN("the particles are the same state")
         {
 
-            auto s = IndexState(0);
+            auto s = IndexState("0");
             for (auto i = 0; i < 4; ++i)
             { filter.add(&s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 100)); }
 
@@ -61,20 +61,20 @@ SCENARIO("weighted filter", "[state estimation][weighted filter]")
         {
             std::vector<IndexState> states;
             states.reserve(4);
-            for (auto i = 0; i < 4; ++i) { states.emplace_back(IndexState(2)); }
+            for (auto i = 0; i < 4; ++i) { states.emplace_back(IndexState("2")); }
 
             for (auto const& s : states)
             { filter.add(&s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 100)); }
 
             THEN("sampling should return a state with that specific index")
-            REQUIRE(filter.sample()->index() == 2);
+            REQUIRE(filter.sample()->index() == "2");
         }
     }
 
     GIVEN("A filter of 3 particles, of which 1 with relative large weight")
     {
         auto b = WeightedFilter<State const*>();
-        auto s = IndexState(0), probable_s = IndexState(1);
+        auto s = IndexState("0"), probable_s = IndexState("1");
 
         b.add(&s);
         b.add(&s);
@@ -87,7 +87,7 @@ SCENARIO("weighted filter", "[state estimation][weighted filter]")
     GIVEN("A filter of 3 particles, of which 1 with relative small weight")
     {
         auto b = WeightedFilter<State const*>();
-        auto s = IndexState(0), improbable_s = IndexState(1);
+        auto s = IndexState("0"), improbable_s = IndexState("1");
 
         b.add(&s);
         b.add(&s);
@@ -111,7 +111,7 @@ SCENARIO("importance sampling", "[state estimation][weighted filter][importance 
         filter.add(s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 10));
         beliefs::ImportanceSampler belief(filter, 1);
 
-        REQUIRE(belief.sample()->index() == 0);
+        REQUIRE(belief.sample()->index() == "0");
 
         WHEN("we perform a sample update")
         {
@@ -119,7 +119,7 @@ SCENARIO("importance sampling", "[state estimation][weighted filter][importance 
             IndexObservation o(0);
 
             belief.updateEstimation(a, &o, d);
-            REQUIRE(belief.sample()->index() == 0);
+            REQUIRE(belief.sample()->index() == "0");
             d.releaseAction(a);
         }
 
@@ -128,7 +128,7 @@ SCENARIO("importance sampling", "[state estimation][weighted filter][importance 
         belief = beliefs::ImportanceSampler(1);
         belief.initiate(d);
 
-        REQUIRE(belief.sample()->index() == 0);
+        REQUIRE(belief.sample()->index() == "0");
 
         WHEN("we perform a sample update")
         {
@@ -136,7 +136,7 @@ SCENARIO("importance sampling", "[state estimation][weighted filter][importance 
             IndexObservation o(0);
 
             belief.updateEstimation(a, &o, d);
-            REQUIRE(belief.sample()->index() == 0);
+            REQUIRE(belief.sample()->index() == "0");
 
             d.releaseAction(a);
         }
@@ -151,7 +151,7 @@ SCENARIO("importance sampling", "[state estimation][weighted filter][importance 
         beliefs::ImportanceSampler belief(10);
         belief.initiate(d);
 
-        REQUIRE(belief.sample()->index() == 0);
+        REQUIRE(belief.sample()->index() == "0");
 
         WHEN("we perform a sample update")
         {
@@ -159,7 +159,7 @@ SCENARIO("importance sampling", "[state estimation][weighted filter][importance 
             IndexObservation o(0);
 
             belief.updateEstimation(a, &o, d);
-            REQUIRE(belief.sample()->index() == 1);
+            REQUIRE(belief.sample()->index() == "1");
 
             d.releaseAction(a);
         }

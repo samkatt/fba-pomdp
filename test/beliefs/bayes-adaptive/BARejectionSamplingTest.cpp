@@ -28,18 +28,18 @@ TEST_CASE("bayes-adaptive rejection sampling", "[state estimation][flat filter][
 
         THEN("Update should linear increment and decrement belief")
         {
-            auto a = IndexAction(domains::LinearDummyDomain::Actions::FORWARD);
-            auto o = IndexObservation(0); // generated observation SHOULD BE 0
+            auto a = IndexAction(std::to_string(domains::LinearDummyDomain::Actions::FORWARD));
+            auto o = IndexObservation("0"); // generated observation SHOULD BE 0
 
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 1);
+            REQUIRE(b.sample()->index() ==std::to_string(std::stoi(s->index())+ 1));
 
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 2);
+            REQUIRE(b.sample()->index() ==std::to_string(std::stoi(s->index())+ 2));
 
-            a = IndexAction(domains::LinearDummyDomain::Actions::BACKWARD);
+            a = IndexAction(std::to_string(domains::LinearDummyDomain::Actions::BACKWARD));
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 1);
+            REQUIRE(b.sample()->index() ==std::to_string(std::stoi(s->index())+ 1));
         }
 
         b.free(d);

@@ -32,26 +32,36 @@ public:
 
 private:
     int _grid_width, _grid_height, _num_obstacles;
-    int const _num_speeds = 3;
+    int const _num_speeds = 2;
     int const _num_traffics = 3;
     int const _num_timeofdays = 2;
+    int const _num_obstacletypes = 3;
+    int x_agent_f = 0;
+    int y_agent_f = 1;
+    int speed_f = 2;
+    int traffic_f = 3;
+    int timeofday_f = 4;
+    int obstacle_type_f = 5;
+    int obstacle_start = 6;
 
-    Domain_Size _domain_size = {_grid_width * _grid_height * _num_speeds * _num_traffics * _num_timeofdays
+    Domain_Size _domain_size = {_grid_width * _grid_height * _num_speeds * _num_traffics * _num_timeofdays * _num_obstacletypes
                                     * static_cast<int>(std::pow(_grid_height, _num_obstacles)),
                                 domains::CollisionAvoidanceBig::NUM_ACTIONS,
-                                static_cast<int>(std::pow(_grid_height, _num_obstacles))};
+                                static_cast<int>(_grid_width * _num_timeofdays * _num_obstacletypes * std::pow(_grid_height, _num_obstacles))};
 
-    std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>> _states{
+    std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>>> _states{
             static_cast<size_t>(_grid_width),
-            std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>(
+            std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>>(
                     _grid_height,
-                    std::vector<std::vector<std::vector<std::vector<State const*>>>>(
+                    std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>(
                             _num_speeds, //speed
-                            std::vector<std::vector<std::vector<State const*>>>(
+                            std::vector<std::vector<std::vector<std::vector<State const*>>>>(
                                     _num_traffics, //traffic
-                                    std::vector<std::vector<State const*>>(
+                                    std::vector<std::vector<std::vector<State const*>>>(
                                             _num_timeofdays, //timeofday
-                                            std::vector<State const*>(std::pow(_grid_height, _num_obstacles))))))};
+                                            std::vector<std::vector<State const*>>(
+                                                    _num_obstacletypes, //obstacletype
+                                                    std::vector<State const*>(std::pow(_grid_height, _num_obstacles)))))))};
 };
 
 }} // namespace bayes_adaptive::domain_extensions

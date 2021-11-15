@@ -32,7 +32,7 @@ TEST_CASE("update", "[belief][point estimator]")
 
             b.updateEstimation(a, o, d);
 
-            REQUIRE(b.sample()->index() == 1);
+            REQUIRE(b.sample()->index() == "1");
 
             d.releaseAction(a);
             d.releaseObservation(o);

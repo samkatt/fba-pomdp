@@ -15,7 +15,7 @@ TEST_CASE("sampling", "[state estimation][flat filter]")
 {
     GIVEN("A filter of size 1")
     {
-        auto s      = new IndexState(0);
+        auto s      = new IndexState("0");
         auto filter = FlatFilter<State const*>({s});
 
         REQUIRE(filter.sample() == s);
@@ -29,7 +29,7 @@ TEST_CASE("sampling", "[state estimation][flat filter]")
 
     GIVEN("A filter of multiple particles of the same state")
     {
-        auto s = new IndexState(0);
+        auto s = new IndexState("0");
         for (auto i = 0; i < size; ++i) { states.push_back(s); }
 
         FlatFilter<State const*> filter(states);
@@ -40,11 +40,11 @@ TEST_CASE("sampling", "[state estimation][flat filter]")
 
     GIVEN("A filter with multiple particles of the same index")
     {
-        for (auto i = 0; i < size; i++) { states.emplace_back(new IndexState(10)); }
+        for (auto i = 0; i < size; i++) { states.emplace_back(new IndexState("10")); }
 
         FlatFilter<State const*> filter(states);
 
-        REQUIRE(filter.sample()->index() == 10);
+        REQUIRE(filter.sample()->index() == "10");
 
         for (auto s : states) { delete s; }
     }
@@ -68,18 +68,18 @@ TEST_CASE("Manager initiate and update tests", "[state estimation][flat filter]"
 
         THEN("Update should linear increment and decrement belief")
         {
-            auto a = IndexAction(domains::LinearDummyDomain::Actions::FORWARD);
-            auto o = IndexObservation(0); // generated observation SHOULD BE 0
+            auto a = IndexAction(std::to_string(domains::LinearDummyDomain::Actions::FORWARD));
+            auto o = IndexObservation("0"); // generated observation SHOULD BE 0
 
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 1);
+            REQUIRE(b.sample()->index() ==std::to_string(std::stoi(s->index())+ 1));
 
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 2);
+            REQUIRE(b.sample()->index() ==std::to_string(std::stoi(s->index())+ 2));
 
-            a = IndexAction(domains::LinearDummyDomain::Actions::BACKWARD);
+            a = IndexAction(std::to_string(domains::LinearDummyDomain::Actions::BACKWARD));
             b.updateEstimation(&a, &o, d);
-            REQUIRE(b.sample()->index() ==std::stoi(s->index())+ 1);
+            REQUIRE(b.sample()->index() ==std::to_string(std::stoi(s->index())+ 1));
         }
 
         b.free(d);

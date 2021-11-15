@@ -62,14 +62,14 @@ SCENARIO(
 
                 REQUIRE(
                     ba_state->model()->transitionExpectation(
-                        state, stay_action)[stay_state->index()]
+                        state, stay_action)[std::stoi(stay_state->index())]
                     == domains::CollisionAvoidance::BLOCK_MOVE_PROB);
                 REQUIRE(
-                    ba_state->model()->transitionExpectation(state, stay_action)[up_state->index()]
+                    ba_state->model()->transitionExpectation(state, stay_action)[std::stoi(up_state->index())]
                     == ((1 - d.BLOCK_MOVE_PROB) / 2));
                 REQUIRE(
                     ba_state->model()->transitionExpectation(
-                        state, stay_action)[down_state->index()]
+                        state, stay_action)[std::stoi(down_state->index())]
                     == ((1 - d.BLOCK_MOVE_PROB) / 2));
 
                 d.releaseState(state);
@@ -90,11 +90,11 @@ SCENARIO(
                 auto const up_state   = d.getState(x - 1, y, {block_pos + 1});
 
                 REQUIRE(
-                    ba_state->model()->transitionExpectation(state, stay_action)[up_state->index()]
+                    ba_state->model()->transitionExpectation(state, stay_action)[std::stoi(up_state->index())]
                     == ((1 - d.BLOCK_MOVE_PROB) / 2));
                 REQUIRE(
                     ba_state->model()->transitionExpectation(
-                        state, stay_action)[stay_state->index()]
+                        state, stay_action)[std::stoi(stay_state->index())]
                     == ((1 + d.BLOCK_MOVE_PROB) / 2));
 
                 d.releaseState(state);
@@ -116,11 +116,11 @@ SCENARIO(
 
                 REQUIRE(
                     ba_state->model()->transitionExpectation(
-                        state, stay_action)[down_state->index()]
+                        state, stay_action)[std::stoi(down_state->index())]
                     == ((1 - d.BLOCK_MOVE_PROB) / 2));
                 REQUIRE(
                     ba_state->model()->transitionExpectation(
-                        state, stay_action)[stay_state->index()]
+                        state, stay_action)[std::stoi(stay_state->index())]
                     == ((1 + d.BLOCK_MOVE_PROB) / 2));
 
                 d.releaseState(state);
@@ -136,7 +136,7 @@ SCENARIO(
 
             for (auto i = 0; i < 10; ++i)
             {
-                auto random_state  = ext.getState(rnd::slowRandomInt(0, S));
+                auto random_state  = ext.getState(std::to_string(rnd::slowRandomInt(0, S)));
                 auto random_action = d.generateRandomAction(random_state);
 
                 // only care about those state than can actually step
@@ -153,13 +153,13 @@ SCENARIO(
 
                 THEN("the new y position should be within bounds")
                 {
-                    if (random_action->index() == d.MOVE_DOWN)
+                    if (random_action->index() == std::to_string(d.MOVE_DOWN))
                     {
                         REQUIRE(d.yAgent(new_state) <= d.yAgent(random_state));
-                    } else if (random_action->index() == d.MOVE_UP)
+                    } else if (random_action->index() == std::to_string(d.MOVE_UP))
                     {
                         REQUIRE(d.yAgent(new_state) >= d.yAgent(random_state));
-                    } else if (random_action->index() == d.STAY)
+                    } else if (random_action->index() == std::to_string(d.STAY))
                     {
                         REQUIRE(d.yAgent(new_state) == d.yAgent(random_state));
                     }
@@ -345,7 +345,7 @@ SCENARIO(
 
             for (auto i = 0; i < 10; ++i)
             {
-                auto random_state  = ext.getState(rnd::slowRandomInt(0, S));
+                auto random_state  = ext.getState(std::to_string(rnd::slowRandomInt(0, S)));
                 auto random_action = d.generateRandomAction(random_state);
 
                 // only care about those state than can actually step
@@ -362,13 +362,13 @@ SCENARIO(
 
                 THEN("the new y position should be within bounds")
                 {
-                    if (random_action->index() == d.MOVE_DOWN)
+                    if (random_action->index() == std::to_string(d.MOVE_DOWN))
                     {
                         REQUIRE(d.yAgent(new_state) <= d.yAgent(random_state));
-                    } else if (random_action->index() == d.MOVE_UP)
+                    } else if (random_action->index() == std::to_string(d.MOVE_UP))
                     {
                         REQUIRE(d.yAgent(new_state) >= d.yAgent(random_state));
-                    } else if (random_action->index() == d.STAY)
+                    } else if (random_action->index() == std::to_string(d.STAY))
                     {
                         REQUIRE(d.yAgent(new_state) == d.yAgent(random_state));
                     }
@@ -397,7 +397,7 @@ SCENARIO(
 
             for (auto i = 0; i < 10; ++i)
             {
-                auto random_state  = ext.getState(rnd::slowRandomInt(0, S));
+                auto random_state  = ext.getState(std::to_string(rnd::slowRandomInt(0, S)));
                 auto random_action = d.generateRandomAction(random_state);
 
                 // only care about those state than can actually step
@@ -414,13 +414,13 @@ SCENARIO(
 
                 THEN("the new y position should be within bounds")
                 {
-                    if (random_action->index() == d.MOVE_DOWN)
+                    if (random_action->index() == std::to_string(d.MOVE_DOWN))
                     {
                         REQUIRE(d.yAgent(new_state) <= d.yAgent(random_state));
-                    } else if (random_action->index() == d.MOVE_UP)
+                    } else if (random_action->index() == std::to_string(d.MOVE_UP))
                     {
                         REQUIRE(d.yAgent(new_state) >= d.yAgent(random_state));
-                    } else if (random_action->index() == d.STAY)
+                    } else if (random_action->index() == std::to_string(d.STAY))
                     {
                         REQUIRE(d.yAgent(new_state) == d.yAgent(random_state));
                     }
@@ -490,7 +490,7 @@ SCENARIO(
         auto const f_ext =
             bayes_adaptive::domain_extensions::CollisionAvoidanceFBAExtension(w, h, n, d.type());
         auto const p = priors::CollisionAvoidanceFactoredPrior(c);
-        auto const s = IndexState(0);
+        auto const s = IndexState("0");
 
         auto const fbapomdp_state = p.sampleCorrectGraphState(&s);
         REQUIRE(fbapomdp_state != 0);
@@ -499,7 +499,7 @@ SCENARIO(
 
         THEN("The number of values of the features should be equal to the grid size")
         {
-            auto const a = IndexAction(rnd::slowRandomInt(0, ext.domainSize()._A));
+            auto const a = IndexAction(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._A)));
 
             REQUIRE(model->transitionNode(&a, 0).range() == 5);
             REQUIRE(model->transitionNode(&a, 1).range() == 5);
@@ -552,7 +552,7 @@ SCENARIO(
 
         auto const d = domains::CollisionAvoidance(w, h, n);
         auto const p = factory::makeFBAPOMDPPrior(d, c);
-        auto const s = IndexState(0);
+        auto const s = IndexState("0");
 
         auto const fbapomdp_template_state = p->sampleCorrectGraphState(&s);
 
@@ -565,7 +565,7 @@ SCENARIO(
             auto const correct_prior      = p->computePriorModel(correct_topologies);
 
             auto const random_feature = rnd::slowRandomInt(0, 3);
-            auto const random_action  = IndexAction(rnd::slowRandomInt(0, 3));
+            auto const random_action  = IndexAction(std::to_string(rnd::slowRandomInt(0, 3)));
 
             // some silly /trivial tests to make sure at least something is okay
             REQUIRE(

@@ -33,7 +33,7 @@ SCENARIO("factored dummy extension test", "[bayes-adaptive][dummy][factored]")
 
             for (auto i = 0; i < 10; ++i)
             {
-                auto s = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S - 1));
+                auto s = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S - 1)));
                 auto a = d.generateRandomAction(s);
 
                 auto s_old = d.copyState(s);
@@ -57,13 +57,13 @@ SCENARIO("factored dummy extension test", "[bayes-adaptive][dummy][factored]")
             for (auto i = 0; i < 10; ++i)
             {
 
-                auto s = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S));
+                auto s = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S)));
 
                 auto s_old = d.copyState(s);
                 auto a     = d.generateRandomAction(s);
 
                 d.step(&s, a, &o, &r);
-                if (s->index() == ext.domainSize()._S - 1)
+                if (s->index() == std::to_string(ext.domainSize()._S - 1))
                 {
                     REQUIRE(ext.reward(s_old, a, s).toDouble() == 0.0);
                 } else
@@ -77,7 +77,7 @@ SCENARIO("factored dummy extension test", "[bayes-adaptive][dummy][factored]")
                 d.releaseObservation(o);
             }
 
-            auto s     = ext.getState(ext.domainSize()._S - 1);
+            auto s     = ext.getState(std::to_string(ext.domainSize()._S - 1));
             auto a     = d.generateRandomAction(s);
             auto s_old = d.copyState(s);
 

@@ -14,6 +14,8 @@
 #include "environment/Horizon.hpp"
 #include "environment/Return.hpp"
 
+#include "boost/timer/timer.hpp"
+
 namespace experiment { namespace planning {
 
 void Result::log(el::base::type::ostream_t& os) const

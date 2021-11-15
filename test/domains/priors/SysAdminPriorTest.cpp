@@ -148,7 +148,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
 
         WHEN("entering a state where 1 computer is working")
         {
-            auto failing_state  = IndexState(0);
+            auto failing_state  = IndexState("0");
             auto fixed_computer = rnd::slowRandomInt(0, size);
 
             auto new_s = d.fixComputer(&failing_state, fixed_computer);
@@ -188,11 +188,11 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                 {
                     for (auto a = 0; a < size; ++a)
                     {
-                        auto reboot = IndexAction(a + size);
+                        auto reboot = IndexAction(std::to_string(a + size));
 
                         for (auto a_2 = 0; a_2 < size; ++a_2)
                         {
-                            auto observe = IndexAction(a_2);
+                            auto observe = IndexAction(std::to_string(a_2));
                             if (state.isOperational(a))
                             {
                                 REQUIRE(
@@ -226,7 +226,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                     bapomdp_state->model()->count(s_compl, &observe, s_compl)
                     == Approx(total_counts * pow(1 - d.params()->_fail_prob, 2)));
 
-                auto reboot = IndexAction(size);
+                auto reboot = IndexAction(std::to_string(size));
                 REQUIRE(
                     bapomdp_state->model()->count(s_init, &reboot, s_compl)
                     == Approx(
@@ -243,7 +243,7 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                               + d.params()->_fail_prob * (1 - d.params()->_fail_prob)
                                     * d.params()->_reboot_success_rate)));
 
-                reboot = IndexAction(size + broken_computer);
+                reboot = IndexAction(std::to_string(size + broken_computer));
                 REQUIRE(
                     bapomdp_state->model()->count(s_compl, &reboot, s_compl)
                     == Approx(
@@ -528,12 +528,12 @@ SCENARIO("sysadmin bayes-adaptive observation prior", "[bayes-adaptive][sysadmin
                 "every observation count really just depends on whether the computer is "
                 "operational")
             {
-                auto working = IndexObservation(domains::SysAdmin::OPERATIONAL),
-                     failing = IndexObservation(domains::SysAdmin::FAILING);
+                auto working = IndexObservation(std::to_string(domains::SysAdmin::OPERATIONAL)),
+                     failing = IndexObservation(std::to_string(domains::SysAdmin::FAILING));
 
                 for (auto i = 0; i < 100; ++i)
                 {
-                    auto s        = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S));
+                    auto s        = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S)));
                     auto computer = rnd::slowRandomInt(0, size);
 
                     auto a = rnd::boolean() ? d.observeAction(computer) : d.rebootAction(computer);
@@ -585,8 +585,8 @@ SCENARIO(
 
         THEN("every observation count really just depends on whether the computer is operational")
         {
-            auto working = IndexObservation(domains::SysAdmin::OPERATIONAL),
-                 failing = IndexObservation(domains::SysAdmin::FAILING);
+            auto working = IndexObservation(std::to_string(domains::SysAdmin::OPERATIONAL)),
+                 failing = IndexObservation(std::to_string(domains::SysAdmin::FAILING));
 
             for (auto i = 0; i < 100; ++i)
             {
@@ -598,13 +598,13 @@ SCENARIO(
                 auto a = rnd::boolean() ? d.observeAction(computer) : d.rebootAction(computer);
 
                 REQUIRE(
-                    ba_s->model()->observationNode(a, 0).count(input_features, working.index())
+                    ba_s->model()->observationNode(a, 0).count(input_features, std::stoi(working.index()))
                     == (input_features[computer]
                             ? Approx(total_counts * d.params()->_observe_prob)
                             : Approx(total_counts * (1 - d.params()->_observe_prob))));
 
                 REQUIRE(
-                    ba_s->model()->observationNode(a, 0).count(input_features, failing.index())
+                    ba_s->model()->observationNode(a, 0).count(input_features, std::stoi(failing.index()))
                     == (input_features[computer]
                             ? Approx(total_counts * (1 - d.params()->_observe_prob))
                             : Approx(total_counts * d.params()->_observe_prob)));
@@ -862,7 +862,7 @@ SCENARIO("linear sysadmin factored prior", "[bayes-adaptive][sysadmin][factored]
 
         THEN("all transition nodes should have all parents")
         {
-            IndexAction random_action(rnd::slowRandomInt(0, ext.domainSize()._A));
+            IndexAction random_action(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._A)));
             int random_computer(rnd::slowRandomInt(0, 4));
 
             REQUIRE(

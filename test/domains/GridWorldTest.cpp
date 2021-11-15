@@ -132,7 +132,7 @@ SCENARIO("GridWorld dynamics", "[domain][gridworld]")
 
             auto next_state = static_cast<State const*>(d.getState({1, 0}, {size - 1, size - 1}));
 
-            REQUIRE((s->index() == old_state_index ||std::stoi(s->index())== next_state->index()));
+            REQUIRE((s->index() == old_state_index ||s->index()== next_state->index()));
 
             d.releaseObservation(o);
             d.releaseState(next_state);
@@ -170,7 +170,7 @@ SCENARIO("gridworld POMDP functions", "[domain][gridworld]")
 
         for (auto i = 0; i < 4; ++i) // hardcoded |A|
         {
-            REQUIRE(actions[i]->index() == i);
+            REQUIRE(actions[i]->index() == std::to_string(i));
             d.releaseAction(actions[i]);
         }
     }

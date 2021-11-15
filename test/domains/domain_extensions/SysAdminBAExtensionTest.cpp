@@ -31,9 +31,9 @@ SCENARIO("bayes-adaptive sysadmin", "[domain][bayes-adaptive][sysadmin]")
             {
                 auto r = rnd::slowRandomInt(0, ext.domainSize()._S);
 
-                auto s = ext.getState(r);
+                auto s = ext.getState(std::to_string(r));
 
-                REQUIRE(s->index() == r);
+                REQUIRE(s->index() == std::to_string(r));
 
                 d.releaseState(s);
             }
@@ -43,9 +43,9 @@ SCENARIO("bayes-adaptive sysadmin", "[domain][bayes-adaptive][sysadmin]")
         {
             for (auto i = 0; i < 10; ++i)
             {
-                auto s     = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S));
+                auto s     = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S)));
                 auto a     = d.generateRandomAction(s);
-                auto new_s = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S));
+                auto new_s = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S)));
 
                 REQUIRE(!ext.terminal(s, a, new_s).terminated());
 
@@ -60,8 +60,8 @@ SCENARIO("bayes-adaptive sysadmin", "[domain][bayes-adaptive][sysadmin]")
             for (auto i = 0; i < 10; ++i)
             {
 
-                auto s     = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S));
-                auto new_s = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S));
+                auto s     = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S)));
+                auto new_s = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S)));
 
                 auto observe = d.observeAction(rnd::slowRandomInt(0, size));
                 auto reboot  = d.rebootAction(rnd::slowRandomInt(0, size));

@@ -53,9 +53,10 @@ private:
     int const _width;
     int const _num_obstacles;
 
-    int const _num_speeds = 3;
+    int const _num_speeds = 2;
     int const _num_traffics = 3;
     int const _num_timeofdays = 2;
+    int const _num_obstacletypes = 3;
 
     float const _noise;
     float const _total_counts;
@@ -98,23 +99,29 @@ private:
     // TODO only using at most 1 obstacle now
     static int const _NUM_ACTIONS = 3;
 
+    constexpr static double const BLOCK_MOVE_PROB = .5;
+    constexpr static double const MOVE_PROB_FAST = 0.7;
+    constexpr static double const MOVE_PROB_SLOW = 0.7;
+
     static int const _AGENT_X_FEATURE = 0;
     static int const _AGENT_Y_FEATURE = 1;
-    static int const _SPEED_FEATURE = 3;
-    static int const _TRAFFIC_FEATURE = 4;
-    static int const _TIMEOFDAY_FEATURE = 5;
+    static int const _SPEED_FEATURE = 2;
+    static int const _TRAFFIC_FEATURE = 3;
+    static int const _TIMEOFDAY_FEATURE = 4;
+    static int const _OBTACLETYPE_FEATURE = 5;
 //    static int const _OBSTACLE_FEATURE = 5; // there are potentially multiple obstacle features I think?
 
     bool const _abstraction;
     int const _num_obstacles;
     int const _width;
     int const _height;
-    int const _num_speeds = 3;
+    int const _num_speeds = 2;
     int const _num_traffics = 3;
     int const _num_timeofdays = 2;
+    int const _num_obstacletypes = 3;
 
-    int const _first_obstacle     = 2; // first feature number for obstacle
-    int const _num_state_features = 6; // TODO now only 1 obstacle, so x+y+obst+speed+traffic+tod = 6  //_first_obstacle + _num_obstacles;
+    int const _first_obstacle     = 6; // first feature number for obstacle
+    int const _num_state_features = _first_obstacle + _num_obstacles;
 
     float const _noise, _counts_total;
     std::string const _edge_noise;
@@ -142,7 +149,7 @@ private:
      * y is the original/current position
      * node should describe the next value of Y given this action and y
      **/
-    void setAgentYTransition(Action const& a, int y, DBNNode& node) const;
+    void setAgentYTransition(Action const& a, int y, DBNNode& node) const; // Todo check if needs to be done
 
     /**
      * @brief sets the new y position of the obstacle
@@ -151,7 +158,7 @@ private:
      * noise & total_counts describe the accuracy & certainty of the prior
      * node should describe the next value of Y given this action and y
      **/
-    std::vector<float> obstacleTransition(int y) const;
+    std::vector<float> obstacleTransition(int y, int speed, int obstacletype) const;
 
     /**
      * @brief samples a structure for the obstacle behaviour
@@ -171,7 +178,11 @@ private:
 
         std::vector<float> timeofdayTransition(int timeofday) const;
 
-        std::vector<float> obstacleTransition(int y, int speed);
+//        std::vector<float> obstacleTransition(int y, int speed);
+
+        std::vector<float> obstacletypeTransition(int obstacletype) const;
+
+        std::vector<float> xTransition(int x, int speed) const;
     };
 
 } // namespace priors

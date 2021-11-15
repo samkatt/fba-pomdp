@@ -16,7 +16,7 @@ DummyDomain::DummyDomain()
 
 State const* DummyDomain::sampleStartState() const
 {
-    return new IndexState(0);
+    return new IndexState("0");
 }
 
 Action const* DummyDomain::generateRandomAction(State const* /*s*/) const
@@ -43,7 +43,7 @@ Terminal
     DummyDomain::step(State const** /*s*/, Action const* /*a*/, Observation const** o, Reward* r)
         const
 {
-    *o = new IndexObservation(0);
+    *o = new IndexObservation("0");
 
     r->set(1);
     return Terminal(false);

@@ -18,8 +18,8 @@
 
 SCENARIO("fbapomdp state sampling", "[bayes-adaptive][factored]")
 {
-    auto up    = IndexAction(domains::FactoredDummyDomain::ACTIONS::UP),
-         right = IndexAction(domains::FactoredDummyDomain::ACTIONS::RIGHT);
+    auto up    = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::UP)),
+         right = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::RIGHT));
 
     GIVEN("A Dummy FBAPOMDP State of size 3")
     {
@@ -40,11 +40,11 @@ SCENARIO("fbapomdp state sampling", "[bayes-adaptive][factored]")
             REQUIRE(
                 fba_state->sampleStateIndex(
                     fba_state->_domain_state, &up, rnd::sample::Dir::sampleFromSampledMult)
-                == 1);
+                == "1");
             REQUIRE(
                 fba_state->sampleStateIndex(
                     fba_state->_domain_state, &up, rnd::sample::Dir::sampleFromExpectedMult)
-                == 1);
+                == "1");
         }
 
         THEN("sampling a new state with right action should return (0,1) state")
@@ -52,11 +52,11 @@ SCENARIO("fbapomdp state sampling", "[bayes-adaptive][factored]")
             REQUIRE(
                 fba_state->sampleStateIndex(
                     fba_state->_domain_state, &right, rnd::sample::Dir::sampleFromSampledMult)
-                == 3);
+                == "3");
             REQUIRE(
                 fba_state->sampleStateIndex(
                     fba_state->_domain_state, &right, rnd::sample::Dir::sampleFromExpectedMult)
-                == 3);
+                == "3");
         }
 
         THEN("sampling an observation should always return 0")
@@ -90,7 +90,7 @@ SCENARIO("fbapomdpstate initiation", "[bayes-adaptive][factored]")
     GIVEN("A random domain")
     {
         auto action_size = 4;
-        auto state       = IndexState(0);
+        auto state       = IndexState("0");
 
         auto domain_sizes  = Domain_Size(40, action_size, 6);
         auto feature_sizes = Domain_Feature_Size({2, 4, 5}, {2, 3});
@@ -145,33 +145,33 @@ SCENARIO("factored dummy factored prior", "[factored][bayes-adaptive][dummy]")
 
     auto ba_state = p->sample(d.sampleStartState());
 
-    auto a_up    = IndexAction(domains::FactoredDummyDomain::ACTIONS::UP),
-         a_right = IndexAction(domains::FactoredDummyDomain::ACTIONS::RIGHT);
+    auto a_up    = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::UP)),
+         a_right = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::RIGHT));
 
     THEN("going up should sample a state higher")
     {
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromSampledMult)
-            == 1);
+            == "1");
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromExpectedMult)
-            == 1);
+            == "1");
 
         d.releaseState(ba_state->_domain_state);
-        ba_state->_domain_state = ext.getState(1);
+        ba_state->_domain_state = ext.getState("1");
 
         AND_THEN("another step up should do the same")
         {
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromSampledMult)
-                == 2);
+                == "2");
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromExpectedMult)
-                == 2);
+                == "2");
         }
 
         AND_THEN("a step right here should increase by step size")
@@ -179,11 +179,11 @@ SCENARIO("factored dummy factored prior", "[factored][bayes-adaptive][dummy]")
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromSampledMult)
-                == 1 + size);
+                == std::to_string(1 + size));
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromExpectedMult)
-                == 1 + size);
+                == std::to_string(1 + size));
         }
     }
 
@@ -192,25 +192,25 @@ SCENARIO("factored dummy factored prior", "[factored][bayes-adaptive][dummy]")
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromSampledMult)
-            == size);
+            == std::to_string(size));
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromExpectedMult)
-            == size);
+            == std::to_string(size));
 
         d.releaseState(ba_state->_domain_state);
-        ba_state->_domain_state = ext.getState(size);
+        ba_state->_domain_state = ext.getState(std::to_string(size));
 
         AND_THEN("another step up should do the same")
         {
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromSampledMult)
-                == 2 * size);
+                == std::to_string(2 * size));
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromExpectedMult)
-                == 2 * size);
+                == std::to_string(2 * size));
         }
 
         AND_THEN("a step up here should increase by 1")
@@ -218,11 +218,11 @@ SCENARIO("factored dummy factored prior", "[factored][bayes-adaptive][dummy]")
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromSampledMult)
-                == 1 + size);
+                == std::to_string(1 + size));
             REQUIRE(
                 ba_state->sampleStateIndex(
                     ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromExpectedMult)
-                == 1 + size);
+                == std::to_string(1 + size));
         }
     }
 
@@ -243,19 +243,19 @@ SCENARIO("copy fbapomdp states", "[bayes-adaptive][flat]")
             bayes_adaptive::domain_extensions::FactoredDummyDomainBAExtension(c.domain_conf.size);
         auto const p = factory::makeTBAPOMDPPrior(d, c);
 
-        auto s1 = p->sample(ext.getState(0));
+        auto s1 = p->sample(ext.getState("0"));
         auto s2 = s1->copy(d.copyState(s1->_domain_state));
 
         WHEN("We update (change) one of the copies")
         {
             d.releaseState(s2->_domain_state);
-            s2->_domain_state = ext.getState(1);
+            s2->_domain_state = ext.getState("1");
 
             THEN("It should be different from the other copy")
             {
                 REQUIRE(s1->_domain_state != s2->_domain_state);
-                REQUIRE(s1->_domain_state->index() == 0);
-                REQUIRE(s2->_domain_state->index() == 1);
+                REQUIRE(s1->_domain_state->index() == "0");
+                REQUIRE(s2->_domain_state->index() == "1");
             }
         }
 
@@ -284,14 +284,14 @@ SCENARIO("compute fbapomdp observation probabilities", "[domain][factored][bayes
 
         auto ba_state = p->sample(d.sampleStartState());
 
-        auto a_up    = IndexAction(domains::FactoredDummyDomain::ACTIONS::UP),
-             a_right = IndexAction(domains::FactoredDummyDomain::ACTIONS::RIGHT);
+        auto a_up    = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::UP)),
+             a_right = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::RIGHT));
 
-        auto o = IndexObservation(0);
+        auto o = IndexObservation("0");
 
         WHEN("we calculate the probability of an observation")
         {
-            auto s = ext.getState(rnd::slowRandomInt(0, ext.domainSize()._S));
+            auto s = ext.getState(std::to_string(rnd::slowRandomInt(0, ext.domainSize()._S)));
 
             REQUIRE(
                 ba_state->computeObservationProbability(&o, &a_up, s, rnd::sample::Dir::sampleMult)
@@ -327,13 +327,13 @@ SCENARIO("compute fbapomdp observation probabilities", "[domain][factored][bayes
 
         WHEN("we compute the probability of an observation")
         {
-            auto listen    = IndexAction(domains::FactoredTiger::OBSERVE),
-                 open_door = IndexAction(rnd::slowRandomInt(0, 2));
+            auto listen    = IndexAction(std::to_string(domains::FactoredTiger::OBSERVE)),
+                 open_door = IndexAction(std::to_string(rnd::slowRandomInt(0, 2)));
 
             auto s = d.sampleStartState();
 
-            auto correct_ob = IndexObservation(d.tigerLocation(s)),
-                 incorrt_ob = IndexObservation(1 - correct_ob.index());
+            auto correct_ob = IndexObservation(std::to_string(d.tigerLocation(s))),
+                 incorrt_ob = IndexObservation(std::to_string(1 - std::stoi(correct_ob.index())));
 
             THEN("Listening produces the dfeault .85/.15 ratio")
             {

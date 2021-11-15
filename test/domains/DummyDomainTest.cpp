@@ -23,7 +23,7 @@ TEST_CASE("dummy domain", "[domain][dummy]")
             auto s = d.sampleStartState();
             auto a = d.generateRandomAction(s);
 
-            REQUIRE(s->index() == 0);
+            REQUIRE(s->index() == "0");
             REQUIRE(std::stoi(a->index()) == 0);
 
             d.releaseState(s);
@@ -37,7 +37,7 @@ TEST_CASE("dummy domain", "[domain][dummy]")
 
             auto t = d.step(&s, a, &o, &r);
 
-            REQUIRE(s->index() == 0);
+            REQUIRE(s->index() == "0");
             REQUIRE(std::stoi(o->index()) == 0);
             REQUIRE(r.toDouble() == 1.0);
             REQUIRE(!t.terminated());
@@ -52,7 +52,7 @@ TEST_CASE("dummy domain", "[domain][dummy]")
             auto s = d.sampleStartState();
             auto a = d.generateRandomAction(s);
 
-            auto o2 = IndexObservation(0);
+            auto o2 = IndexObservation("0");
 
             REQUIRE(d.computeObservationProbability(&o2, a, s) == 1);
 
@@ -69,7 +69,7 @@ TEST_CASE("linear dummy domain", "[domain][dummy][linear]")
         auto d = domains::LinearDummyDomain();
 
         auto s = d.sampleStartState();
-        auto a = IndexAction(domains::LinearDummyDomain::Actions::FORWARD);
+        auto a = IndexAction(std::to_string(domains::LinearDummyDomain::Actions::FORWARD));
 
         Reward r(0);
         Observation const* o = nullptr;
@@ -79,7 +79,7 @@ TEST_CASE("linear dummy domain", "[domain][dummy][linear]")
             // step 1
             auto t = d.step(&s, &a, &o, &r);
 
-            REQUIRE(s->index() == 1);
+            REQUIRE(s->index() == "1");
             REQUIRE(std::stoi(o->index()) == 0);
             REQUIRE(r.toDouble() == 1.0);
             REQUIRE(!t.terminated());
@@ -92,7 +92,7 @@ TEST_CASE("linear dummy domain", "[domain][dummy][linear]")
             // step 2
             t = d.step(&s, &a, &o, &r);
 
-            REQUIRE(s->index() == 2);
+            REQUIRE(s->index() == "2");
             REQUIRE(std::stoi(o->index()) == 0);
             REQUIRE(r.toDouble() == 1.0);
             REQUIRE(!t.terminated());
@@ -106,10 +106,10 @@ TEST_CASE("linear dummy domain", "[domain][dummy][linear]")
             {
 
                 // step back
-                a.index(domains::LinearDummyDomain::Actions::BACKWARD);
+                a.index(std::to_string(domains::LinearDummyDomain::Actions::BACKWARD));
                 t = d.step(&s, &a, &o, &r);
 
-                REQUIRE(s->index() == 1);
+                REQUIRE(s->index() == "1");
                 REQUIRE(std::stoi(o->index()) == 0);
                 REQUIRE(r.toDouble() == 1.0);
                 REQUIRE(!t.terminated());

@@ -39,7 +39,7 @@ double FactoredDummyDomain::computeObservationProbability(
 
 State const* FactoredDummyDomain::sampleStartState() const
 {
-    return new IndexState(0);
+    return new IndexState("0");
 }
 
 Terminal

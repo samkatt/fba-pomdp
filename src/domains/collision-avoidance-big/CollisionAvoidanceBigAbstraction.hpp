@@ -28,13 +28,16 @@ namespace abstractions {
         int _UCB_exploration = 1;
         std::vector<int> _counts;
 
-//        static int const _SPEED_FEATURE = 3;
-//        static int const _TRAFFIC_FEATURE = 4;
-        int const _tod_feature = 5;
+        static int const _speed_feature = 2;
+        static int const _traffic_feature = 3;
+        static int const _tod_feature = 4;
+        static int const _obstacletype_feature = 5;
+        static int const _first_obstacle = 6;
 
-        const int _num_speeds = 3;
+        const int _num_speeds = 2;
         const int _num_traffics = 3;
         const int _num_timeofdays = 2;
+        const int _num_obstacletypes = 3;
 
         std::vector<Domain_Size> _abstract_domain_sizes;
         std::vector<Domain_Feature_Size> _abstract_domain_feature_sizes;

@@ -21,7 +21,7 @@ SCENARIO("collision-avoidance state indexing", "[domain][bayes-adaptive][collisi
         auto const y_block = rnd::slowRandomInt(0, height);
 
         auto const s = d.getState(x, y, {y_block});
-        REQUIRE(s->index() == x * height * height + y * height + y_block);
+        REQUIRE(std::stoi(s->index()) == x * height * height + y * height + y_block);
 
         auto const s_by_index = ext.getState(s->index());
 

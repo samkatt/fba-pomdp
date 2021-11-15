@@ -99,7 +99,7 @@ TEST_CASE("step function", "[bayes-adaptive]")
                 {
                     d.step(&s, a, &o, &r);
 
-                    REQUIRE(s->index() == 0);
+                    REQUIRE(s->index() == "0");
                     REQUIRE(std::stoi(a->index()) == 0);
                     REQUIRE(std::stoi(o->index()) == 0);
                 }

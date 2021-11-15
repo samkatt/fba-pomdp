@@ -107,14 +107,14 @@ SCENARIO("GridWorldCoffee dynamics", "[domain][gridworldcoffee]")
         {
             auto next_state = static_cast<State const*>(d.getState({0, 0}, 1, 0));
             auto t = d.step(&s, &left, &o, &r);
-            REQUIRE((s->index() == old_state_index ||std::stoi(s->index())== next_state->index()));
+            REQUIRE((s->index() == old_state_index ||s->index()== next_state->index()));
             REQUIRE(r.toDouble() == domains::GridWorldCoffee::step_reward);
             REQUIRE(!t.terminated());
 
             d.releaseObservation(o);
 
             d.step(&s, &down, &o, &r);
-            REQUIRE((s->index() == old_state_index ||std::stoi(s->index())== next_state->index()));
+            REQUIRE((s->index() == old_state_index ||s->index()== next_state->index()));
             REQUIRE(r.toDouble() == domains::GridWorldCoffee::step_reward);
             REQUIRE(!t.terminated());
 
@@ -130,8 +130,8 @@ SCENARIO("GridWorldCoffee dynamics", "[domain][gridworldcoffee]")
             auto next_state2 = static_cast<State const*>(d.getState({0, 0}, 1, 0));
             auto next_state3 = static_cast<State const*>(d.getState({1, 0}, 1, 0));
 
-            REQUIRE((s->index() == old_state_index ||std::stoi(s->index())== next_state1->index()
-            ||std::stoi(s->index())== next_state2->index() ||std::stoi(s->index())== next_state3->index()));
+            REQUIRE((s->index() == old_state_index ||s->index()== next_state1->index()
+            ||s->index()== next_state2->index() ||s->index()== next_state3->index()));
 
             d.releaseObservation(o);
             d.releaseState(next_state1);
@@ -171,7 +171,7 @@ SCENARIO("gridworldcoffee POMDP functions", "[domain][gridworldcoffee]")
 
         for (auto i = 0; i < 4; ++i) // hardcoded |A|
         {
-            REQUIRE(actions[i]->index() == i);
+            REQUIRE(actions[i]->index() == std::to_string(i));
             d.releaseAction(actions[i]);
         }
     }

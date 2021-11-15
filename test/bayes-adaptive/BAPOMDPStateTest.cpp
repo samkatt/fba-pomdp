@@ -39,12 +39,12 @@ SCENARIO("sample from BAPODMP states", "[bayes-adaptive][flat]")
 
                 THEN("Sampling states and observations always return 0")
                 {
-                    auto s = IndexState(0);
+                    auto s = IndexState("0");
                     auto a = IndexAction(std::to_string(0));
 
                     for (auto i = 0; i < 10; ++i)
                     {
-                        REQUIRE(ba_state->sampleStateIndex(&s, &a, m) == 0);
+                        REQUIRE(ba_state->sampleStateIndex(&s, &a, m) == "0");
                         REQUIRE(ba_state->sampleObservationIndex(&a, &s, m) == 0);
                     }
                 }
@@ -73,7 +73,7 @@ SCENARIO("sample from BAPODMP states", "[bayes-adaptive][flat]")
                         auto new_s = d.sampleStartState();
 
                         REQUIRE(
-                            ba_state->sampleStateIndex(ba_state->_domain_state, a, m)
+                            std::stoi(ba_state->sampleStateIndex(ba_state->_domain_state, a, m))
                             < ext.domainSize()._S);
                         REQUIRE(
                             ba_state->sampleObservationIndex(a, new_s, m) < ext.domainSize()._O);
@@ -85,7 +85,7 @@ SCENARIO("sample from BAPODMP states", "[bayes-adaptive][flat]")
 
                 THEN("Sampling states when observing returns the same state")
                 {
-                    auto listen = IndexAction(domains::Tiger::Literal::OBSERVE);
+                    auto listen = IndexAction(std::to_string(domains::Tiger::Literal::OBSERVE));
 
                     for (auto i = 0; i < 10; ++i)
                     {
@@ -148,10 +148,10 @@ SCENARIO("updating BAPOMDPState", "[bayes-adaptive][flat]")
                             for (auto new_s_i = 0; new_s_i < ext.domainSize()._S; ++new_s_i)
                             {
 
-                                auto state       = IndexState(s_i);
-                                auto action      = IndexAction(a_i);
-                                auto observation = IndexObservation(o_i);
-                                auto new_state   = IndexState(new_s_i);
+                                auto state       = IndexState("s_i");
+                                auto action      = IndexAction("a_i");
+                                auto observation = IndexObservation("o_i");
+                                auto new_state   = IndexState("new_s_i");
 
                                 if (s_i !=std::stoi(s->index())|| a_i != std::stoi(a->index())
                                     || new_s_i !=std::stoi(new_s->index()))
@@ -218,19 +218,19 @@ SCENARIO("copy bapomdp states", "[bayes-adaptive][flat]")
             domains::Tiger::TigerType::EPISODIC);
         auto const p = factory::makeTBAPOMDPPrior(d, c);
 
-        auto s1 = p->sample(ext.getState(0));
+        auto s1 = p->sample(ext.getState("0"));
         auto s2 = s1->copy(d.copyState(s1->_domain_state));
 
         WHEN("We update (change) one of the copies")
         {
             d.releaseState(s2->_domain_state);
-            s2->_domain_state = ext.getState(1);
+            s2->_domain_state = ext.getState("1");
 
             THEN("It should be different from the other copy")
             {
                 REQUIRE(s1->_domain_state != s2->_domain_state);
-                REQUIRE(s1->_domain_state->index() == 0);
-                REQUIRE(s2->_domain_state->index() == 1);
+                REQUIRE(s1->_domain_state->index() == "0");
+                REQUIRE(s2->_domain_state->index() == "1");
             }
         }
 
@@ -259,7 +259,7 @@ SCENARIO("compute BAPOMDP observation probabilitieis", "[bayes-adaptive][flat][d
         WHEN("computing the probabilisty of an observation")
         {
             auto s = d.sampleStartState();
-            auto o = IndexObservation(0);
+            auto o = IndexObservation("0");
             auto a = d.generateRandomAction(ba_state);
 
             REQUIRE(
@@ -288,13 +288,13 @@ SCENARIO("compute BAPOMDP observation probabilitieis", "[bayes-adaptive][flat][d
 
         WHEN("computing the probability of an observation")
         {
-            auto listen    = IndexAction(domains::Tiger::OBSERVE),
-                 open_door = IndexAction(rnd::slowRandomInt(0, 2));
+            auto listen    = IndexAction(std::to_string(domains::Tiger::OBSERVE)),
+                 open_door = IndexAction(std::to_string(rnd::slowRandomInt(0, 2)));
 
             auto s = d.sampleStartState();
 
             auto correct_ob = IndexObservation(s->index()),
-                 incorrt_ob = IndexObservation(1 - s->index());
+                 incorrt_ob = IndexObservation(std::to_string(1 - std::stoi(s->index())));
 
             THEN("Listening produces the dfeault .85/.15 ratio")
             {

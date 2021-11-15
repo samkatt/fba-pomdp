@@ -23,7 +23,7 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
         THEN("start state has index 0")
         {
             auto s = d.sampleStartState();
-            REQUIRE(s->index() == 0);
+            REQUIRE(s->index() == "0");
             d.releaseState(s);
         }
 
@@ -35,7 +35,7 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
             REQUIRE(std::stoi(a->index()) < 2);
             ;
 
-            IndexObservation o(0);
+            IndexObservation o("0");
             THEN("the observation probability to o=0 is 1")
             REQUIRE(d.computeObservationProbability(&o, a, s) == 1);
 
@@ -46,13 +46,13 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
         THEN("Step up leads to (0,1)")
         {
             auto s       = d.sampleStartState();
-            auto a_up    = IndexAction(domains::FactoredDummyDomain::ACTIONS::UP),
-                 a_right = IndexAction(domains::FactoredDummyDomain::ACTIONS::RIGHT);
+            auto a_up    = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::UP)),
+                 a_right = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::RIGHT));
 
             Observation const* o = nullptr;
             auto t               = d.step(&s, &a_up, &o, &r);
 
-            REQUIRE(s->index() == 1);
+            REQUIRE(s->index() == "1");
             REQUIRE(std::stoi(o->index()) == 0);
             REQUIRE(r.toDouble() == -1.0);
             REQUIRE(!t.terminated());
@@ -66,7 +66,7 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
             {
                 t = d.step(&s, &a_right, &o, &r);
 
-                REQUIRE(s->index() == 4);
+                REQUIRE(s->index() == "4");
                 REQUIRE(std::stoi(o->index()) == 0);
                 REQUIRE(r.toDouble() == -1.0);
                 REQUIRE(!t.terminated());
@@ -87,8 +87,8 @@ TEST_CASE("factored dummy environment", "[domain][dummy][factored]")
             d.addLegalActions(s, &legal_actions);
 
             REQUIRE(legal_actions.size() == 2);
-            REQUIRE(legal_actions[0]->index() == domains::FactoredDummyDomain::ACTIONS::UP);
-            REQUIRE(legal_actions[1]->index() == domains::FactoredDummyDomain::ACTIONS::RIGHT);
+            REQUIRE(legal_actions[0]->index() == std::to_string(domains::FactoredDummyDomain::ACTIONS::UP));
+            REQUIRE(legal_actions[1]->index() == std::to_string(domains::FactoredDummyDomain::ACTIONS::RIGHT));
 
             d.releaseState(s);
             for (auto a : legal_actions) { d.releaseAction(a); }

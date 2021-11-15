@@ -35,25 +35,25 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
     {
         THEN("the index does not exceed the legal range")
         {
-            REQUIRE(initial_state_index < 2);
-            REQUIRE(initial_state_index > -1);
+            REQUIRE(std::stoi(initial_state_index) < 2);
+            REQUIRE(std::stoi(initial_state_index) > -1);
         }
     }
 
     WHEN("agents observes")
     {
-        a.index(domains::Tiger::Literal::OBSERVE);
+        a.index(std::to_string(domains::Tiger::Literal::OBSERVE));
         auto t = d.step(&s, &a, &o, &r);
 
         REQUIRE(s->index() == initial_state_index);
         REQUIRE(std::stoi(o->index()) < 2);
         REQUIRE(std::stoi(o->index()) > -1);
         REQUIRE(r.toDouble() == -1.0);
-        REQUIRE(a.index() == domains::Tiger::Literal::OBSERVE);
+        REQUIRE(a.index() == std::to_string(domains::Tiger::Literal::OBSERVE));
         REQUIRE(!t.terminated());
 
         auto correct_observation = IndexObservation(s->index()),
-             incorec_observation = IndexObservation(1 - s->index());
+             incorec_observation = IndexObservation(std::to_string(1 - std::stoi(s->index())));
         REQUIRE(d.computeObservationProbability(&correct_observation, &a, s) == .85);
         REQUIRE(d.computeObservationProbability(&incorec_observation, &a, s) == .15);
 
@@ -70,7 +70,7 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
         REQUIRE(std::stoi(o->index()) > -1);
         REQUIRE(r.toDouble() == 10.0);
 
-        auto ob1 = IndexObservation(0), ob2 = IndexObservation(1);
+        auto ob1 = IndexObservation("0"), ob2 = IndexObservation("1");
         REQUIRE(d.computeObservationProbability(&ob1, &a, s) == .5);
         REQUIRE(d.computeObservationProbability(&ob2, &a, s) == .5);
 
@@ -80,14 +80,14 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
 
     WHEN("agent opens wrong door")
     {
-        a.index(1 - s->index());
+        a.index(std::to_string(1 - std::stoi(s->index())));
         d.step(&s, &a, &o, &r);
 
         REQUIRE(std::stoi(o->index()) < 2);
         REQUIRE(std::stoi(o->index()) > -1);
         REQUIRE(r.toDouble() == -100.0);
 
-        auto ob1 = IndexObservation(0), ob2 = IndexObservation(1);
+        auto ob1 = IndexObservation("0"), ob2 = IndexObservation("1");
         REQUIRE(d.computeObservationProbability(&ob1, &a, s) == .5);
         REQUIRE(d.computeObservationProbability(&ob2, &a, s) == .5);
 
@@ -101,8 +101,8 @@ TEST_CASE("general tiger functionality", "[domain][tiger]")
 
         THEN("action should not exceed legal indices")
         {
-            REQUIRE(action->index() < 3);
-            REQUIRE(action->index() >= 0);
+            REQUIRE(std::stoi(action->index()) < 3);
+            REQUIRE(std::stoi(action->index()) >= 0);
         }
 
         d.releaseAction(action);
@@ -120,7 +120,7 @@ TEST_CASE("episodic tiger functionality", "[domain][tiger][episodic]")
     {
         for (auto i = 0; i < 2; ++i)
         {
-            auto a = IndexAction(i);
+            auto a = IndexAction(std::to_string(i));
 
             auto s = d.sampleStartState();
             auto t = d.step(&s, &a, &o, &r);
@@ -144,7 +144,7 @@ TEST_CASE("continuous tiger functionality", "[domain][tiger][continuous]")
     {
         for (auto i = 0; i < 2; ++i)
         {
-            auto a = IndexAction(i);
+            auto a = IndexAction(std::to_string(i));
 
             auto s = d.sampleStartState();
             auto t = d.step(&s, &a, &o, &r);
@@ -178,8 +178,8 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
 
                 THEN("The index is within the legal range")
                 {
-                    REQUIRE(s->index() < (2 << num_features));
-                    REQUIRE(s->index() >= 0);
+                    REQUIRE(std::stoi(s->index()) < (2 << num_features));
+                    REQUIRE(std::stoi(s->index()) >= 0);
                 }
 
                 d.releaseState(s);
@@ -191,7 +191,7 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
                 auto s           = d.sampleStartState();
                 auto start_index = s->index();
 
-                auto a = IndexAction(domains::Tiger::Literal::OBSERVE);
+                auto a = IndexAction(std::to_string(domains::Tiger::Literal::OBSERVE));
                 auto r = Reward(0);
 
                 Observation const* o;
@@ -215,7 +215,7 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
             {
 
                 auto s = d.sampleStartState();
-                auto a = IndexAction(d.tigerLocation(s));
+                auto a = IndexAction(std::to_string(d.tigerLocation(s)));
                 auto r = Reward(0);
 
                 Observation const* o;
@@ -224,8 +224,8 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
 
                 THEN("the new state & observation are legal and reward is 10")
                 {
-                    REQUIRE(s->index() < 2 << num_features);
-                    REQUIRE(s->index() >= 0);
+                    REQUIRE(std::stoi(s->index()) < 2 << num_features);
+                    REQUIRE(std::stoi(s->index()) >= 0);
 
                     REQUIRE(std::stoi(o->index()) < 2);
                     REQUIRE(std::stoi(o->index()) >= 0);
@@ -249,7 +249,7 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
             {
                 auto s = d.sampleStartState();
 
-                auto a = IndexAction(static_cast<int>((d.tigerLocation(s) == 0u)));
+                auto a = IndexAction(std::to_string(static_cast<int>((d.tigerLocation(s) == 0u))));
                 auto r = Reward(0);
 
                 Observation const* o;
@@ -258,8 +258,8 @@ TEST_CASE("factored tiger environment", "[environment][tiger][factored]")
 
                 THEN("the new state & observation are legal and reward is 10")
                 {
-                    REQUIRE(s->index() < 2 << num_features);
-                    REQUIRE(s->index() >= 0);
+                    REQUIRE(std::stoi(s->index()) < 2 << num_features);
+                    REQUIRE(std::stoi(s->index()) >= 0);
 
                     REQUIRE(std::stoi(o->index()) < 2);
                     REQUIRE(std::stoi(o->index()) >= 0);
@@ -333,11 +333,11 @@ SCENARIO("FactoredTiger domain", "[domain][tiger][factored]")
 
             WHEN("the agent opens a door")
             {
-                auto a = IndexAction(rnd::slowRandomInt(0, 2));
+                auto a = IndexAction(std::to_string(rnd::slowRandomInt(0, 2)));
 
                 THEN("observation probability is always .5")
                 {
-                    auto o = IndexObservation(rnd::slowRandomInt(0, 2));
+                    auto o = IndexObservation(std::to_string(rnd::slowRandomInt(0, 2)));
 
                     REQUIRE(d.computeObservationProbability(&o, &a, s) == .5);
                 }
@@ -345,14 +345,14 @@ SCENARIO("FactoredTiger domain", "[domain][tiger][factored]")
 
             WHEN("the agent listens")
             {
-                auto a = IndexAction(domains::FactoredTiger::OBSERVE);
+                auto a = IndexAction(std::to_string(domains::FactoredTiger::OBSERVE));
 
                 THEN(
                     "the observation probability of the correct & incorrect location is .85 and "
                     ".15 respectively")
                 {
-                    auto correct_observation = IndexObservation(d.tigerLocation(s)),
-                         incorrt_observation = IndexObservation(1 - correct_observation.index());
+                    auto correct_observation = IndexObservation(std::to_string(d.tigerLocation(s))),
+                         incorrt_observation = IndexObservation(std::to_string(1 - std::stoi(correct_observation.index())));
 
                     REQUIRE(d.computeObservationProbability(&correct_observation, &a, s) == .85);
                     REQUIRE(d.computeObservationProbability(&incorrt_observation, &a, s) == .15);

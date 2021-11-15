@@ -120,8 +120,8 @@ SCENARIO("sysadmin state modifiers", "[domains][sysadmin]")
             auto observe = d.observeAction(comp);
             auto reboot  = d.rebootAction(comp);
 
-            REQUIRE(observe->index() == comp);
-            REQUIRE(reboot->index() == comp + size);
+            REQUIRE(observe->index() == std::to_string(comp));
+            REQUIRE(reboot->index() == std::to_string(comp + size));
 
             d.releaseAction(observe);
             d.releaseAction(reboot);
@@ -310,7 +310,7 @@ SCENARIO("sysadmin domain", "[domain][sysadmin]")
         THEN("generating random actions will return all")
         {
             // random legal sysadmin state
-            auto state = IndexState((1 << rnd::slowRandomInt(0, size)));
+            auto state = IndexState(std::to_string((1 << rnd::slowRandomInt(0, size))));
 
             std::vector<bool> action_is_generated(2 * size, false);
 
@@ -328,21 +328,21 @@ SCENARIO("sysadmin domain", "[domain][sysadmin]")
 
         THEN("legal actions will always be all actions and not too many")
         {
-            auto state = IndexState((1 << rnd::slowRandomInt(0, size)));
+            auto state = IndexState(std::to_string((1 << rnd::slowRandomInt(0, size))));
             std::vector<Action const*> actions;
 
             d.addLegalActions(&state, &actions);
 
             REQUIRE(actions.size() == 2 * size);
-            for (size_t i = 0; i < actions.size(); ++i) { REQUIRE(actions[i]->index() == i); }
+            for (size_t i = 0; i < actions.size(); ++i) { REQUIRE(actions[i]->index() == "i"); }
         }
 
         WHEN("all computers are working & testing observation probabilities")
         {
             auto s        = d.sampleStartState();
             auto a        = d.generateRandomAction(s);
-            auto work_obs = IndexObservation(domains::SysAdmin::OPERATIONAL),
-                 fail_obs = IndexObservation(domains::SysAdmin::FAILING);
+            auto work_obs = IndexObservation(std::to_string(domains::SysAdmin::OPERATIONAL)),
+                 fail_obs = IndexObservation(std::to_string(domains::SysAdmin::FAILING));
 
             // 0.95 is a parameter in sysadmin-- not public so this will
             // fail when those params are changed
@@ -358,8 +358,8 @@ SCENARIO("sysadmin domain", "[domain][sysadmin]")
 
             auto s        = d.getState(std::vector<int>(size, 0));
             auto a        = d.generateRandomAction(s);
-            auto work_obs = IndexObservation(domains::SysAdmin::OPERATIONAL),
-                 fail_obs = IndexObservation(domains::SysAdmin::FAILING);
+            auto work_obs = IndexObservation(std::to_string(domains::SysAdmin::OPERATIONAL)),
+                 fail_obs = IndexObservation(std::to_string(domains::SysAdmin::FAILING));
 
             // 0.95 is a parameter in sysadmin-- not public so this will
             // fail when those params are changed
@@ -380,8 +380,8 @@ SCENARIO("sysadmin domain", "[domain][sysadmin]")
             auto rebooting = d.rebootAction(breaking_computer),
                  pinging   = d.observeAction(breaking_computer);
 
-            auto work_obs = IndexObservation(domains::SysAdmin::OPERATIONAL),
-                 fail_obs = IndexObservation(domains::SysAdmin::FAILING);
+            auto work_obs = IndexObservation(std::to_string(domains::SysAdmin::OPERATIONAL)),
+                 fail_obs = IndexObservation(std::to_string(domains::SysAdmin::FAILING));
 
             REQUIRE(d.computeObservationProbability(&work_obs, rebooting, s) == Approx(.05));
             REQUIRE(d.computeObservationProbability(&work_obs, pinging, s) == Approx(.05));
@@ -408,8 +408,8 @@ SCENARIO("sysadmin domain", "[domain][sysadmin]")
             auto rebooting = d.rebootAction(working_computer),
                  pinging   = d.observeAction(working_computer);
 
-            auto work_obs = IndexObservation(domains::SysAdmin::OPERATIONAL),
-                 fail_obs = IndexObservation(domains::SysAdmin::FAILING);
+            auto work_obs = IndexObservation(std::to_string(domains::SysAdmin::OPERATIONAL)),
+                 fail_obs = IndexObservation(std::to_string(domains::SysAdmin::FAILING));
 
             REQUIRE(d.computeObservationProbability(&fail_obs, rebooting, s) == Approx(.05));
             REQUIRE(d.computeObservationProbability(&fail_obs, pinging, s) == Approx(.05));

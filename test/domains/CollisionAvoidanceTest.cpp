@@ -219,7 +219,7 @@ SCENARIO("adding legal actions in the collision avoidance domain", "[domain][col
     d.addLegalActions(s, &actions);
 
     REQUIRE(actions.size() == 3);
-    for (auto i = 0; i < 3; i++) { REQUIRE(actions[i]->index() == i); }
+    for (auto i = 0; i < 3; i++) { REQUIRE(actions[i]->index() == std::to_string(i)); }
 
     d.releaseState(s);
     for (auto const& a : actions) { d.releaseAction(a); }

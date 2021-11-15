@@ -12,7 +12,6 @@ CollisionAvoidanceBigBAExtension::CollisionAvoidanceBigBAExtension(
         _grid_height(grid_height),
         _num_obstacles(num_obstacles)
 {
-
     // locally create & store all states
     std::vector<int> const obstacles_range(_num_obstacles, _grid_height);
 
@@ -22,12 +21,16 @@ CollisionAvoidanceBigBAExtension::CollisionAvoidanceBigBAExtension(
             for (auto speed = 0; speed < _num_speeds; ++speed) {
                 for (auto traffic = 0; traffic < _num_traffics; ++traffic) {
                     for (auto timeofday = 0; timeofday < _num_timeofdays; ++timeofday) {
-                        std::vector<int> obstacles(_num_obstacles);
-                        auto obs_i = 0;
-                        do {
-                            _states[x][y_agent][speed][traffic][timeofday][obs_i++] =
-                                    new domains::CollisionAvoidanceBigState(x, y_agent, speed, traffic, timeofday, obstacles, index++);
-                        } while (!indexing::increment(obstacles, obstacles_range));
+                        for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) {
+                            std::vector<int> obstacles(_num_obstacles);
+                            auto obs_i = 0;
+                            do {
+                                std::vector<int> vector1 = {x, y_agent, speed, traffic, timeofday, obstacletype};
+                                vector1.insert(vector1.end(), obstacles.begin(), obstacles.end());
+                                _states[x][y_agent][speed][traffic][timeofday][obstacletype][obs_i++] =
+                                        new domains::CollisionAvoidanceBigState(vector1, index++);
+                            } while (!indexing::increment(obstacles, obstacles_range));
+                        }
                     }
                 }
             }
@@ -38,12 +41,14 @@ CollisionAvoidanceBigBAExtension::CollisionAvoidanceBigBAExtension(
 CollisionAvoidanceBigBAExtension::~CollisionAvoidanceBigBAExtension()
 {
     // clean up allocated states
-    for (auto& outer : _states) {
-        for (auto& inner_width : outer) {
-            for (auto& speed : inner_width) {
-                for (auto& traffic : speed) {
-                    for (auto& timeofday : traffic) {
-                        for (auto s : timeofday) { delete s; }
+    for (auto& width : _states) { // width
+        for (auto& height : width) { // height
+            for (auto& speed : height) { // speed
+                for (auto& traffic : speed) { // traffic
+                    for (auto& timeofday : traffic) { // timeofday
+                        for (auto& obstacletype : timeofday) { // obstacletype
+                            for (auto s: obstacletype) { delete s; } // obstacle
+                        }
                     }
                 }
             }
@@ -60,9 +65,9 @@ State const* CollisionAvoidanceBigBAExtension::getState(std::string index) const
 {
     auto features = indexing::projectUsingDimensions(
         std::stoi(index),
-        {_grid_width, _grid_height, _num_speeds, _num_traffics, _num_timeofdays, static_cast<int>(std::pow(_grid_height, _num_obstacles))});
+        {_grid_width, _grid_height, _num_speeds, _num_traffics, _num_timeofdays, _num_obstacletypes, static_cast<int>(std::pow(_grid_height, _num_obstacles))});
 
-    return _states[features[0]][features[1]][features[2]][features[3]][features[4]][features[5]];
+    return _states[features[0]][features[1]][features[2]][features[3]][features[4]][features[5]][features[6]];
 }
 
 Terminal CollisionAvoidanceBigBAExtension::terminal(
@@ -71,10 +76,10 @@ Terminal CollisionAvoidanceBigBAExtension::terminal(
     State const* new_s) const
 {
     auto const ca_state = static_cast<domains::CollisionAvoidanceBigState const*>(new_s);
-    auto const crashed  = ca_state->x_agent < _num_obstacles
-                         && ca_state->y_agent == ca_state->obstacles_pos[ca_state->x_agent];
+    auto const crashed  = ca_state->_state_vector[x_agent_f] < _num_obstacles
+                         && ca_state->_state_vector[y_agent_f] == ca_state->getFeatureValues()[obstacle_start + ca_state->_state_vector[x_agent_f]];
 
-    return Terminal(crashed || ca_state->x_agent == 0);
+    return Terminal(crashed || ca_state->_state_vector[x_agent_f] == 0);
 }
 
 Reward CollisionAvoidanceBigBAExtension::reward(
@@ -88,8 +93,8 @@ Reward CollisionAvoidanceBigBAExtension::reward(
 
     auto const ca_state = static_cast<domains::CollisionAvoidanceBigState const*>(new_s);
 
-    if (ca_state->x_agent < _num_obstacles
-        && ca_state->y_agent == ca_state->obstacles_pos[ca_state->x_agent])
+    if (ca_state->_state_vector[x_agent_f] < _num_obstacles
+        && ca_state->_state_vector[y_agent_f] == ca_state->getFeatureValues()[obstacle_start + ca_state->_state_vector[x_agent_f]])
     {
         return Reward(-domains::CollisionAvoidanceBig::COLLIDE_PENALTY);
     }

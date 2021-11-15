@@ -20,30 +20,30 @@ SCENARIO("factored dummy table prior", "[factored][bayes-adaptive][dummy][flat]"
 
     auto ba_state = static_cast<BAPOMDPPrior const&>(p).sample(d.sampleStartState());
 
-    auto a_up    = IndexAction(domains::FactoredDummyDomain::ACTIONS::UP),
-         a_right = IndexAction(domains::FactoredDummyDomain::ACTIONS::RIGHT);
+    auto a_up    = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::UP)),
+         a_right = IndexAction(std::to_string(domains::FactoredDummyDomain::ACTIONS::RIGHT));
 
     THEN("going up should sample a state higher")
     {
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromSampledMult)
-            == 1);
+            == std::to_string(1));
 
         d.releaseState(ba_state->_domain_state);
-        ba_state->_domain_state = ext.getState(1);
+        ba_state->_domain_state = ext.getState("1");
 
         AND_THEN("another step up should do the same")
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromSampledMult)
-            == 2);
+            == std::to_string(2));
 
         AND_THEN("a step right here should increase by step size")
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromSampledMult)
-            == 1 + size);
+            == std::to_string(1 + size));
     }
 
     THEN("going right should sample a state to the right")
@@ -51,21 +51,21 @@ SCENARIO("factored dummy table prior", "[factored][bayes-adaptive][dummy][flat]"
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromSampledMult)
-            == size);
+            == std::to_string(size));
 
         d.releaseState(ba_state->_domain_state);
-        ba_state->_domain_state = ext.getState(size);
+        ba_state->_domain_state = ext.getState(std::to_string(size));
         AND_THEN("another step up should do the same")
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_right, rnd::sample::Dir::sampleFromSampledMult)
-            == 2 * size);
+            == std::to_string(2 * size));
 
         AND_THEN("a step up here should increase by 1")
         REQUIRE(
             ba_state->sampleStateIndex(
                 ba_state->_domain_state, &a_up, rnd::sample::Dir::sampleFromSampledMult)
-            == 1 + size);
+            == std::to_string(1 + size));
     }
 
     d.releaseState(ba_state->_domain_state);

@@ -47,14 +47,14 @@ TEST_CASE("tiger bayes-adaptive prior", "[tiger][bayes-adaptive]")
             auto const prior = priors::TigerBAPrior(c);
             auto ba_s        = static_cast<BAPOMDPState*>(prior.sample(s));
 
-            IndexAction listen(domains::Tiger::Literal::OBSERVE);
-            IndexAction open_left(domains::Tiger::Literal::LEFT);
-            IndexAction open_right(domains::Tiger::Literal::RIGHT);
+            IndexAction listen(std::to_string(domains::Tiger::Literal::OBSERVE));
+            IndexAction open_left(std::to_string(domains::Tiger::Literal::LEFT));
+            IndexAction open_right(std::to_string(domains::Tiger::Literal::RIGHT));
 
             IndexObservation correct_observation(ba_s->index());
-            IndexObservation wrong_observation(1 - ba_s->index());
+            IndexObservation wrong_observation(std::to_string(1 - std::stoi(ba_s->index())));
 
-            IndexState other_state(1 - ba_s->index());
+            IndexState other_state(std::to_string(1 - std::stoi(ba_s->index())));
 
             // listening
             REQUIRE(ba_s->model()->count(ba_s, &listen, ba_s) == known_counts);
@@ -98,14 +98,14 @@ TEST_CASE("tiger bayes-adaptive prior", "[tiger][bayes-adaptive]")
             auto const prior = priors::TigerBAPrior(c);
             auto ba_s        = static_cast<BAPOMDPState*>(prior.sample(s));
 
-            IndexAction listen(domains::Tiger::Literal::OBSERVE);
-            IndexAction open_left(domains::Tiger::Literal::LEFT);
-            IndexAction open_right(domains::Tiger::Literal::RIGHT);
+            IndexAction listen(std::to_string(domains::Tiger::Literal::OBSERVE));
+            IndexAction open_left(std::to_string(domains::Tiger::Literal::LEFT));
+            IndexAction open_right(std::to_string(domains::Tiger::Literal::RIGHT));
 
             IndexObservation correct_observation(ba_s->index());
-            IndexObservation wrong_observation(1 - ba_s->index());
+            IndexObservation wrong_observation(std::to_string(1 - std::stoi(ba_s->index())));
 
-            IndexState other_state(1 - ba_s->index());
+            IndexState other_state(std::to_string(1 - std::stoi(ba_s->index())));
 
             // listening
             REQUIRE(ba_s->model()->count(ba_s, &listen, ba_s) == known_counts);
@@ -261,15 +261,15 @@ SCENARIO("factored tiger BAPOMDPPrior", "[bayes-adaptive][factored][tiger][flat]
 
                 THEN("the observation prior counts for listening must be according to the noise")
                 {
-                    auto listen = IndexAction(domains::FactoredTiger::TigerAction::OBSERVE);
+                    auto listen = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
 
                     auto hear_right =
-                             IndexObservation(domains::FactoredTiger::TigerLocation::RIGHT),
-                         hear_left = IndexObservation(domains::FactoredTiger::TigerLocation::LEFT);
+                             IndexObservation(std::to_string(domains::FactoredTiger::TigerLocation::RIGHT)),
+                         hear_left = IndexObservation(std::to_string(domains::FactoredTiger::TigerLocation::LEFT));
 
                     for (auto s = 0; s < S; ++s)
                     {
-                        auto state = ext.getState(s);
+                        auto state = ext.getState(std::to_string(s));
 
                         auto hear_correct =
                             (d.tigerLocation(state) == domains::FactoredTiger::TigerLocation::LEFT)
@@ -296,18 +296,18 @@ SCENARIO("factored tiger BAPOMDPPrior", "[bayes-adaptive][factored][tiger][flat]
                 {
                     for (auto s = 0; s < S; ++s)
                     {
-                        auto state = ext.getState(s);
+                        auto state = ext.getState(std::to_string(s));
 
                         for (auto o = 0; o < 2; ++o)
                         {
-                            auto observation = IndexObservation(o);
+                            auto observation = IndexObservation(std::to_string(o));
 
                             auto action =
-                                IndexAction(domains::FactoredTiger::TigerAction::OPEN_LEFT);
+                                IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OPEN_LEFT));
                             REQUIRE(
                                 ba_s->model()->count(&action, state, &observation) == known_counts);
 
-                            action = IndexAction(domains::FactoredTiger::TigerAction::OPEN_RIGHT);
+                            action = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OPEN_RIGHT));
                             REQUIRE(
                                 ba_s->model()->count(&action, state, &observation) == known_counts);
                         }
@@ -319,15 +319,15 @@ SCENARIO("factored tiger BAPOMDPPrior", "[bayes-adaptive][factored][tiger][flat]
                 THEN("the transition counts for listening must be deterministic")
                 {
 
-                    auto listen = IndexAction(domains::FactoredTiger::TigerAction::OBSERVE);
+                    auto listen = IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
 
                     for (auto s = 0; s < S; ++s)
                     {
-                        auto state = ext.getState(s);
+                        auto state = ext.getState(std::to_string(s));
 
                         for (auto new_s = 0; new_s < S; ++new_s)
                         {
-                            auto new_state = ext.getState(new_s);
+                            auto new_state = ext.getState(std::to_string(new_s));
 
                             auto expected_count =
                                 (state->index() == new_state->index()) ? known_counts : 0;
@@ -345,19 +345,19 @@ SCENARIO("factored tiger BAPOMDPPrior", "[bayes-adaptive][factored][tiger][flat]
                 {
                     for (auto s = 0; s < S; ++s)
                     {
-                        auto state = ext.getState(s);
+                        auto state = ext.getState(std::to_string(s));
 
                         for (auto new_s = 0; new_s < S; ++new_s)
                         {
-                            auto new_state = ext.getState(new_s);
+                            auto new_state = ext.getState(std::to_string(new_s));
 
                             auto open_door =
-                                IndexAction(domains::FactoredTiger::TigerAction::OPEN_LEFT);
+                                IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OPEN_LEFT));
                             REQUIRE(
                                 ba_s->model()->count(state, &open_door, new_state) == known_counts);
 
                             open_door =
-                                IndexAction(domains::FactoredTiger::TigerAction::OPEN_RIGHT);
+                                IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OPEN_RIGHT));
                             REQUIRE(
                                 ba_s->model()->count(state, &open_door, new_state) == known_counts);
                         }
@@ -468,7 +468,7 @@ SCENARIO("factored tiger FBAPOMDPPrior", "[bayes-adaptive][factored][tiger]")
                                                               // might be different structures
                             {
                                 auto listen =
-                                    IndexAction(domains::FactoredTiger::TigerAction::OBSERVE);
+                                    IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
 
                                 auto node = ba_s->model()->observationNode(&listen, 0);
 
@@ -544,7 +544,7 @@ SCENARIO("factored tiger FBAPOMDPPrior", "[bayes-adaptive][factored][tiger]")
                             {
 
                                 auto listen =
-                                    IndexAction(domains::FactoredTiger::TigerAction::OBSERVE);
+                                    IndexAction(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
 
                                 auto node = ba_s->model()->transitionNode(&listen, f);
 
@@ -604,7 +604,7 @@ SCENARIO("fully connected factored tiger model", "[bayes-adaptive][domains][tige
         auto const domain_state = d.sampleStartState();
         auto const hyper_state  = p->sampleFullyConnectedState(domain_state);
 
-        IndexAction random_action(domains::FactoredTiger::OBSERVE);
+        IndexAction random_action(std::to_string(domains::FactoredTiger::OBSERVE));
         REQUIRE(
             *hyper_state->model()->observationNode(&random_action, 0).parents()
             == std::vector<int>({0, 1, 2, 3, 4, 5}));
@@ -634,7 +634,7 @@ SCENARIO(
     GIVEN("a model sampled from the prior with match-uniform structure noise")
     {
 
-        IndexAction a(domains::FactoredTiger::TigerAction::OBSERVE);
+        IndexAction a(std::to_string(domains::FactoredTiger::TigerAction::OBSERVE));
 
         for (auto i = 0; i < 10; ++i)
         {

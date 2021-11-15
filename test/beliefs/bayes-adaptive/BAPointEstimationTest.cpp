@@ -29,7 +29,7 @@ TEST_CASE("update bayes-adaptive point estimation", "[belief][point estimator][b
 
             b.updateEstimation(a, o, d);
 
-            REQUIRE(b.sample()->index() == 1);
+            REQUIRE(b.sample()->index() == "1");
 
             d.releaseAction(a);
             d.releaseObservation(o);

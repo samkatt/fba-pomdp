@@ -30,7 +30,7 @@ SCENARIO(
         filter.add(s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 10));
         beliefs::BAImportanceSampling belief(filter, 1, false, false,false,false);
 
-        REQUIRE(belief.sample()->index() == 0);
+        REQUIRE(belief.sample()->index() == "0");
 
         WHEN("we perform a sample update")
         {
@@ -38,7 +38,7 @@ SCENARIO(
             IndexObservation o(0);
 
             belief.updateEstimation(a, &o, d);
-            REQUIRE(belief.sample()->index() == 0);
+            REQUIRE(belief.sample()->index() == "0");
             d.releaseAction(a);
         }
 
@@ -47,7 +47,7 @@ SCENARIO(
         belief = beliefs::BAImportanceSampling(1, false, false, false,false);
         belief.initiate(d);
 
-        REQUIRE(belief.sample()->index() == 0);
+        REQUIRE(belief.sample()->index() == "0");
 
         WHEN("we perform a sample update")
         {
@@ -55,7 +55,7 @@ SCENARIO(
             IndexObservation o(0);
 
             belief.updateEstimation(a, &o, d);
-            REQUIRE(belief.sample()->index() == 0);
+            REQUIRE(belief.sample()->index() == "0");
 
             d.releaseAction(a);
         }
@@ -70,7 +70,7 @@ SCENARIO(
         beliefs::BAImportanceSampling belief(10, false, false, false,false);
         belief.initiate(d);
 
-        REQUIRE(belief.sample()->index() == 0);
+        REQUIRE(belief.sample()->index() == "0");
 
         WHEN("we perform a sample update")
         {
@@ -78,7 +78,7 @@ SCENARIO(
             IndexObservation o(0);
 
             belief.updateEstimation(a, &o, d);
-            REQUIRE(belief.sample()->index() == 1);
+            REQUIRE(belief.sample()->index() == "1");
 
             d.releaseAction(a);
         }

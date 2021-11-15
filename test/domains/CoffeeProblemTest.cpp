@@ -24,7 +24,7 @@ SCENARIO("Coffee problem", "[domain][coffee]")
             for (auto i = 0; i < 1000; ++i)
             {
                 auto s                      = d.sampleStartState();
-                occurred_states[s->index()] = true;
+                occurred_states[std::stoi(s->index())] = true;
 
                 d.releaseState(s);
             }
@@ -44,10 +44,10 @@ SCENARIO("Coffee problem", "[domain][coffee]")
 
             AND_THEN("those actions cannot exceed index of 2")
             {
-                REQUIRE(actions[0]->index() < 3);
-                REQUIRE(actions[0]->index() < 3);
-                REQUIRE(actions[1]->index() > -1);
-                REQUIRE(actions[1]->index() > -1);
+                REQUIRE(std::stoi(actions[0]->index()) < 3);
+                REQUIRE(std::stoi(actions[0]->index()) < 3);
+                REQUIRE(std::stoi(actions[1]->index()) > -1);
+                REQUIRE(std::stoi(actions[1]->index()) > -1);
             }
 
             for (auto& a : actions) { d.releaseAction(a); }
@@ -58,7 +58,7 @@ SCENARIO("Coffee problem", "[domain][coffee]")
             auto old_rain     = s_coffee->rains();
             auto old_umbrella = s_coffee->umbrella();
 
-            auto a = IndexAction(rnd::slowRandomInt(0, 2));
+            auto a = IndexAction(std::to_string(rnd::slowRandomInt(0, 2)));
 
             Observation const* o;
             Reward r(0);
@@ -78,7 +78,7 @@ SCENARIO("Coffee problem", "[domain][coffee]")
 
         WHEN("The robot gets coffee")
         {
-            auto a = CoffeeProblemAction(GetCoffee);
+            auto a = CoffeeProblemAction(std::to_string(GetCoffee));
 
             Observation const* o;
             Reward r(0);
@@ -102,7 +102,7 @@ SCENARIO("Coffee problem", "[domain][coffee]")
 
         WHEN("The robot checks for coffee")
         {
-            auto a = IndexAction(CheckCoffee);
+            auto a = IndexAction(std::to_string(CheckCoffee));
 
             Observation const* o;
             Reward r(0);
@@ -135,7 +135,7 @@ SCENARIO("Boutilier coffee problem", "[domain][coffee]")
             for (auto i = 0; i < 1000; ++i)
             {
                 auto s                      = d.sampleStartState();
-                occurred_states[s->index()] = true;
+                occurred_states[std::stoi(s->index())] = true;
 
                 d.releaseState(s);
             }
@@ -155,10 +155,10 @@ SCENARIO("Boutilier coffee problem", "[domain][coffee]")
 
             AND_THEN("those actions cannot exceed index of 2")
             {
-                REQUIRE(actions[0]->index() < 3);
-                REQUIRE(actions[0]->index() < 3);
-                REQUIRE(actions[1]->index() > -1);
-                REQUIRE(actions[1]->index() > -1);
+                REQUIRE(std::stoi(actions[0]->index()) < 3);
+                REQUIRE(std::stoi(actions[0]->index()) < 3);
+                REQUIRE(std::stoi(actions[1]->index()) > -1);
+                REQUIRE(std::stoi(actions[1]->index()) > -1);
             }
 
             for (auto& a : actions) { d.releaseAction(a); }
@@ -170,7 +170,7 @@ SCENARIO("Boutilier coffee problem", "[domain][coffee]")
             auto had_umbrella  = s_coffee->umbrella();
             auto wanted_coffee = s_coffee->wantsCoffee();
 
-            auto a = IndexAction(rnd::slowRandomInt(0, 2));
+            auto a = IndexAction(std::to_string(rnd::slowRandomInt(0, 2)));
 
             Observation const* o;
             Reward r(0);
@@ -193,7 +193,7 @@ SCENARIO("Boutilier coffee problem", "[domain][coffee]")
 
         WHEN("The robot gets coffee")
         {
-            auto a = IndexAction(GetCoffee);
+            auto a = IndexAction(std::to_string(GetCoffee));
 
             Observation const* o;
             Reward r(0);
@@ -218,7 +218,7 @@ SCENARIO("Boutilier coffee problem", "[domain][coffee]")
 
         WHEN("The robot checks for coffee")
         {
-            auto a = IndexAction(CheckCoffee);
+            auto a = IndexAction(std::to_string(CheckCoffee));
 
             Observation const* o;
             Reward r(0);

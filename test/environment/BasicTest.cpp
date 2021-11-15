@@ -18,16 +18,16 @@ void testIndexClass(std::string const& name, GENERATOR& distr)
     GIVEN("an " + name)
     {
         auto i       = distr(rnd::rng());
-        auto to_test = T(i);
+        auto to_test = T(std::to_string(i));
 
-        THEN("index should be as initiated") { REQUIRE(to_test.index() == i); }
+        THEN("index should be as initiated") { REQUIRE(to_test.index() == std::to_string(i)); }
 
         WHEN("changing index")
         {
             auto j = distr(rnd::rng());
-            to_test.index(j);
+            to_test.index(std::to_string(j));
 
-            THEN("index should be as changed") { REQUIRE(to_test.index() == j); }
+            THEN("index should be as changed") { REQUIRE(to_test.index() == std::to_string(j)); }
         }
     }
 }
