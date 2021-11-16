@@ -79,15 +79,15 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
     }
     else {
         // TODO change
-        success_prob = domain.believedTransitionProb(domain.agentOnCarpet(
-                {static_cast<unsigned int>(s->_state_vector[_x_feature]),
-                 static_cast<unsigned int>(s->_state_vector[_y_feature])},
-                0), s->_state_vector[_rain_feature]);
+        success_prob = 0.9;
+//        success_prob = domain.believedTransitionProb(domain.agentOnCarpet(
+//                {static_cast<unsigned int>(s->_state_vector[_x_feature]),
+//                 static_cast<unsigned int>(s->_state_vector[_y_feature])},
+//                0), s->_state_vector[_rain_feature]);
     }
 
     /*** fail move ***/
-    if (GridWorldCoffeeBig::goal_location == GridWorldCoffeeBigState::pos({static_cast<unsigned int>(s->_state_vector[_x_feature]),
-                                              static_cast<unsigned int>(s->_state_vector[_y_feature])}))
+    if (domain.foundGoal(s))
     {
         auto const prob = (1 - success_prob);
         for (auto const& rain : rain_values)
@@ -122,8 +122,7 @@ void GridWorldCoffeeBigFlatBAPrior::setPriorTransitionProbabilities(
     /*** move succeeds ***/
     auto const new_agent_pos = domain.applyMove({static_cast<unsigned int>(s->_state_vector[_x_feature]),
                                                  static_cast<unsigned int>(s->_state_vector[_y_feature])}, a);
-    if (GridWorldCoffeeBig::goal_location == GridWorldCoffeeBigState::pos({static_cast<unsigned int>(s->_state_vector[_x_feature]),
-                                              static_cast<unsigned int>(s->_state_vector[_y_feature])}))
+    if (domain.foundGoal(s))
     {
         for (auto const& rain : rain_values)
         {
@@ -337,7 +336,20 @@ void GridWorldCoffeeBigFactBAPrior::setNoisyTransitionNode(
                         features_on++;
                     }
                 }
-                trans_prob = GridWorldCoffeeBig::believedTransitionProb(raining, features_on);
+
+                if (!raining) { // no rain
+                    if (parents.size() - start == 0) { // no other extra variables as parents
+                        trans_prob = GridWorldCoffeeBig::move_prob; // TODO give wrong move prob...?
+                    } else {
+                        trans_prob = 0.5;
+                    }
+                } else { //rain
+                    if (parents.size() - start == 0) { // no other extra variables as parents
+                        trans_prob = GridWorldCoffeeBig::rain_move_prob;
+                    } else {
+                        trans_prob = 0.5; // TODO check
+                    }
+                }
             }
 
             // fail move

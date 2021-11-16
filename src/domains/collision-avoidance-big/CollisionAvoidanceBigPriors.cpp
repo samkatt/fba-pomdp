@@ -444,7 +444,7 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
             // add f_parent as parent randomly,
             // or for sure if we want to match and f_parent is itself
             // TODO perhaps make this part of the environment, the probability for a feature to be added as parent
-            if ((rnd::slowRandomInt(1,100) <= 20) || (f_parent == f && _edge_noise == "match-uniform")) {
+            if ((rnd::slowRandomInt(1,100) <= 50) || (f_parent == f && _edge_noise == "match-uniform")) {
                 for (auto a = 0; a < _NUM_ACTIONS; ++a) {
                     parents[a].emplace_back(f_parent);
                 }

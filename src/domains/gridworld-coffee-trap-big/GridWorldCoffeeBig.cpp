@@ -17,8 +17,10 @@ std::vector<std::string> const GridWorldCoffeeBig::GridWorldCoffeeBigAction::act
                                                                                   "LEFT"};
 
 GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const GridWorldCoffeeBig::start_location = {0, 0};
-GridWorldCoffeeBig::GridWorldCoffeeBigState::pos const GridWorldCoffeeBig::goal_location = {2,4};
-std::vector<GridWorldCoffeeBig::GridWorldCoffeeBigState::pos> const GridWorldCoffeeBig::slow_locations = {{0, 3},{1, 3}, {2, 1}};
+std::vector<GridWorldCoffeeBig::GridWorldCoffeeBigState::pos> const GridWorldCoffeeBig::goal_locations = {{2,4}, {3,4}, {4,3}};
+std::vector<GridWorldCoffeeBig::GridWorldCoffeeBigState::pos> const GridWorldCoffeeBig::slow_locations = {{0, 3},{1, 3}}; //, {2, 1}};
+std::vector<GridWorldCoffeeBig::GridWorldCoffeeBigState::pos> const GridWorldCoffeeBig::slippery_locations = {{2,3}}; //, {2,3}}; // {1, 0},{1, 1}, {2, 3}};
+
 
 
 GridWorldCoffeeBig::GridWorldCoffeeBig(size_t extra_features, bool store_statespace ):
@@ -115,10 +117,10 @@ float GridWorldCoffeeBig::obsDisplProb(unsigned int loc, unsigned int observed_l
     return res;
 }
 
-float GridWorldCoffeeBig::believedTransitionProb(bool const& rain, int const& features_on) {
-    return rain ? rain_move_prob*pow(move_prob_reduction, features_on)  // rain
-    : move_prob*pow(move_prob_reduction, features_on); // no rain
-}
+//float GridWorldCoffeeBig::believedTransitionProb(bool const& rain, int const& features_on) {
+//    return rain ? rain_move_prob*pow(move_prob_reduction, features_on)  // rain
+//    : move_prob*pow(move_prob_reduction, features_on); // no rain
+//}
 
 // Todo: change for the new carpet tiles? CHECK IF WORKS
 bool GridWorldCoffeeBig::agentOnCarpet(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& carpet_config) const {
@@ -147,10 +149,24 @@ bool GridWorldCoffeeBig::agentOnSlowLocation(GridWorldCoffeeBigState::pos const&
            != slow_locations.end();
 }
 
+bool GridWorldCoffeeBig::agentOnSlipperyLocation(GridWorldCoffeeBigState::pos const& agent_pos, int rain) const
+{
+    if (rain == 0) {
+        return false;
+    }
+    // On slippery state
+    return std::find(slippery_locations.begin(), slippery_locations.end(), agent_pos)
+           != slippery_locations.end();
+}
+
 bool GridWorldCoffeeBig::foundGoal(GridWorldCoffeeBigState const* s) const
 {
-    return (GridWorldCoffeeBigState::pos({static_cast<unsigned int>(s->_state_vector[0]),
-                                          static_cast<unsigned int>(s->_state_vector[1])}) == goal_location);
+    return std::find(goal_locations.begin(), goal_locations.end(),
+                     GridWorldCoffeeBigState::pos({static_cast<unsigned int>(s->_state_vector[0]),
+                                                       static_cast<unsigned int>(s->_state_vector[1])}))
+                        != goal_locations.end();
+//    return (GridWorldCoffeeBigState::pos({static_cast<unsigned int>(s->_state_vector[0]),
+//                                          static_cast<unsigned int>(s->_state_vector[1])}) == goal_location);
 }
 
 State const* GridWorldCoffeeBig::sampleRandomState() const
@@ -278,7 +294,7 @@ State const* GridWorldCoffeeBig::sampleStartState() const
     auto randomState = std::vector<int>(3+_extra_features, 0);
     randomState[0] = start_location.x;
     randomState[1] = start_location.y;
-    for (auto i = 3; i < (int) (3 + _extra_features); i++) {
+    for (auto i = 2; i < (int) (3 + _extra_features); i++) {
         randomState[i] = static_cast<unsigned int>(rnd::slowRandomInt(0, 2));
     }
     return getState(randomState);
@@ -309,6 +325,9 @@ Terminal GridWorldCoffeeBig::step(State const** s, Action const* a, Observation 
     // carpet: rain: 0.05, no rain: 0.15
     bool const move_succeeds = (agentOnSlowLocation(agent_pos))
             ? rnd::uniform_rand01() < slow_move_prob
+            : (grid_state->_state_vector[_rain_feature]) ?
+              ((agentOnSlipperyLocation(agent_pos, grid_state->_state_vector[_rain_feature]))
+            ? rnd::uniform_rand01() < move_prob_slippery_rain : rnd::uniform_rand01() < move_prob_rain)
             : rnd::uniform_rand01() < move_prob;
 
     auto const new_agent_pos = (move_succeeds) ? applyMove(agent_pos, a) : agent_pos;

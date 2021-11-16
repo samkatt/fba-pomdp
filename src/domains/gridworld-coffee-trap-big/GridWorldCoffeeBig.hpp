@@ -40,8 +40,10 @@ public:
     // parameters
     constexpr static double const goal_reward    = 1;
     constexpr static double const step_reward    = 0;
-    constexpr static double const same_weather_prob = .7;
-    constexpr static double const move_prob      = .95;
+    constexpr static double const same_weather_prob = 1;
+    constexpr static double const move_prob      = 0.98;
+    constexpr static double const move_prob_rain = 0.66;
+    constexpr static double const move_prob_slippery_rain = 0.15;
     constexpr static double const rain_move_prob = .3; // the probability that the agent believes
     constexpr static double const move_prob_reduction = .9; // per feature that is "on" how much does the agent believe the movement probability is lowered
     constexpr static double const slow_move_prob = .1;
@@ -164,16 +166,17 @@ public:
     explicit GridWorldCoffeeBig(size_t extra_features, bool store_statespace);
 
     static std::vector<GridWorldCoffeeBigState::pos> const slow_locations;
+    static std::vector<GridWorldCoffeeBigState::pos> const slippery_locations;
 
     static GridWorldCoffeeBigState::pos const start_location; // = {0,0};
-    static GridWorldCoffeeBigState::pos const goal_location;
+    static std::vector<GridWorldCoffeeBigState::pos> const goal_locations;
 
     /***** getters of parameters and settings of the domain ****/
     size_t size() const;
     double goalReward() const;
     bool agentOnSlowLocation(GridWorldCoffeeBigState::pos const& agent_pos) const;
     bool agentOnCarpet(GridWorldCoffeeBigState::pos const& agent_pos, unsigned int const& carpet_config) const;
-    static float believedTransitionProb(bool const& rain, int const& features_on);
+//    static float believedTransitionProb(bool const& rain, int const& features_on);
     State const* sampleRandomState() const;
 
     /**
@@ -256,6 +259,8 @@ private:
     void assertLegal(GridWorldCoffeeBigState::pos const& position) const;
 
     std::vector<int> getStateVectorFromIndex(std::string index) const;
+
+    bool agentOnSlipperyLocation(const GridWorldCoffeeBigState::pos &agent_pos, int rain) const;
 };
 
 } // namespace domains

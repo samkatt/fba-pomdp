@@ -138,7 +138,7 @@ CollisionAvoidanceBig::CollisionAvoidanceBig(
     for (auto d = 0; d < grid_height; ++d)
     {
         _observation_error_probability.emplace_back(
-            rnd::normal::cdf(d + .5, 0, 1) - rnd::normal::cdf(d - .5, 0, 1));
+            rnd::normal::cdf(d + .5, 0, 0.5) - rnd::normal::cdf(d - .5, 0, 0.5));
     }
 
     if (version == INIT_RANDOM_POSITION)
@@ -294,16 +294,19 @@ double CollisionAvoidanceBig::computeObservationProbability(
     if (feature_values[timeofday_f] != static_cast<CollisionAvoidanceBigObservation const*>(o)->timeofday) {
         return 0;
     }
+    if (feature_values[obstacle_type_f] != static_cast<CollisionAvoidanceBigObservation const*>(o)->obstacletype) {
+        return 0;
+    }
 
     double p = 1;
 
     for (auto i = 0; i < _num_obstacles; ++i)
     { p *= _observation_error_probability[std::abs(feature_values[obstacle_start + i] - obs[i])]; }
 
-    if (feature_values[obstacle_type_f] != static_cast<CollisionAvoidanceBigObservation const*>(o)->obstacletype) {
-        return p * 0.5 * (1 - CORRECT_TYPE);
-    }
-    return p*CORRECT_TYPE;
+//    if (feature_values[obstacle_type_f] != static_cast<CollisionAvoidanceBigObservation const*>(o)->obstacletype) {
+//        return p * 0.5 * (1 - CORRECT_TYPE);
+//    }
+    return p; // *CORRECT_TYPE;
 }
 
 int CollisionAvoidanceBig::keepInBounds(int value, int num_options) const

@@ -100,7 +100,7 @@ public:
     constexpr static double const BLOCK_MOVE_PROB = .5;
     constexpr static double const MOVE_PROB_FAST = 0.7;
     constexpr static double const MOVE_PROB_SLOW = 0.7;
-    constexpr static double const CORRECT_TYPE = 0.6;
+    constexpr static double const CORRECT_TYPE = 0.7;
 
       /**
       * @brief An observation in the collision avoidance problem

@@ -95,8 +95,11 @@ Terminal GridWorldCoffeeBigBAExtension::terminal(State const* s, Action const* a
 
     auto const gw_state = static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s);
 
-    return Terminal(domains::GridWorldCoffeeBig::goal_location ==
-    domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos({static_cast<unsigned int>(gw_state->_state_vector[0]), static_cast<unsigned int>(gw_state->_state_vector[1])}));
+    return Terminal(domains::GridWorldCoffeeBig::goal_locations[0] ==
+                    domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos({static_cast<unsigned int>(gw_state->_state_vector[0]), static_cast<unsigned int>(gw_state->_state_vector[1])})
+                    ||
+                    domains::GridWorldCoffeeBig::goal_locations[1] ==
+                    domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos({static_cast<unsigned int>(gw_state->_state_vector[0]), static_cast<unsigned int>(gw_state->_state_vector[1])}));
 }
 
 Reward GridWorldCoffeeBigBAExtension::reward(State const* s, Action const* a, State const* new_s) const
@@ -107,7 +110,10 @@ Reward GridWorldCoffeeBigBAExtension::reward(State const* s, Action const* a, St
 
     auto const gw_state = static_cast<domains::GridWorldCoffeeBig::GridWorldCoffeeBigState const*>(s);
 
-    if (domains::GridWorldCoffeeBig::goal_location ==
+    if (domains::GridWorldCoffeeBig::goal_locations[0] ==
+            domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos({static_cast<unsigned int>(gw_state->_state_vector[0]), static_cast<unsigned int>(gw_state->_state_vector[1])})
+            ||
+            domains::GridWorldCoffeeBig::goal_locations[1] ==
             domains::GridWorldCoffeeBig::GridWorldCoffeeBigState::pos({static_cast<unsigned int>(gw_state->_state_vector[0]), static_cast<unsigned int>(gw_state->_state_vector[1])})) // found goal
     {
         return Reward(domains::GridWorldCoffeeBig::goal_reward);
