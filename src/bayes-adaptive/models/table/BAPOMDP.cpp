@@ -149,6 +149,9 @@ Terminal BAPOMDP::step(
     } else {
         test1 = ba_s->sampleStateIndex(domain_state, a, _sample_method);
     }
+    // TODO maybe get abstract state?
+    //  but then for observation need to still generate somehow also using the older part of state?
+    // at least need the observation relevant thing. In gridworld not a problem, in collision need to check then
     auto const new_s = _ba_domain_ext->getState(test1);
 //    auto const new_s = (sample_type == SampleType::Abstract) ?
 //            _ba_domain_ext->getState(static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method)) :

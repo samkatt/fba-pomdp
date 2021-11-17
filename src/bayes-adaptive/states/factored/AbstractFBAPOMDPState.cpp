@@ -63,8 +63,9 @@ std::string AbstractFBAPOMDPState::sampleStateIndexAbstract(
         rnd::sample::Dir::sampleMethod m) const
 {
     if (_abstraction == 0) {
+        // this can go faster?
         auto parent_values = s->getFeatureValues(); // model()->stateFeatureValues(s);
-        auto next_values = std::vector<int>(parent_values.size(), 0);
+        auto next_values = parent_values; // std::vector<int>(parent_values.size(), 0);
         for (auto n = 0; n < (int) feature_set.size(); ++n) {
             next_values[feature_set[n]] = _abstract_model.transitionNode(a, n).sample(parent_values, m);
         }

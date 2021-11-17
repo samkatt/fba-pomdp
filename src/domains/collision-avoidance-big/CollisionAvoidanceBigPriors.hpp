@@ -108,7 +108,7 @@ private:
     static int const _SPEED_FEATURE = 2;
     static int const _TRAFFIC_FEATURE = 3;
     static int const _TIMEOFDAY_FEATURE = 4;
-    static int const _OBTACLETYPE_FEATURE = 5;
+    static int const _OBSTACLETYPE_FEATURE = 5;
 //    static int const _OBSTACLE_FEATURE = 5; // there are potentially multiple obstacle features I think?
 
     bool const _abstraction;

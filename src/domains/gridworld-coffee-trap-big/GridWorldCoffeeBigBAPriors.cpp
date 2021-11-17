@@ -498,7 +498,7 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
     /*** noisy struct prior ****/
     auto structure = _correct_struct_prior.structure();
 
-    if (rnd::slowRandomInt(1,100) <=10) // randomly add rain to parents of x and y
+    if (rnd::slowRandomInt(1,100) <=50) // randomly add rain to parents of x and y
     {
         for (auto a = 0; a < _domain_size._A; ++a) {
             structure.T[a][_agent_x_feature].emplace_back(_rain_feature);
@@ -506,17 +506,42 @@ FBAPOMDPState* GridWorldCoffeeBigFactBAPrior::sampleFBAPOMDPState(State const* d
         }
     }
 
-    // uniformly add any extra binary feature as parent
-    for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
-    {
-        if (rnd::slowRandomInt(1,100) <= 10) // randomly add binary feature to parents of x and y
-        {
-            for (auto a = 0; a < _domain_size._A; ++a) {
-                structure.T[a][_agent_x_feature].emplace_back(f);
-                structure.T[a][_agent_y_feature].emplace_back(f);
-            }
+    std::random_device rd;
+    std::mt19937 g(rd());
+
+    int max_extra_parents = 3;
+    auto extra_parents_to_add = std::vector<int> (max_extra_parents + 1);
+    std::iota(std::begin(extra_parents_to_add), std::end(extra_parents_to_add), 0);
+    std::shuffle(extra_parents_to_add.begin(), extra_parents_to_add.end(), g);
+
+    auto random_to_add = std::vector<int> (_carpet_tiles);
+    std::iota(std::begin(random_to_add), std::end(random_to_add), 3);
+    std::shuffle(random_to_add.begin(), random_to_add.end(), g);
+
+    // add 0 - 4 parents
+    for (auto extra_feature = 0; extra_feature < extra_parents_to_add[0]; ++extra_feature) {
+        // add the first entries from the random_to_add
+        for (auto a = 0; a < _domain_size._A; ++a) {
+            structure.T[a][_agent_x_feature].emplace_back(random_to_add[extra_feature]);
+            structure.T[a][_agent_y_feature].emplace_back(random_to_add[extra_feature]);
         }
     }
+    for (auto a = 0; a < _domain_size._A; ++a) {
+        std::sort(structure.T[a][_agent_x_feature].begin(), structure.T[a][_agent_x_feature].end());
+        std::sort(structure.T[a][_agent_y_feature].begin(), structure.T[a][_agent_y_feature].end());
+    }
+
+    // uniformly add any extra binary feature as parent
+//    for (auto f = 3; f < (int)_domain_feature_size._S.size(); ++f)
+//    {
+//        if (rnd::slowRandomInt(1,100) <= 10) // randomly add binary feature to parents of x and y
+//        {
+//            for (auto a = 0; a < _domain_size._A; ++a) {
+//                structure.T[a][_agent_x_feature].emplace_back(f);
+//                structure.T[a][_agent_y_feature].emplace_back(f);
+//            }
+//        }
+//    }
 
     if (_abstraction) {
         return new AbstractFBAPOMDPState(domain_state, computePriorModel(structure));

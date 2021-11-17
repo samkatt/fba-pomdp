@@ -230,7 +230,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
     const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_SPEED_FEATURE] = _num_speeds;
     const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_TRAFFIC_FEATURE] = _num_traffics;
     const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_TIMEOFDAY_FEATURE] = _num_timeofdays;
-    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_OBTACLETYPE_FEATURE] = _num_obstacletypes;
+    const_cast<Domain_Feature_Size&>(_domain_feature_size)._S[_OBSTACLETYPE_FEATURE] = _num_obstacletypes;
     const_cast<Domain_Feature_Size&>(_domain_feature_size)._O[0] = _width;
     const_cast<Domain_Feature_Size&>(_domain_feature_size)._O[1] = _num_timeofdays;
     const_cast<Domain_Feature_Size&>(_domain_feature_size)._O[2] = _num_obstacletypes;
@@ -308,9 +308,9 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
         }
 
         // set obstacle type feature for each action
-        model.resetTransitionNode(&action, _OBTACLETYPE_FEATURE, {_OBTACLETYPE_FEATURE});
+        model.resetTransitionNode(&action, _OBSTACLETYPE_FEATURE, {_OBSTACLETYPE_FEATURE});
         for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) { // loop over node input
-            model.transitionNode(&action, _OBTACLETYPE_FEATURE)
+            model.transitionNode(&action, _OBSTACLETYPE_FEATURE)
                     .setDirichletDistribution({obstacletype}, obstacletypeTransition(obstacletype));
         }
     }
@@ -323,7 +323,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
         auto action = IndexAction(std::to_string(a));
         // set block y features for each action
         for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f) {
-            model.resetTransitionNode(&action, f, {_SPEED_FEATURE, _OBTACLETYPE_FEATURE, f});
+            model.resetTransitionNode(&action, f, {_SPEED_FEATURE, _OBSTACLETYPE_FEATURE, f});
             for (auto y = 0; y < _height; ++y) {
                 for (auto speed = 0; speed < _num_speeds; ++speed) {
                     for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) { // loop over node input
@@ -362,7 +362,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
         }
 
         // Obstacle type
-        model.resetObservationNode(&action, 2, {_OBTACLETYPE_FEATURE});
+        model.resetObservationNode(&action, 2, {_OBSTACLETYPE_FEATURE});
         for (auto obsttype = 0; obsttype < _num_obstacletypes; ++obsttype) {
             std::vector<float> obsttype_obs_counts(_num_obstacletypes, 0);
             obsttype_obs_counts[obsttype] += 1;
@@ -438,18 +438,55 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
     // generate random structure for each obstacle
     for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f) {
         auto parents = std::vector<std::vector<int>>(_NUM_ACTIONS);
+        for (auto a = 0; a < _domain_size._A; ++a) {
+            parents[a].emplace_back(f);
+        }
+
+        // change, obstacle really influenced by speed and obstacle type
+        // so not influenced by X,Y, traffic and timeofday?
+        std::random_device rd;
+        std::mt19937 g(rd());
 
 
-        for (auto f_parent = 0; f_parent < _num_state_features; ++f_parent) {
-            // add f_parent as parent randomly,
-            // or for sure if we want to match and f_parent is itself
-            // TODO perhaps make this part of the environment, the probability for a feature to be added as parent
-            if ((rnd::slowRandomInt(1,100) <= 50) || (f_parent == f && _edge_noise == "match-uniform")) {
-                for (auto a = 0; a < _NUM_ACTIONS; ++a) {
-                    parents[a].emplace_back(f_parent);
-                }
+
+        int max_extra_parents = 3;
+        auto extra_parents_to_add = std::vector<int> (max_extra_parents + 1);
+        std::iota(std::begin(extra_parents_to_add), std::end(extra_parents_to_add), 0);
+        std::shuffle(extra_parents_to_add.begin(), extra_parents_to_add.end(), g);
+
+        auto random_to_add = std::vector<int> (_num_state_features - 2);
+        std::iota(std::begin(random_to_add), std::end(random_to_add), 0);
+        std::shuffle(random_to_add.begin(), random_to_add.end(), g);
+
+        // add 0 - 3 parents
+        for (auto extra_feature = 0; extra_feature < extra_parents_to_add[0]; ++extra_feature) {
+            // add the first entries from the random_to_add
+            for (auto a = 0; a < _domain_size._A; ++a) {
+                parents[a].emplace_back(random_to_add[extra_feature]);
             }
         }
+
+        if (rnd::slowRandomInt(1,100) <=50) // randomly add obstacletype as parent of obstacle movement
+        {
+            for (auto a = 0; a < _domain_size._A; ++a) {
+                parents[a].emplace_back(5); // _OBSTACLETYPE_FEATURE);
+            }
+        }
+        for (auto a = 0; a < _domain_size._A; ++a) {
+            std::sort(parents[a].begin(), parents[a].end()); // _OBSTACLETYPE_FEATURE);
+        }
+
+//        for (auto f_parent = 0; f_parent < _num_state_features; ++f_parent) {
+//            // add f_parent as parent randomly,
+//            // or for sure if we want to match and f_parent is itself
+//            // TODO perhaps make this part of the environment, the probability for a feature to be added as parent
+//            if ((rnd::slowRandomInt(1,100) <= 50) || (f_parent == f && _edge_noise == "match-uniform")) {
+//                for (auto a = 0; a < _NUM_ACTIONS; ++a) {
+//                    parents[a].emplace_back(f_parent);
+//                }
+//            }
+//        }
+
         sampleBlockTModel(&model, f, std::move(parents));
     }
 

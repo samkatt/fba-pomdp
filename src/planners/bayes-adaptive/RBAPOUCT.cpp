@@ -154,8 +154,8 @@ Action const* RBAPOUCT::selectAction(
             elapsed_time = timer.elapsed();
 ////            VLOG(1) << "Elapsed time " << (elapsed_time.user + elapsed_time.system);
 //
-        } while ((elapsed_time.user + elapsed_time.system) < (_milliseconds_thinking*one_millisecond));
-//        } while ((elapsed_time.wall) < (_milliseconds_thinking*one_millisecond));
+//        } while ((elapsed_time.user + elapsed_time.system) < (_milliseconds_thinking*one_millisecond));
+        } while ((elapsed_time.wall) < (_milliseconds_thinking*one_millisecond));
     }
 
 //    VLOG(1) << "Simulations done: " << sims_done;
