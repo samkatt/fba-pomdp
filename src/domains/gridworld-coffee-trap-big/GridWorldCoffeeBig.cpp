@@ -182,8 +182,13 @@ State const* GridWorldCoffeeBig::sampleRandomState() const
 }
 
 void GridWorldCoffeeBig::clearCache() const {
+    // does this actually clear everything though, does it release the states? maybe not?
+//    for (auto& element: _S_cache) {
+//        this->releaseState(element.second);
+//    }
     _S_cache.clear();
     _O_cache.clear();
+
 }
 
 GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState ( std::vector<int> const& state_vector) const
@@ -196,16 +201,15 @@ GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState 
         if (search != _S_cache.end()) { // found
             return &search->second;
         } else { // not found
-            auto inserted = _S_cache.emplace(index, GridWorldCoffeeBigState(state_vector, index));
-            return &inserted.first->second;
+//            auto inserted = _S_cache.emplace(index, GridWorldCoffeeBigState(state_vector, index));
+            return &_S_cache.emplace(index, GridWorldCoffeeBigState(state_vector, index)).first->second;
         }
 //        auto const * state = new GridWorldCoffeeBigState(agent_pos, rain, carpet_config, positionsToIndex(agent_pos, rain, carpet_config));
 //        return state;
     }
 }
 
-GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState (
-        std::string index) const
+GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState ( std::string index) const
 {
     if (_store_statespace) {
         return &_S[std::stoi(index)];
@@ -214,9 +218,10 @@ GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState 
         if (search != _S_cache.end()) { // found
             return &search->second;
         } else { // not found
-            std::vector<int> features = getStateVectorFromIndex(index);
-            auto inserted = _S_cache.emplace(index, GridWorldCoffeeBigState(features, index));
-            return &inserted.first->second;
+//            std::vector<int> features = getStateVectorFromIndex(index);
+//            auto inserted = _S_cache.emplace(index, GridWorldCoffeeBigState(features, index));
+//            return &inserted.first->second;
+            return &_S_cache.emplace(index, GridWorldCoffeeBigState(getStateVectorFromIndex(index), index)).first->second;
         }
 //        auto const * state = new GridWorldCoffeeBigState(agent_pos, rain, carpet_config, positionsToIndex(agent_pos, rain, carpet_config));
 //        return state;
@@ -234,8 +239,9 @@ GridWorldCoffeeBig::GridWorldCoffeeBigObservation const* GridWorldCoffeeBig::get
         if (search != _O_cache.end()) { // found
             return &search->second;
         } else { // not found
-            auto inserted = _O_cache.emplace(std::to_string(index), GridWorldCoffeeBigObservation(agent_pos, index));
-            return &inserted.first->second;
+            return &_O_cache.emplace(std::to_string(index), GridWorldCoffeeBigObservation(agent_pos, index)).first->second;
+//            auto inserted = _O_cache.emplace(std::to_string(index), GridWorldCoffeeBigObservation(agent_pos, index));
+//            return &inserted.first->second;
         }
 //        auto const * observation = new GridWorldCoffeeBigObservation(agent_pos, positionsToObservationIndex(agent_pos));
 //        return observation;
@@ -349,11 +355,20 @@ Terminal GridWorldCoffeeBig::step(State const** s, Action const* a, Observation 
 void GridWorldCoffeeBig::releaseObservation(Observation const* o) const
 {
     assertLegal(o);
+//    if (!_store_statespace) {
+//        delete (o);
+//    }
 }
 
 void GridWorldCoffeeBig::releaseState(State const* s) const
 {
     assertLegal(s);
+//    if (!_store_statespace) {
+////        if (s != nullptr) {
+////            delete static_cast<GridWorldCoffeeBigState*>(const_cast<State*>(s));
+////        }
+//        delete (s);
+//    }
 }
 
 Observation const* GridWorldCoffeeBig::copyObservation(Observation const* o) const

@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     /***** run program *****/
     try
     {
-        LOG(INFO) << "(" << conf.id << "): Starting FBAPOMDP experiment";
+        VLOG(1) << "INFO " << "(" << conf.id << "): Starting FBAPOMDP experiment";
 
         auto const fbapomdp = factory::makeFBAPOMDP(conf);
         auto const res      = experiment::bapomdp::run(fbapomdp.get(), conf);

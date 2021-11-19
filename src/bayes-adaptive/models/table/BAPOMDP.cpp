@@ -143,22 +143,22 @@ Terminal BAPOMDP::step(
     auto const domain_state = ba_s->_domain_state;
 
     // sample state
-    std::string test1;
-    if (sample_type == SampleType::Abstract) {
-        test1 = static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method);
-    } else {
-        test1 = ba_s->sampleStateIndex(domain_state, a, _sample_method);
-    }
+//    std::string test1;
+//    if (sample_type == SampleType::Abstract) {
+//        test1 = static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method);
+//    } else {
+//        test1 = ba_s->sampleStateIndex(domain_state, a, _sample_method);
+//    }
     // TODO maybe get abstract state?
     //  but then for observation need to still generate somehow also using the older part of state?
     // at least need the observation relevant thing. In gridworld not a problem, in collision need to check then
-    auto const new_s = _ba_domain_ext->getState(test1);
-//    auto const new_s = (sample_type == SampleType::Abstract) ?
-//            _ba_domain_ext->getState(static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method)) :
-//            _ba_domain_ext->getState(ba_s->sampleStateIndex(domain_state, a, _sample_method));
+//    auto const new_s = _ba_domain_ext->getState(test1);
+    auto const new_s = (sample_type == SampleType::Abstract) ?
+            _ba_domain_ext->getState(static_cast<AbstractFBAPOMDPState*>(ba_s)->sampleStateIndexAbstract(domain_state, a, _sample_method)) :
+            _ba_domain_ext->getState(ba_s->sampleStateIndex(domain_state, a, _sample_method));
 
-    auto test2 = ba_s->sampleObservationIndex(a, new_s, _sample_method);
-    *o = _observations.get(test2); // ba_s->getObservation(test2); // _observations.get(test2);
+//    auto test2 = ba_s->sampleObservationIndex(a, new_s, _sample_method);
+    *o = _observations.get(ba_s->sampleObservationIndex(a, new_s, _sample_method)); // ba_s->getObservation(test2); // _observations.get(test2);
 
     auto const t = _ba_domain_ext->terminal(domain_state, a, new_s);
     *r           = _ba_domain_ext->reward(domain_state, a, new_s);

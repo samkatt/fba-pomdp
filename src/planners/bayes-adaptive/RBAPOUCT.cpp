@@ -201,6 +201,7 @@ Action const* RBAPOUCT::selectAction(
     }
 
     freeTree(simulator);
+
     return best_action;
 }
 

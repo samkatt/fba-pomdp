@@ -372,22 +372,21 @@ std::string BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sa
 
     auto parent_values = s->getFeatureValues(); // stateFeatureValues(s);
 
+    if (!isNumber(s->index())) { // TODO should be better way
+        std::string index;
+        for (int i=0; i < (int) _domain_feature_size->_S.size() - 1; i++){
+            index += std::to_string(transitionNode(a, i).sample(parent_values, m));
+            index += '+';
+        }
+        index += std::to_string(transitionNode(a, _domain_feature_size->_S.size() - 1).sample(parent_values, m));
+        return index;
+    }
+
     //create a vector for the next-stage variables - XXX: this is a memory allocation... expensive!?
     auto feature_values = std::vector<int>(_domain_feature_size->_S.size());
     //fill the vector by sampling next stage feature 1 by 1
     for (auto n = 0; n < (int) _domain_feature_size->_S.size(); ++n)
     { feature_values[n] = transitionNode(a, n).sample(parent_values, m); }
-
-    if (!isNumber(s->index())) { // TODO should be better way
-        std::string index;
-        for (int i=0; i < (int) feature_values.size() - 1; i++){
-            index += std::to_string(feature_values[i]);
-            index += '+';
-        }
-        index += std::to_string(feature_values[feature_values.size() - 1]);
-
-        return index;
-    }
 
     return std::to_string(indexing::project(feature_values, _domain_feature_size->_S));
 }

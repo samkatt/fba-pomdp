@@ -57,7 +57,7 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
     boost::timer::cpu_timer timer;
     for (auto run = 0; run < conf.num_runs; ++run)
     {
-        env->clearCache();
+//        env->clearCache();
         belief->initiate(*bapomdp);
 
         if (VLOG_IS_ON(3))
@@ -112,6 +112,7 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
             dynamic_cast<BAState const*>(belief->sample())->logCounts();
         }
         belief->free(*bapomdp);
+        env->clearCache();
     }
 
     return learning_results;

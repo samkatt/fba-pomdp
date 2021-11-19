@@ -123,6 +123,7 @@ Action const*
     }
 
     freeTree(simulator);
+
     return best_action;
 }
 
@@ -308,6 +309,7 @@ void POUCT::freeTree(POMDP const& simulator) const
     }
 
     _action_nodes.clear();
+
 }
 
 void POUCT::initiateUCBTable()
