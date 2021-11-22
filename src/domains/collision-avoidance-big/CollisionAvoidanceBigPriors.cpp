@@ -25,17 +25,17 @@ std::vector<float> observationDistrBig(int height, std::vector<int> const& obsta
 
     for (auto const& b : obstacles_pos)
     {
-        obs_distr[0] *= static_cast<float>(rnd::normal::cdf(-b + .5, 0, 1) * 10000);
+        obs_distr[0] *= static_cast<float>(rnd::normal::cdf(-b + .5, 0, 0.5) * 10000);
 
         for (auto y = 1; y < height - 1; ++y)
         {
             auto dist = std::abs(y - b);
             obs_distr[y] *= static_cast<float>(
-                (rnd::normal::cdf(dist + .5, 0, 1) - rnd::normal::cdf(dist - .5, 0, 1)) * 10000);
+                (rnd::normal::cdf(dist + .5, 0, 0.5) - rnd::normal::cdf(dist - .5, 0, 0.5)) * 10000);
         }
 
         auto dist             = height - 1 - b;
-        obs_distr[height - 1] = static_cast<float>(rnd::normal::cdf(-dist + .5, 0, 1) * 10000);
+        obs_distr[height - 1] = static_cast<float>(rnd::normal::cdf(-dist + .5, 0, 0.5) * 10000);
     }
 
     return obs_distr;
@@ -48,17 +48,17 @@ std::vector<float> observationDistrBig(int height, int obstacle_pos)
 {
     auto obs_distr = std::vector<float>(height, 1);
 
-    obs_distr[0] = static_cast<float>(rnd::normal::cdf(-obstacle_pos + .5, 0, 1));
+    obs_distr[0] = static_cast<float>(rnd::normal::cdf(-obstacle_pos + .5, 0, 0.5));
 
     for (auto y = 1; y < height - 1; ++y)
     {
         auto dist    = std::abs(y - obstacle_pos);
         obs_distr[y] = static_cast<float>(
-            (rnd::normal::cdf(dist + .5, 0, 1) - rnd::normal::cdf(dist - .5, 0, 1)));
+            (rnd::normal::cdf(dist + .5, 0, 0.5) - rnd::normal::cdf(dist - .5, 0, 0.5)));
     }
 
     auto dist             = height - 1 - obstacle_pos;
-    obs_distr[height - 1] = static_cast<float>(rnd::normal::cdf(-dist + .5, 0, 1));
+    obs_distr[height - 1] = static_cast<float>(rnd::normal::cdf(-dist + .5, 0, 0.5));
 
     return obs_distr;
 }
@@ -513,7 +513,8 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y,
     // overestimate the move speed when the relative speed is low, underestimate the movement when the speed is high
 //    auto move_prob = static_cast<float>(.2 + 0.05*(obstacletype+1)*speed - 0.05*(obstacletype+1)*(speed - 1)-.5 * _noise*speed + -.5 *_noise*(speed -1));
     // probability that it moves up, as well as for moving down (i.e. the probability that the block moves is 2* move_prob)
-    auto move_prob = 0.5*(BLOCK_MOVE_PROB + 0.1*(obstacletype+1)*speed + 0.1*(obstacletype+1)*(speed - 1));
+    double diff = 0.025;
+    auto move_prob = 0.5*(BLOCK_MOVE_PROB + diff*(obstacletype+1)*speed + diff*(obstacletype+1)*(speed - 1));
 
     // probability of staying is different if the obstacle is at the top or bottom:
     auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(1 - move_prob)
@@ -584,28 +585,29 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::xTransition(int x, int sp
 std::vector<float> CollisionAvoidanceBigFactoredPrior::speedTransition(int speed, int traffic) const {
     // TODO use _noise here?
     std::vector<float> speed_counts(_num_speeds, 0);
+//    double diff = 0.05;
 
     if (speed == 1) {
         if (traffic == 2) {
-            speed_counts[keepInBounds(speed - 1)] += 0.75 * _counts_total;
-            speed_counts[speed] += 0.25 * _counts_total;
+            speed_counts[keepInBounds(speed - 1)] += 0.9 * _counts_total;
+            speed_counts[speed] += 0.1 * _counts_total;
         } else if (traffic == 1) {
-            speed_counts[keepInBounds(speed - 1)] += 0.5 * _counts_total;
-            speed_counts[speed] += 0.5 * _counts_total;
+            speed_counts[keepInBounds(speed - 1)] += 0.2 * _counts_total;
+            speed_counts[speed] += 0.8 * _counts_total;
         } else {
-            speed_counts[keepInBounds(speed - 1)] += 0.25 * _counts_total;
-            speed_counts[speed] += 0.75 * _counts_total;
+            speed_counts[keepInBounds(speed - 1)] += 0.1 * _counts_total;
+            speed_counts[speed] += 0.9 * _counts_total;
         }
     } else {
         if (traffic == 2) {
-            speed_counts[keepInBounds(speed + 1)] += 0.25 * _counts_total;
-            speed_counts[speed] += 0.75 * _counts_total;
+            speed_counts[keepInBounds(speed + 1)] += 0.1 * _counts_total;
+            speed_counts[speed] += 0.9 * _counts_total;
         } else if (traffic == 1) {
-            speed_counts[keepInBounds(speed + 1)] += 0.5 * _counts_total;
-            speed_counts[speed] += 0.5 * _counts_total;
+            speed_counts[keepInBounds(speed + 1)] += 0.2 * _counts_total;
+            speed_counts[speed] += 0.8 * _counts_total;
         } else {
-            speed_counts[keepInBounds(speed + 1)] += 0.75 * _counts_total;
-            speed_counts[speed] += 0.25 * _counts_total;
+            speed_counts[keepInBounds(speed + 1)] += 0.9 * _counts_total;
+            speed_counts[speed] += 0.1 * _counts_total;
         }
     }
 
@@ -618,29 +620,29 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::trafficTransition(int tra
 
     if (traffic == 2) {
         if (timeofday == 1) {
-            traffic_counts[traffic] += 0.8 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.2 * _counts_total;
+            traffic_counts[traffic] += 0.9 * _counts_total;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.1 * _counts_total;
         } else {
-            traffic_counts[traffic] += 0.2 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.8 * _counts_total;
+            traffic_counts[traffic] += 0.1 * _counts_total;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.9 * _counts_total;
         }
     } else if (traffic == 1) {
         if (timeofday == 1) {
-            traffic_counts[traffic] += 0.6 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.3 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.1 * _counts_total;
+            traffic_counts[traffic] += 0.8 * _counts_total;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.15 * _counts_total;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.05 * _counts_total;
         } else {
-            traffic_counts[traffic] += 0.6 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.1 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.3 * _counts_total;
+            traffic_counts[traffic] += 0.8 * _counts_total;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.05 * _counts_total;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.15 * _counts_total;
         }
     } else {
         if (timeofday == 1) {
-            traffic_counts[traffic] += 0.2 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.8 * _counts_total;
+            traffic_counts[traffic] += 0.1 * _counts_total;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.9 * _counts_total;
         } else {
-            traffic_counts[traffic] += 0.8 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.2 * _counts_total;
+            traffic_counts[traffic] += 0.9 * _counts_total;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.1 * _counts_total;
         }
     }
 

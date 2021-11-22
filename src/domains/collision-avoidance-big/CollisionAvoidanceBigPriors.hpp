@@ -100,8 +100,8 @@ private:
     static int const _NUM_ACTIONS = 3;
 
     constexpr static double const BLOCK_MOVE_PROB = .5;
-    constexpr static double const MOVE_PROB_FAST = 0.7;
-    constexpr static double const MOVE_PROB_SLOW = 0.7;
+    constexpr static double const MOVE_PROB_FAST = 0.85;
+    constexpr static double const MOVE_PROB_SLOW = 0.85;
 
     static int const _AGENT_X_FEATURE = 0;
     static int const _AGENT_Y_FEATURE = 1;
