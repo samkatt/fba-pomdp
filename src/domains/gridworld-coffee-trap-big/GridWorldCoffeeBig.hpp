@@ -239,7 +239,7 @@ private:
     std::vector<GridWorldCoffeeBigState> _S       = {};
     std::vector<GridWorldCoffeeBigObservation> _O = {};
     mutable std::unordered_map<std::string, GridWorldCoffeeBigState> _S_cache = {};
-    mutable std::unordered_map<std::string, GridWorldCoffeeBigObservation> _O_cache = {};
+//    mutable std::unordered_map<std::string, GridWorldCoffeeBigObservation> _O_cache = {};
 
     /**
      * @brief returns an observation from position agent_pos and rain

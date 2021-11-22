@@ -63,22 +63,21 @@ std::string AbstractFBAPOMDPState::sampleStateIndexAbstract(
         rnd::sample::Dir::sampleMethod m) const
 {
     if (_abstraction == 0) {
-        // this can go faster?
         auto parent_values = s->getFeatureValues(); // model()->stateFeatureValues(s);
+
+        if (!isNumber(s->index())) { // TODO should be better way
+            std::string index = s->index();
+            // TODO this only works if all the variables are at most 1 character long
+            for (auto n = 0; n < (int) feature_set.size(); ++n) {
+                index.replace(feature_set[n]*2, 1, std::to_string(_abstract_model.transitionNode(a, n).sample(parent_values, m)));
+            }
+
+            return index;
+        }
+
         auto next_values = parent_values; // std::vector<int>(parent_values.size(), 0);
         for (auto n = 0; n < (int) feature_set.size(); ++n) {
             next_values[feature_set[n]] = _abstract_model.transitionNode(a, n).sample(parent_values, m);
-        }
-
-        if (!isNumber(s->index())) { // TODO should be better way
-            std::string index;
-            for (int i=0; i < (int) next_values.size() - 1; i++){
-                index += std::to_string(next_values[i]);
-                index += '+';
-            }
-            index += std::to_string(next_values[next_values.size() - 1]);
-
-            return index;
         }
 
         return model()->sampleStateIndexThroughAbstraction(&next_values);

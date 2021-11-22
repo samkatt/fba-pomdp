@@ -63,11 +63,11 @@ GridWorldCoffeeBig::GridWorldCoffeeBig(size_t extra_features, bool store_statesp
                     do
                     {
 //                        auto const i = positionsToIndex(agent_pos, rain, binary_features);
-
                         assert(static_cast<unsigned int>(index) == _S.size());
 
                         std::vector<int> state_vector = {static_cast<int>(x_agent), static_cast<int>(y_agent), static_cast<int>(rain)};
                         state_vector.insert(state_vector.end(), binary_features.begin(), binary_features.end());
+//                        std::string index = positionsToIndex(state_vector);
 
                         _S.emplace_back(GridWorldCoffeeBigState(state_vector, std::to_string(index++)));
                     } while (!indexing::increment(binary_features, _extrafeatures_space));
@@ -78,6 +78,27 @@ GridWorldCoffeeBig::GridWorldCoffeeBig(size_t extra_features, bool store_statesp
 
                 _O.emplace_back(GridWorldCoffeeBigObservation(agent_pos, j));
 
+            }
+        }
+    } else { // do O anyway
+        _O_size = _size * _size; //
+
+        _O.reserve(_O_size);
+
+        // generate state space
+        // TODO use indexing::project?
+        for (unsigned int x_agent = 0; x_agent < _size; ++x_agent)
+        {
+            for (unsigned int y_agent = 0; y_agent < _size; ++y_agent)
+            {
+
+                GridWorldCoffeeBigState::pos const agent_pos{x_agent, y_agent};
+
+                auto const j = positionsToObservationIndex(agent_pos);
+
+                assert(static_cast<unsigned int>(j) == _O.size());
+
+                _O.emplace_back(GridWorldCoffeeBigObservation(agent_pos, j));
             }
         }
     }
@@ -182,13 +203,8 @@ State const* GridWorldCoffeeBig::sampleRandomState() const
 }
 
 void GridWorldCoffeeBig::clearCache() const {
-    // does this actually clear everything though, does it release the states? maybe not?
-//    for (auto& element: _S_cache) {
-//        this->releaseState(element.second);
-//    }
     _S_cache.clear();
-    _O_cache.clear();
-
+//    _O_cache.clear();
 }
 
 GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState ( std::vector<int> const& state_vector) const
@@ -201,11 +217,8 @@ GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState 
         if (search != _S_cache.end()) { // found
             return &search->second;
         } else { // not found
-//            auto inserted = _S_cache.emplace(index, GridWorldCoffeeBigState(state_vector, index));
             return &_S_cache.emplace(index, GridWorldCoffeeBigState(state_vector, index)).first->second;
         }
-//        auto const * state = new GridWorldCoffeeBigState(agent_pos, rain, carpet_config, positionsToIndex(agent_pos, rain, carpet_config));
-//        return state;
     }
 }
 
@@ -218,34 +231,31 @@ GridWorldCoffeeBig::GridWorldCoffeeBigState const* GridWorldCoffeeBig::getState 
         if (search != _S_cache.end()) { // found
             return &search->second;
         } else { // not found
-//            std::vector<int> features = getStateVectorFromIndex(index);
-//            auto inserted = _S_cache.emplace(index, GridWorldCoffeeBigState(features, index));
-//            return &inserted.first->second;
             return &_S_cache.emplace(index, GridWorldCoffeeBigState(getStateVectorFromIndex(index), index)).first->second;
         }
-//        auto const * state = new GridWorldCoffeeBigState(agent_pos, rain, carpet_config, positionsToIndex(agent_pos, rain, carpet_config));
-//        return state;
     }
 }
 
 GridWorldCoffeeBig::GridWorldCoffeeBigObservation const* GridWorldCoffeeBig::getObservation(
     GridWorldCoffeeBigState::pos const& agent_pos) const
 {
-    if (_store_statespace) {
-        return &_O[positionsToObservationIndex(agent_pos)];
-    } else {
-        auto index = positionsToObservationIndex(agent_pos);
-        auto search = _O_cache.find(std::to_string(index));
-        if (search != _O_cache.end()) { // found
-            return &search->second;
-        } else { // not found
-            return &_O_cache.emplace(std::to_string(index), GridWorldCoffeeBigObservation(agent_pos, index)).first->second;
-//            auto inserted = _O_cache.emplace(std::to_string(index), GridWorldCoffeeBigObservation(agent_pos, index));
-//            return &inserted.first->second;
-        }
-//        auto const * observation = new GridWorldCoffeeBigObservation(agent_pos, positionsToObservationIndex(agent_pos));
-//        return observation;
-    }
+    // try with storing O
+    return &_O[positionsToObservationIndex(agent_pos)];
+//    if (_store_statespace) {
+//        return &_O[positionsToObservationIndex(agent_pos)];
+//    } else {
+//        auto index = positionsToObservationIndex(agent_pos);
+//        auto search = _O_cache.find(std::to_string(index));
+//        if (search != _O_cache.end()) { // found
+//            return &search->second;
+//        } else { // not found
+//            return &_O_cache.emplace(std::to_string(index), GridWorldCoffeeBigObservation(agent_pos, index)).first->second;
+////            auto inserted = _O_cache.emplace(std::to_string(index), GridWorldCoffeeBigObservation(agent_pos, index));
+////            return &inserted.first->second;
+//        }
+////        auto const * observation = new GridWorldCoffeeBigObservation(agent_pos, positionsToObservationIndex(agent_pos));
+////        return observation;
+//    }
 }
 
 Action const* GridWorldCoffeeBig::generateRandomAction(State const* s) const
@@ -364,10 +374,7 @@ void GridWorldCoffeeBig::releaseState(State const* s) const
 {
     assertLegal(s);
 //    if (!_store_statespace) {
-////        if (s != nullptr) {
-////            delete static_cast<GridWorldCoffeeBigState*>(const_cast<State*>(s));
-////        }
-//        delete (s);
+//        _S_cache.erase(positionsToIndex(s->getFeatureValues()));
 //    }
 }
 
@@ -492,8 +499,8 @@ void GridWorldCoffeeBig::assertLegal(State const* s) const
     // TODO fix
 //    assert(std::stoi(s->index()) >= 0 &&std::stoi(s->index())< _S_size);
 //    assertLegal(static_cast<GridWorldCoffeeBigState const*>(s)->_agent_position);
-    assert((static_cast<GridWorldCoffeeBigState const*>(s)->_state_vector[_rain_feature] == 0)
-            || (static_cast<GridWorldCoffeeBigState const*>(s)->_state_vector[_rain_feature] == 1));
+//    assert((static_cast<GridWorldCoffeeBigState const*>(s)->_state_vector[_rain_feature] == 0)
+//            || (static_cast<GridWorldCoffeeBigState const*>(s)->_state_vector[_rain_feature] == 1));
 //    assert(static_cast<GridWorldCoffeeBigState const*>(s)->_feature_config < (unsigned int) std::pow(2, _extra_features));
 }
 

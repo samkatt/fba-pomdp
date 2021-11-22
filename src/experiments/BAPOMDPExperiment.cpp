@@ -70,11 +70,16 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
         {
             VLOG(1) << "run " << run + 1 << "/" << conf.num_runs << ", episode " << episode + 1
                     << "/" << conf.num_episodes;
+
+
+
             // time including resetDomainState
 //            timer.restart();
 //            belief->resetDomainStateDistribution(*bapomdp);
 //            int selectedAbstraction = 1; // abstraction->selectAbstraction();
 //            VLOG(1) << "Selected abstraction " << selectedAbstraction;
+            // clear states used in previous episode, not needed for the resetDomainStateDistribution (I think?)
+            bapomdp->clearCache();
             if (useAbstraction) {
                 if (abstraction->isFullModel(selectedAbstraction)) {
                     belief->resetDomainStateDistribution(*bapomdp);
@@ -111,7 +116,9 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
             VLOG(3) << "Example BA counts at end of run " << run << ":";
             dynamic_cast<BAState const*>(belief->sample())->logCounts();
         }
+        // two times states, in bapomdp and in env? where does the cache grow?
         belief->free(*bapomdp);
+        bapomdp->clearCache();
         env->clearCache();
     }
 

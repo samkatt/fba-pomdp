@@ -65,15 +65,6 @@ void BAImportanceSampling::initiate(POMDP const& d)
     {
         auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(d.sampleStartState());
         _filter.add(s, 1.0 / static_cast<double>(_n));
-//        if (_abstraction) {
-//            if (_update_abstract_model_normalized) {
-//                // Update the abstraction
-//                static_cast<AbstractFBAPOMDPState *>(s)->setAbstractionNormalized(0);
-//            } else if (_update_abstract_model) {
-//                // Update the abstraction
-//                static_cast<AbstractFBAPOMDPState *>(s)->setAbstraction(0);
-//            }
-//        }
     }
 
     VLOG(3) << "Status of importance sampling filter after initiating:\n"
@@ -141,19 +132,6 @@ void BAImportanceSampling::resetDomainStateDistribution(const BAPOMDP &bapomdp)
     _filter.free();
     _filter = std::move(new_filter);
 
-//
-    // fill up the new filter
-    // by sampling models from our current belief
-//    while (new_filter.size() != _n)
-//    {
-//        auto s = dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
-//        bapomdp.resetDomainState(s);
-//        new_filter.add(s, 1.0 / static_cast<double>(_n));
-//    }
-//
-//    _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); });
-//    _filter = std::move(new_filter);
-
     VLOG(3) << "Status of importance sampling filter after initiating while keeping counts:\n"
             << _filter.toString(stateToString);
 }
@@ -165,28 +143,43 @@ void BAImportanceSampling::resetDomainStateDistributionAndAddAbstraction(const B
 
     auto new_filter = WeightedFilter<State const*>();
 
-    // fill up the new filter
-    // by sampling models from our current belief
-    while (new_filter.size() != _n)
-    {
-        auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(bapomdp.copyState(_filter.sample()));
-        bapomdp.resetDomainState(s);
-        if (_abstraction) {
-            if(_remake_abstract_model) {
-                static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(
-                        s->model_real(), i, bapomdp, &static_cast<AbstractFBAPOMDPState *>(s)->feature_set));
-            } else {
-                if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() != 0) {
-                    static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(
-                            s->model_real(), i, bapomdp, &static_cast<AbstractFBAPOMDPState *>(s)->feature_set));
-                }
-            }
-        }
+    // more memory efficient way
+    auto sampled_samples = std::vector<int>(_n, 0);
 
-        new_filter.add(s, 1.0 / static_cast<double>(_n));
+    for (auto j = 0; j < (int) _n; j++) {
+        sampled_samples[_filter.sampleIndex()] += 1;
+    }
+    // First free unused particles from memory
+    for (int j = 0; j < (int) _n; j++) {
+        if (sampled_samples[j] == 0) {
+            _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); }, j);
+        }
+    }
+    // Then build new belief, and free remaining particles while doing so
+    for (int j = 0; j < (int) _n; j++) {
+        if (sampled_samples[j] > 0) {
+            for (int k = 0; k < sampled_samples[j]; k++) {
+                auto s = (AbstractFBAPOMDPState *) dynamic_cast<BAState const*>(bapomdp.copyState(_filter.particle(j)->particle));
+                bapomdp.resetDomainState(s);
+
+                if (_abstraction) {
+                    if(_remake_abstract_model) {
+                        static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(
+                                s->model_real(), i, bapomdp, &static_cast<AbstractFBAPOMDPState *>(s)->feature_set));
+                    } else {
+                        if (*static_cast<AbstractFBAPOMDPState*>(s)->getAbstraction() != 0) {
+                            static_cast<AbstractFBAPOMDPState*>(s)->setAbstraction(abstraction.constructAbstractModel(
+                                    s->model_real(), i, bapomdp, &static_cast<AbstractFBAPOMDPState *>(s)->feature_set));
+                        }
+                    }
+                }
+                new_filter.add(s, 1.0 / static_cast<double>(_n));
+            }
+            _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); }, j);
+        }
     }
 
-    _filter.free([&bapomdp](State const* s) { bapomdp.releaseState(s); });
+    _filter.free();
     _filter = std::move(new_filter);
 
     VLOG(3) << "Status of importance sampling filter after initiating while keeping counts:\n"
