@@ -447,8 +447,6 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
         std::random_device rd;
         std::mt19937 g(rd());
 
-
-
         int max_extra_parents = 3;
         auto extra_parents_to_add = std::vector<int> (max_extra_parents + 1);
         std::iota(std::begin(extra_parents_to_add), std::end(extra_parents_to_add), 0);
@@ -519,6 +517,34 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y,
     // probability of staying is different if the obstacle is at the top or bottom:
     auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(1 - move_prob)
                                                   : static_cast<float>(1 - 2*move_prob);
+
+    std::vector<float> position_counts(_height);
+
+    if (y != 0)
+    {
+        position_counts[y - 1] = move_prob * _counts_total;
+    }
+
+    if (y != _domain_feature_size._S[_first_obstacle] - 1)
+    {
+        position_counts[y + 1] = move_prob * _counts_total;
+    }
+
+    position_counts[y] = stay_prob * _counts_total;
+
+    return position_counts;
+}
+
+std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y) const
+{
+    double noise = 0.4;
+    auto move_prob = static_cast<float>(.25 - .5 * noise);
+
+    // probability of staying is most definitely twice the probability
+    // of moving- only not if the obstacle is at the top or bottom:
+    // this is takes on 3 times as many probability
+    auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(3 * .25 + .5 * noise)
+                                                  : static_cast<float>(2 * .25 + noise);
 
     std::vector<float> position_counts(_height);
 
@@ -796,12 +822,6 @@ void CollisionAvoidanceBigFactoredPrior::sampleBlockTModel(
 //        auto correct_edge  = -1;
 
         for (auto const& p : structure[a]) {
-
-//            if (p == obstacle_feature)
-//            {
-//                correct_edge = parent_values.size();
-//            }
-
             parent_values.emplace_back(0);
             parent_ranges.emplace_back(_domain_feature_size._S[p]);
         }
@@ -809,31 +829,11 @@ void CollisionAvoidanceBigFactoredPrior::sampleBlockTModel(
         // set counts according to parents
         model->resetTransitionNode(&action, obstacle_feature, structure[a]);
 
-//        if (correct_edge != -1) { // if the feature itself is part of the parents...?
-//            do {
-//                model->transitionNode(&action, obstacle_feature)
-//                    .setDirichletDistribution(
-//                        parent_values, obstacleTransition(parent_values[correct_edge]));
-//            } while (!indexing::increment(parent_values, parent_ranges));
-//
-//        } else { // if the feature itself is not part of the parents...?
-            // not correct edge: uniform prior
-        auto counts = std::vector<float>(
-            _domain_feature_size._S[obstacle_feature],
-            _counts_total / static_cast<float>(_domain_feature_size._S[obstacle_feature]));
-
-        // base case: no parents
-        if (parent_values.empty()) {
+        // always at least one parent
+        do {
             model->transitionNode(&action, obstacle_feature)
-                .setDirichletDistribution({0}, std::move(counts));
-        } else {
-            // at least one parent
-            do {
-                model->transitionNode(&action, obstacle_feature)
-                    .setDirichletDistribution(parent_values, counts);
-            } while (!indexing::increment(parent_values, parent_ranges));
-        }
-//        }
+                .setDirichletDistribution(parent_values, obstacleTransition(parent_values[parent_values.size()-1]));
+        } while (!indexing::increment(parent_values, parent_ranges));
     }
 }
 

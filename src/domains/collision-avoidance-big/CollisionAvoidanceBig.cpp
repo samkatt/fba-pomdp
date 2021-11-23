@@ -109,7 +109,7 @@ CollisionAvoidanceBig::CollisionAvoidanceBig(
                                 std::vector<int> vector1 = {x, y_agent, speed, traffic, timeofday, obstacletype};
                                 vector1.insert(vector1.end(), obstacles.begin(), obstacles.end());
                                 _states[x][y_agent][speed][traffic][timeofday][obstacletype][obs_i++] =
-                                        new CollisionAvoidanceBigState(vector1, index++);
+                                        new CollisionAvoidanceBigState(vector1, std::to_string(index++));
                             } while (!indexing::increment(obstacles, _obstacles_space));
                         }
                     }
@@ -388,9 +388,7 @@ Terminal
         feature_values[i] = moveObstacle(feature_values[i], collision_state->_state_vector[speed_f], collision_state->_state_vector[obstacle_type_f]);
     }
 //    for (auto& b : blocks) { b = moveObstacle(b, collision_state->speed); }
-    std::vector<int> test = {feature_values.begin() + obstacle_start, feature_values.end()};
-    auto test2 = indexing::project(test, _obstacles_space);
-    *s = _states[x][y][speed][traffic][timeofday][obstacletype][test2];
+    *s = _states[x][y][speed][traffic][timeofday][obstacletype][indexing::project({feature_values.begin() + obstacle_start, feature_values.end()}, _obstacles_space)];
 
     // generate observation
 //    for (auto& b : blocks)

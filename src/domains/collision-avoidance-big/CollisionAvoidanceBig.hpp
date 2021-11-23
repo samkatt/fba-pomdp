@@ -27,7 +27,7 @@ namespace domains {
 struct CollisionAvoidanceBigState : public State
 {
     CollisionAvoidanceBigState( std::vector<int> state_vector,
-        int index) :
+        std::string index) :
             _state_vector(std::move(state_vector)),
             _index(index)
     {
@@ -38,7 +38,7 @@ struct CollisionAvoidanceBigState : public State
         throw "CollisionAvoidanceBigState::index(i) should not be called...?";
     }
 
-    std::string index() const final { return std::to_string(_index); }
+    std::string index() const final { return _index; }
 
     std::string toString() const final
     {
@@ -48,7 +48,7 @@ struct CollisionAvoidanceBigState : public State
         { obsts += std::to_string(_state_vector[i]) + ","; }
         obsts += std::to_string(_state_vector[_state_vector.size()-1]);
 
-        return "(index:" + std::to_string(_index) + " (" + std::to_string(_state_vector[0]) + ","
+        return "(index:" + _index + " (" + std::to_string(_state_vector[0]) + ","
                + std::to_string(_state_vector[1]) + "), " + std::to_string(_state_vector[2]) + ", " + std::to_string(_state_vector[3]) + ", "
               + std::to_string(_state_vector[4]) + ", " + std::to_string(_state_vector[5]) + ", "+ obsts
                + "})";
@@ -57,7 +57,7 @@ struct CollisionAvoidanceBigState : public State
     std::vector<int> getFeatureValues() const final;
     std::vector<int> const _state_vector;
 
-    int _index;
+    std::string _index;
 
 //    std::vector<int> obstacles_pos;
 };
@@ -186,7 +186,16 @@ public:
     State const* copyState(State const* s) const final;
     void clearCache() const final;
 
-private:
+/**
+ * @brief returns the state associated with index
+ *
+ * @param index the index of the state
+ *
+ * @return the CollisionAvoidanceBigState of index
+ */
+State const* getState(int index) const;
+
+    private:
     int const _grid_width;
     int const _grid_height;
     int const _num_speeds = 2;
@@ -228,7 +237,7 @@ private:
 
     // describes the noise of the observation
     mutable std::normal_distribution<float> _observation_distr =
-        std::normal_distribution<float>(0, 1);
+        std::normal_distribution<float>(0, 0.5);
 
     mutable std::uniform_int_distribution<int> _y_sampler{
         rnd::integerDistribution(0, _grid_height)};
@@ -236,23 +245,14 @@ private:
     utils::categoricalDistr _state_prior{static_cast<size_t>(
         _grid_width * _grid_height * _num_speeds * _num_traffics * _num_timeofdays * _num_obstacletypes * static_cast<int>(std::pow(_grid_height, _num_obstacles)))};
 
-    /**
-     * @brief returns the state associated with index
-     *
-     * @param index the index of the state
-     *
-     * @return the CollisionAvoidanceBigState of index
-     */
-    State const* getState(int index) const;
-
-    /**
-     * @brief computes reward associated with <*,a,new_s>
-     *
-     * @param a
-     * @param new_s
-     *
-     * @return the reward of ending up in new_s after taking action a
-     */
+        /**
+         * @brief computes reward associated with <*,a,new_s>
+         *
+         * @param a
+         * @param new_s
+         *
+         * @return the reward of ending up in new_s after taking action a
+         */
     Reward reward(Action const* a, State const* new_s) const;
 
     /**

@@ -68,7 +68,7 @@ std::unique_ptr<BADomainExtension> makeBADomainExtension(configurations::BAConf 
 
     if (d == "random-collision-avoidance-big" || d == "centered-collision-avoidance-big")
         return std::unique_ptr<BADomainExtension>(new ext::CollisionAvoidanceBigBAExtension(
-                c.domain_conf.width, c.domain_conf.height, c.domain_conf.size));
+                c.domain_conf.width, c.domain_conf.height, c.domain_conf.size, static_cast<domains::CollisionAvoidanceBig const&>(domain)));
 
     throw "incorrect domain provided, " + d + " is not supported as tabular BA-POMDP";
 }

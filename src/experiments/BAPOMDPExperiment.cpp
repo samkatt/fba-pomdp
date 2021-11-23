@@ -79,7 +79,9 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
 //            int selectedAbstraction = 1; // abstraction->selectAbstraction();
 //            VLOG(1) << "Selected abstraction " << selectedAbstraction;
             // clear states used in previous episode, not needed for the resetDomainStateDistribution (I think?)
-            bapomdp->clearCache();
+            if (!conf.domain_conf.store_statespace) {
+                bapomdp->clearCache();
+            }
             if (useAbstraction) {
                 if (abstraction->isFullModel(selectedAbstraction)) {
                     belief->resetDomainStateDistribution(*bapomdp);
@@ -118,8 +120,10 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
         }
         // two times states, in bapomdp and in env? where does the cache grow?
         belief->free(*bapomdp);
-        bapomdp->clearCache();
-        env->clearCache();
+        if (!conf.domain_conf.store_statespace) {
+            bapomdp->clearCache();
+            env->clearCache();
+        }
     }
 
     return learning_results;

@@ -21,7 +21,7 @@ class CollisionAvoidanceBigBAExtension : public BADomainExtension
 {
 
 public:
-    CollisionAvoidanceBigBAExtension(int grid_width, int grid_height, int num_obstacles);
+    CollisionAvoidanceBigBAExtension(int grid_width, int grid_height, int num_obstacles, domains::CollisionAvoidanceBig const& problem_domain);
     ~CollisionAvoidanceBigBAExtension();
 
     /*** BADomainExtension interface implementation ****/
@@ -48,20 +48,21 @@ private:
                                     * static_cast<int>(std::pow(_grid_height, _num_obstacles)),
                                 domains::CollisionAvoidanceBig::NUM_ACTIONS,
                                 static_cast<int>(_grid_width * _num_timeofdays * _num_obstacletypes * std::pow(_grid_height, _num_obstacles))};
+    domains::CollisionAvoidanceBig const& collisionavoidancebig;
 
-    std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>>> _states{
-            static_cast<size_t>(_grid_width),
-            std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>>(
-                    _grid_height,
-                    std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>(
-                            _num_speeds, //speed
-                            std::vector<std::vector<std::vector<std::vector<State const*>>>>(
-                                    _num_traffics, //traffic
-                                    std::vector<std::vector<std::vector<State const*>>>(
-                                            _num_timeofdays, //timeofday
-                                            std::vector<std::vector<State const*>>(
-                                                    _num_obstacletypes, //obstacletype
-                                                    std::vector<State const*>(std::pow(_grid_height, _num_obstacles)))))))};
+//    std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>>> _states{
+//            static_cast<size_t>(_grid_width),
+//            std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>>(
+//                    _grid_height,
+//                    std::vector<std::vector<std::vector<std::vector<std::vector<State const*>>>>>(
+//                            _num_speeds, //speed
+//                            std::vector<std::vector<std::vector<std::vector<State const*>>>>(
+//                                    _num_traffics, //traffic
+//                                    std::vector<std::vector<std::vector<State const*>>>(
+//                                            _num_timeofdays, //timeofday
+//                                            std::vector<std::vector<State const*>>(
+//                                                    _num_obstacletypes, //obstacletype
+//                                                    std::vector<State const*>(std::pow(_grid_height, _num_obstacles)))))))};
 };
 
 }} // namespace bayes_adaptive::domain_extensions

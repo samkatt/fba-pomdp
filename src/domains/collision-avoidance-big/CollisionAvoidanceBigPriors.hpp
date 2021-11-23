@@ -183,6 +183,8 @@ private:
         std::vector<float> obstacletypeTransition(int obstacletype) const;
 
         std::vector<float> xTransition(int x, int speed) const;
+
+        std::vector<float> obstacleTransition(int y) const;
     };
 
 } // namespace priors
