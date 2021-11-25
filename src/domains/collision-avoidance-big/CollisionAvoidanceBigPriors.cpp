@@ -327,8 +327,12 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
             for (auto y = 0; y < _height; ++y) {
                 for (auto speed = 0; speed < _num_speeds; ++speed) {
                     for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) { // loop over node input
+                        // correct transitions
                         model.transitionNode(&action, f)
-                                .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y, speed, obstacletype)); // TODO does the order here matter...?
+                                .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y, speed, obstacletype));
+                        // wrong transitions
+//                        model.transitionNode(&action, f)
+//                            .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y)); 
                     }
                 }
             }
@@ -444,23 +448,30 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
 
         // change, obstacle really influenced by speed and obstacle type
         // so not influenced by X,Y, traffic and timeofday?
-        std::random_device rd;
-        std::mt19937 g(rd());
+//        std::random_device rd;
+//        std::mt19937 g(rd());
+//
+//        int max_extra_parents = 3;
+//        auto extra_parents_to_add = std::vector<int> (max_extra_parents + 1);
+//        std::iota(std::begin(extra_parents_to_add), std::end(extra_parents_to_add), 0);
+//        std::shuffle(extra_parents_to_add.begin(), extra_parents_to_add.end(), g);
+//
+//        auto random_to_add = std::vector<int> (_num_state_features - 2);
+//        std::iota(std::begin(random_to_add), std::end(random_to_add), 0);
+//        std::shuffle(random_to_add.begin(), random_to_add.end(), g);
+//
+//        // add 0 - 3 parents
+//        for (auto extra_feature = 0; extra_feature < extra_parents_to_add[0]; ++extra_feature) {
+//            // add the first entries from the random_to_add
+//            for (auto a = 0; a < _domain_size._A; ++a) {
+//                parents[a].emplace_back(random_to_add[extra_feature]);
+//            }
+//        }
 
-        int max_extra_parents = 3;
-        auto extra_parents_to_add = std::vector<int> (max_extra_parents + 1);
-        std::iota(std::begin(extra_parents_to_add), std::end(extra_parents_to_add), 0);
-        std::shuffle(extra_parents_to_add.begin(), extra_parents_to_add.end(), g);
-
-        auto random_to_add = std::vector<int> (_num_state_features - 2);
-        std::iota(std::begin(random_to_add), std::end(random_to_add), 0);
-        std::shuffle(random_to_add.begin(), random_to_add.end(), g);
-
-        // add 0 - 3 parents
-        for (auto extra_feature = 0; extra_feature < extra_parents_to_add[0]; ++extra_feature) {
-            // add the first entries from the random_to_add
+        if (rnd::slowRandomInt(1,100) <=50) // randomly add speed as parent of obstacle movement
+        {
             for (auto a = 0; a < _domain_size._A; ++a) {
-                parents[a].emplace_back(random_to_add[extra_feature]);
+                parents[a].emplace_back(2); // _SPEED_FEATURE);
             }
         }
 
@@ -471,7 +482,7 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
             }
         }
         for (auto a = 0; a < _domain_size._A; ++a) {
-            std::sort(parents[a].begin(), parents[a].end()); // _OBSTACLETYPE_FEATURE);
+            std::sort(parents[a].begin(), parents[a].end());
         }
 
 //        for (auto f_parent = 0; f_parent < _num_state_features; ++f_parent) {
@@ -598,11 +609,11 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::xTransition(int x, int sp
     std::vector<float> x_counts(_width, 0);
 
     if (speed == 1) {
-        x_counts[x - 1] += MOVE_PROB_FAST * _counts_total;
-        x_counts[std::max(x - 2, 0)] += (1 - MOVE_PROB_FAST) * _counts_total;
+        x_counts[x - 1] += MOVE_PROB_FAST * 10000;
+        x_counts[std::max(x - 2, 0)] += (1 - MOVE_PROB_FAST) * 10000;
     } else {
-        x_counts[x - 1] += MOVE_PROB_SLOW * _counts_total;
-        x_counts[x] += (1 - MOVE_PROB_SLOW) * _counts_total;
+        x_counts[x - 1] += MOVE_PROB_SLOW * 10000;
+        x_counts[x] += (1 - MOVE_PROB_SLOW) * 10000;
     }
 
     return x_counts;
@@ -615,25 +626,25 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::speedTransition(int speed
 
     if (speed == 1) {
         if (traffic == 2) {
-            speed_counts[keepInBounds(speed - 1)] += 0.9 * _counts_total;
-            speed_counts[speed] += 0.1 * _counts_total;
+            speed_counts[keepInBounds(speed - 1)] += 0.9 * 10000;
+            speed_counts[speed] += 0.1 * 10000;
         } else if (traffic == 1) {
-            speed_counts[keepInBounds(speed - 1)] += 0.2 * _counts_total;
-            speed_counts[speed] += 0.8 * _counts_total;
+            speed_counts[keepInBounds(speed - 1)] += 0.2 * 10000;
+            speed_counts[speed] += 0.8 * 10000;
         } else {
-            speed_counts[keepInBounds(speed - 1)] += 0.1 * _counts_total;
-            speed_counts[speed] += 0.9 * _counts_total;
+            speed_counts[keepInBounds(speed - 1)] += 0.1 * 10000;
+            speed_counts[speed] += 0.9 * 10000;
         }
     } else {
         if (traffic == 2) {
-            speed_counts[keepInBounds(speed + 1)] += 0.1 * _counts_total;
-            speed_counts[speed] += 0.9 * _counts_total;
+            speed_counts[keepInBounds(speed + 1)] += 0.1 * 10000;
+            speed_counts[speed] += 0.9 * 10000;
         } else if (traffic == 1) {
-            speed_counts[keepInBounds(speed + 1)] += 0.2 * _counts_total;
-            speed_counts[speed] += 0.8 * _counts_total;
+            speed_counts[keepInBounds(speed + 1)] += 0.2 * 10000;
+            speed_counts[speed] += 0.8 * 10000;
         } else {
-            speed_counts[keepInBounds(speed + 1)] += 0.9 * _counts_total;
-            speed_counts[speed] += 0.1 * _counts_total;
+            speed_counts[keepInBounds(speed + 1)] += 0.9 * 10000;
+            speed_counts[speed] += 0.1 * 10000;
         }
     }
 
@@ -646,29 +657,29 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::trafficTransition(int tra
 
     if (traffic == 2) {
         if (timeofday == 1) {
-            traffic_counts[traffic] += 0.9 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.1 * _counts_total;
+            traffic_counts[traffic] += 0.9 * 10000;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.1 * 10000;
         } else {
-            traffic_counts[traffic] += 0.1 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.9 * _counts_total;
+            traffic_counts[traffic] += 0.1 * 10000;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.9 * 10000;
         }
     } else if (traffic == 1) {
         if (timeofday == 1) {
-            traffic_counts[traffic] += 0.8 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.15 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.05 * _counts_total;
+            traffic_counts[traffic] += 0.8 * 10000;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.15 * 10000;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.05 * 10000;
         } else {
-            traffic_counts[traffic] += 0.8 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.05 * _counts_total;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.15 * _counts_total;
+            traffic_counts[traffic] += 0.8 * 10000;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.05 * 10000;
+            traffic_counts[keepInBounds(traffic - 1)] += 0.15 * 10000;
         }
     } else {
         if (timeofday == 1) {
-            traffic_counts[traffic] += 0.1 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.9 * _counts_total;
+            traffic_counts[traffic] += 0.1 * 10000;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.9 * 10000;
         } else {
-            traffic_counts[traffic] += 0.9 * _counts_total;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.1 * _counts_total;
+            traffic_counts[traffic] += 0.9 * 10000;
+            traffic_counts[keepInBounds(traffic + 1)] += 0.1 * 10000;
         }
     }
 
