@@ -328,11 +328,11 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
                 for (auto speed = 0; speed < _num_speeds; ++speed) {
                     for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) { // loop over node input
                         // correct transitions
-                        model.transitionNode(&action, f)
-                                .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y, speed, obstacletype));
-                        // wrong transitions
 //                        model.transitionNode(&action, f)
-//                            .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y)); 
+//                                .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y, speed, obstacletype));
+                        // wrong transitions
+                        model.transitionNode(&action, f)
+                            .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y));
                     }
                 }
             }
