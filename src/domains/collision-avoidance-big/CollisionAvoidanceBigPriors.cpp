@@ -332,7 +332,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
 //                                .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y, speed, obstacletype));
                         // wrong transitions
                         model.transitionNode(&action, f)
-                            .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y));
+                            .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(speed, y));
                     }
                 }
             }
@@ -549,6 +549,34 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y,
 std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y) const
 {
     double noise = 0.4;
+    auto move_prob = static_cast<float>(.25 - .5 * noise);
+
+    // probability of staying is most definitely twice the probability
+    // of moving- only not if the obstacle is at the top or bottom:
+    // this is takes on 3 times as many probability
+    auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(3 * .25 + .5 * noise)
+                                                  : static_cast<float>(2 * .25 + noise);
+
+    std::vector<float> position_counts(_height);
+
+    if (y != 0)
+    {
+        position_counts[y - 1] = move_prob * _counts_total;
+    }
+
+    if (y != _domain_feature_size._S[_first_obstacle] - 1)
+    {
+        position_counts[y + 1] = move_prob * _counts_total;
+    }
+
+    position_counts[y] = stay_prob * _counts_total;
+
+    return position_counts;
+}
+
+std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int speed, int y) const
+{
+    double noise = 0.4 - speed * _noise - (speed - 1) * _noise;
     auto move_prob = static_cast<float>(.25 - .5 * noise);
 
     // probability of staying is most definitely twice the probability
@@ -841,10 +869,21 @@ void CollisionAvoidanceBigFactoredPrior::sampleBlockTModel(
         model->resetTransitionNode(&action, obstacle_feature, structure[a]);
 
         // always at least one parent
-        do {
-            model->transitionNode(&action, obstacle_feature)
-                .setDirichletDistribution(parent_values, obstacleTransition(parent_values[parent_values.size()-1]));
-        } while (!indexing::increment(parent_values, parent_ranges));
+        if (structure[a][0] == _SPEED_FEATURE) { // assume that speeds has an influence
+            do {
+                model->transitionNode(&action, obstacle_feature)
+                        .setDirichletDistribution(parent_values, obstacleTransition(parent_values[0], parent_values[parent_values.size()-1]));
+            } while (!indexing::increment(parent_values, parent_ranges));
+        } else {
+            do {
+                model->transitionNode(&action, obstacle_feature)
+                        .setDirichletDistribution(parent_values, obstacleTransition(parent_values[0], parent_values[parent_values.size()-1]));
+            } while (!indexing::increment(parent_values, parent_ranges));
+        }
+//        do {
+//            model->transitionNode(&action, obstacle_feature)
+//                .setDirichletDistribution(parent_values, obstacleTransition(parent_values[parent_values.size()-1]));
+//        } while (!indexing::increment(parent_values, parent_ranges));
     }
 }
 

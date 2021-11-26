@@ -178,7 +178,7 @@ private:
 
         std::vector<float> timeofdayTransition(int timeofday) const;
 
-//        std::vector<float> obstacleTransition(int y, int speed);
+        std::vector<float> obstacleTransition(int speed, int y) const;
 
         std::vector<float> obstacletypeTransition(int obstacletype) const;
 
