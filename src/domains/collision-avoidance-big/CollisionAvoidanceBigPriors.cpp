@@ -537,7 +537,8 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int x,
     // probability that it moves up, as well as for moving down (i.e. the probability that the block moves is 2* move_prob)
     auto startpointStayprob = 0.1 + obstacletype * 0.2;
     auto endpointStayprob = 0.9;
-    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/3 * (4 - x);
+    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/(_width-2) * (_width-1 - x);
+//    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/3 * (4 - x);
 
 //    auto adjusted_move_prob = 1 - stayprob;
     auto move_prob = 1 - stayprob; // 0.5*(BLOCK_MOVE_PROB + diff*(obstacletype+1)*speed + diff*(obstacletype+1)*(speed - 1));

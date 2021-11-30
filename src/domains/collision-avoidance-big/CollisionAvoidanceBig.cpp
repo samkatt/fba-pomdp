@@ -511,7 +511,7 @@ int CollisionAvoidanceBig::moveObstacle(int current_position, int x, int speed, 
 
     auto startpointStayprob = 0.05 + obstacletype * 0.1;
     auto endpointStayprob = 0.6;
-    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/3 * (4 - x);
+    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/(_grid_width-2) * (_grid_width-1 - x);
 
     auto prob = rnd::uniform_rand01();
     int m;
