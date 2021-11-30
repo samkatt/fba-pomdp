@@ -34,14 +34,14 @@ abstractions::CollisionAvoidanceBigAbstraction::CollisionAvoidanceBigAbstraction
     // { }, {obstacletype/traffic}, {speed/timeofday}, {obstacletype/traffic, obstacletype/traffic}, {obstacletype/traffic, speed/timeofday},
     // {speed, traffic/obstacletype, timeofday}, {speed/timeofday, traffic, obstacletype},
     // speed: 3, traffic: 4, timeofday: 5
-    _abstract_domain_sizes = std::vector<Domain_Size> (12,
+    _abstract_domain_sizes = std::vector<Domain_Size> (8,
            Domain_Size(c.domain_conf.width * c.domain_conf.height * static_cast<int>(std::pow(c.domain_conf.height, c.domain_conf.size)),
            3, c.domain_conf.width * _num_timeofdays * _num_obstacletypes * static_cast<int>(std::pow(c.domain_conf.height, c.domain_conf.size))));
     auto observation_feature_size = std::vector<int>(3 + c.domain_conf.size, c.domain_conf.height);
     observation_feature_size[0] = c.domain_conf.width;
     observation_feature_size[1] = _num_timeofdays;
     observation_feature_size[2] = _num_obstacletypes;
-    _abstract_domain_feature_sizes = std::vector<Domain_Feature_Size> (12,
+    _abstract_domain_feature_sizes = std::vector<Domain_Feature_Size> (8,
                        Domain_Feature_Size(std::vector<int>(2 + c.domain_conf.size, c.domain_conf.height),
                                            observation_feature_size));
     _abstract_step_sizes = std::vector<bayes_adaptive::factored::BABNModel::Indexing_Steps> (12,
@@ -173,7 +173,9 @@ abstractions::CollisionAvoidanceBigAbstraction::constructAbstractModel(bayes_ada
         auto newModel = model.abstract(abstraction_set, model.structure(), &_abstract_domain_sizes[index_to_use],
                                        &_abstract_domain_feature_sizes[index_to_use],
                                        &_abstract_step_sizes[index_to_use], false);
+
         newModel.abstractionNormalizeCounts(abstractPriorModel, abstractPriorModel_normalized);
+
         return newModel;
     } else {
         return model.abstract(abstraction_set, model.structure(), &_abstract_domain_sizes[index_to_use],
