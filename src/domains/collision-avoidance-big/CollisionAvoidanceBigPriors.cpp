@@ -323,16 +323,22 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
         auto action = IndexAction(std::to_string(a));
         // set block y features for each action
         for (auto f = _first_obstacle; f < (_first_obstacle + _num_obstacles); ++f) {
-            model.resetTransitionNode(&action, f, {_SPEED_FEATURE, _OBSTACLETYPE_FEATURE, f});
-            for (auto y = 0; y < _height; ++y) {
-                for (auto speed = 0; speed < _num_speeds; ++speed) {
-                    for (auto obstacletype = 0; obstacletype < _num_obstacletypes; ++obstacletype) { // loop over node input
-                        // correct transitions
-//                        model.transitionNode(&action, f)
-//                                .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(y, speed, obstacletype));
-                        // wrong transitions
-                        model.transitionNode(&action, f)
-                            .setDirichletDistribution({speed, obstacletype, y}, obstacleTransition(speed, y));
+            model.resetTransitionNode(&action, f, {_AGENT_X_FEATURE, _OBSTACLETYPE_FEATURE, f});
+            for (auto x = 1; x < _width; ++x) {
+                for (auto y = 0; y < _height; ++y) { // Obstacle Y
+                    for (auto obstacletype = 0;
+                         obstacletype < _num_obstacletypes; ++obstacletype) { // loop over node input
+                        if (_edge_noise.empty()) {
+                            // correct transitions
+                            model.transitionNode(&action, f)
+                                    .setDirichletDistribution({x, obstacletype, y},
+                                                              obstacleTransition(x, obstacletype, y));
+                        } else { // match-counts
+                            // wrong transitions
+                            model.transitionNode(&action, f)
+                                    .setDirichletDistribution({x, obstacletype, y},
+                                                              obstacleTransition(y));
+                        }
                     }
                 }
             }
@@ -467,6 +473,12 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
 //                parents[a].emplace_back(random_to_add[extra_feature]);
 //            }
 //        }
+        if (rnd::slowRandomInt(1,100) <=50) // randomly add x as parent of obstacle movement
+        {
+            for (auto a = 0; a < _domain_size._A; ++a) {
+                parents[a].emplace_back(0); // _X_FEATURE);
+            }
+        }
 
         if (rnd::slowRandomInt(1,100) <=50) // randomly add speed as parent of obstacle movement
         {
@@ -481,6 +493,7 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
                 parents[a].emplace_back(5); // _OBSTACLETYPE_FEATURE);
             }
         }
+
         for (auto a = 0; a < _domain_size._A; ++a) {
             std::sort(parents[a].begin(), parents[a].end());
         }
@@ -515,15 +528,19 @@ void CollisionAvoidanceBigFactoredPrior::setAgentYTransition(Action const& a, in
     node.increment({y}, new_y);
 }
 
-std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y, int speed, int obstacletype) const
+std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int x, int obstacletype, int y) const
 {
     // Only used when correct graph is used
     // TODO change this if I want to use this as a "wrong" prior
     // overestimate the move speed when the relative speed is low, underestimate the movement when the speed is high
 //    auto move_prob = static_cast<float>(.2 + 0.05*(obstacletype+1)*speed - 0.05*(obstacletype+1)*(speed - 1)-.5 * _noise*speed + -.5 *_noise*(speed -1));
     // probability that it moves up, as well as for moving down (i.e. the probability that the block moves is 2* move_prob)
-    double diff = 0.025;
-    auto move_prob = 0.5*(BLOCK_MOVE_PROB + diff*(obstacletype+1)*speed + diff*(obstacletype+1)*(speed - 1));
+    auto startpointStayprob = 0.1 + obstacletype * 0.2;
+    auto endpointStayprob = 0.9;
+    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/3 * (4 - x);
+
+//    auto adjusted_move_prob = 1 - stayprob;
+    auto move_prob = 1 - stayprob; // 0.5*(BLOCK_MOVE_PROB + diff*(obstacletype+1)*speed + diff*(obstacletype+1)*(speed - 1));
 
     // probability of staying is different if the obstacle is at the top or bottom:
     auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(1 - move_prob)
@@ -548,14 +565,14 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y,
 
 std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y) const
 {
-    double noise = 0.4;
-    auto move_prob = static_cast<float>(.25 - .5 * noise);
+//    double noise = 0.4;
+    auto move_prob = 0.9; // static_cast<float>(.25 - .5 * noise);
 
     // probability of staying is most definitely twice the probability
     // of moving- only not if the obstacle is at the top or bottom:
     // this is takes on 3 times as many probability
-    auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(3 * .25 + .5 * noise)
-                                                  : static_cast<float>(2 * .25 + noise);
+    auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(1 - move_prob + 0.5 * move_prob)
+                                                  : static_cast<float>(1 - move_prob);
 
     std::vector<float> position_counts(_height);
 
@@ -653,23 +670,23 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::speedTransition(int speed
 //    double diff = 0.05;
 
     if (speed == 1) {
-        if (traffic == 2) {
+        if (traffic == 1) {
             speed_counts[keepInBounds(speed - 1)] += 0.9 * 10000;
             speed_counts[speed] += 0.1 * 10000;
-        } else if (traffic == 1) {
-            speed_counts[keepInBounds(speed - 1)] += 0.2 * 10000;
-            speed_counts[speed] += 0.8 * 10000;
+//        } else if (traffic == 1) {
+//            speed_counts[keepInBounds(speed - 1)] += 0.2 * 10000;
+//            speed_counts[speed] += 0.8 * 10000;
         } else {
             speed_counts[keepInBounds(speed - 1)] += 0.1 * 10000;
             speed_counts[speed] += 0.9 * 10000;
         }
     } else {
-        if (traffic == 2) {
+        if (traffic == 1) {
             speed_counts[keepInBounds(speed + 1)] += 0.1 * 10000;
             speed_counts[speed] += 0.9 * 10000;
-        } else if (traffic == 1) {
-            speed_counts[keepInBounds(speed + 1)] += 0.2 * 10000;
-            speed_counts[speed] += 0.8 * 10000;
+//        } else if (traffic == 1) {
+//            speed_counts[keepInBounds(speed + 1)] += 0.2 * 10000;
+//            speed_counts[speed] += 0.8 * 10000;
         } else {
             speed_counts[keepInBounds(speed + 1)] += 0.9 * 10000;
             speed_counts[speed] += 0.1 * 10000;
@@ -683,7 +700,7 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::trafficTransition(int tra
     // TODO use _noise here?
     std::vector<float> traffic_counts(_num_traffics, 0);
 
-    if (traffic == 2) {
+    if (traffic == 1) {
         if (timeofday == 1) {
             traffic_counts[traffic] += 0.9 * 10000;
             traffic_counts[keepInBounds(traffic - 1)] += 0.1 * 10000;
@@ -691,16 +708,16 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::trafficTransition(int tra
             traffic_counts[traffic] += 0.1 * 10000;
             traffic_counts[keepInBounds(traffic - 1)] += 0.9 * 10000;
         }
-    } else if (traffic == 1) {
-        if (timeofday == 1) {
-            traffic_counts[traffic] += 0.8 * 10000;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.15 * 10000;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.05 * 10000;
-        } else {
-            traffic_counts[traffic] += 0.8 * 10000;
-            traffic_counts[keepInBounds(traffic + 1)] += 0.05 * 10000;
-            traffic_counts[keepInBounds(traffic - 1)] += 0.15 * 10000;
-        }
+//    } else if (traffic == 1) {
+//        if (timeofday == 1) {
+//            traffic_counts[traffic] += 0.8 * 10000;
+//            traffic_counts[keepInBounds(traffic + 1)] += 0.15 * 10000;
+//            traffic_counts[keepInBounds(traffic - 1)] += 0.05 * 10000;
+//        } else {
+//            traffic_counts[traffic] += 0.8 * 10000;
+//            traffic_counts[keepInBounds(traffic + 1)] += 0.05 * 10000;
+//            traffic_counts[keepInBounds(traffic - 1)] += 0.15 * 10000;
+//        }
     } else {
         if (timeofday == 1) {
             traffic_counts[traffic] += 0.1 * 10000;
@@ -868,18 +885,22 @@ void CollisionAvoidanceBigFactoredPrior::sampleBlockTModel(
         // set counts according to parents
         model->resetTransitionNode(&action, obstacle_feature, structure[a]);
 
-        // always at least one parent
-        if (structure[a][0] == _SPEED_FEATURE) { // assume that speeds has an influence
-            do {
-                model->transitionNode(&action, obstacle_feature)
-                        .setDirichletDistribution(parent_values, obstacleTransition(parent_values[0], parent_values[parent_values.size()-1]));
-            } while (!indexing::increment(parent_values, parent_ranges));
-        } else {
-            do {
-                model->transitionNode(&action, obstacle_feature)
-                        .setDirichletDistribution(parent_values, obstacleTransition(parent_values[0], parent_values[parent_values.size()-1]));
-            } while (!indexing::increment(parent_values, parent_ranges));
-        }
+        // always at least one parent   // possible extra parents: x, speed, obstacle type
+        do {
+            model->transitionNode(&action, obstacle_feature)
+                    .setDirichletDistribution(parent_values, obstacleTransition(parent_values[parent_values.size()-1]));
+        } while (!indexing::increment(parent_values, parent_ranges));
+//        if (structure[a][0] == _SPEED_FEATURE) { // assume that speed has an influence
+//            do {
+//                model->transitionNode(&action, obstacle_feature)
+//                        .setDirichletDistribution(parent_values, obstacleTransition(parent_values[0], parent_values[parent_values.size()-1]));
+//            } while (!indexing::increment(parent_values, parent_ranges));
+//        } else {
+//            do {
+//                model->transitionNode(&action, obstacle_feature)
+//                        .setDirichletDistribution(parent_values, obstacleTransition(parent_values[parent_values.size()-1]));
+//            } while (!indexing::increment(parent_values, parent_ranges));
+//        }
 //        do {
 //            model->transitionNode(&action, obstacle_feature)
 //                .setDirichletDistribution(parent_values, obstacleTransition(parent_values[parent_values.size()-1]));

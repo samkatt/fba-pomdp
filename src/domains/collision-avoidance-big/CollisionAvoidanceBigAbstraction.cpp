@@ -49,11 +49,11 @@ abstractions::CollisionAvoidanceBigAbstraction::CollisionAvoidanceBigAbstraction
                                                                                                      indexing::stepSize(_abstract_domain_feature_sizes[0]._S),
                                                                                                      indexing::stepSize(_abstract_domain_feature_sizes[0]._O)));
 
-    std::vector<int> num_features =  {4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7}; // first one is skipped (the minimum abstraction)
+    std::vector<int> num_features = {4, 4, 5, 5, 6, 6, 7};   // {4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7}; // first one is skipped (the minimum abstraction)
     // speed, traffic, timeofday, obstacletypes,
     std::vector<std::vector<int>> feature_sizes_sets = {{2}, {3},
-                                                        {2, 3}, {2, 2}, {3, 2}, {3, 3},
-                                                        {2, 3, 2}, {2, 2, 3}, {2, 3, 3}, {3, 2, 3}, {2, 3, 2, 3}};
+                                                        {2, 3}, {2, 2}, // {3, 2}, {3, 3},
+                                                        {2, 2, 2}, {2, 2, 3}, {2, 2, 2, 3}}; // {2, 3, 2}, {2, 2, 3}, {2, 3, 3}, {3, 2, 3}, {2, 3, 2, 3}};
     for (unsigned int i = 1; i <= num_features.size(); ++i) {
         int dom_size = c.domain_conf.width * c.domain_conf.height * static_cast<int>(std::pow(c.domain_conf.height, c.domain_conf.size));
         int obs_size = c.domain_conf.width * _num_timeofdays * _num_obstacletypes * static_cast<int>(std::pow(c.domain_conf.height, c.domain_conf.size));
@@ -140,40 +140,24 @@ abstractions::CollisionAvoidanceBigAbstraction::constructAbstractModel(bayes_ada
     if (abstraction_set.size() == 3) { // {x, y, obst}
         index_to_use = 0;
     } else if (abstraction_set.size() == 7) { // {x, y, obst, speed, traffic, timeofday, obstacletype}
-        index_to_use = 11;
+        index_to_use = 7;
     } else if (abstraction_set.size() == 4) { // {2}, {3}, speed/timeofday, traffic,obstacletype
-        if (abstraction_set[2] == _tod_feature || abstraction_set[2] == _speed_feature) {
-            index_to_use = 1;
-        } else {
+        if (abstraction_set[2] == _obstacletype_feature) {
             index_to_use = 2;
-        }
-    } else if (abstraction_set.size() == 5) { // size 5, {2, 3}, {2, 2}, {3, 2}, {3, 3}, (3, 4, 5, 6)
-        if (abstraction_set[2] == _speed_feature || abstraction_set[2] == _tod_feature) {
-            if (abstraction_set[3] == _tod_feature) {
-                index_to_use = 4;
-            } else {
-                index_to_use = 3;
-            }
-        } else { // traffic
-            if (abstraction_set[3] == _obstacletype_feature) {
-                index_to_use = 6;
-            } else {
-                index_to_use = 5;
-            }
-        }
-    } else { // size 6, {2, 3, 2}, {2, 2, 3}, {2, 3, 3}, {3, 2, 3} (7, 8, 9, 10)
-        if (abstraction_set[2] == _traffic_feature) {
-            index_to_use = 10;
         } else {
-            if (abstraction_set[3] == _tod_feature) {
-                index_to_use = 8;
-            } else {
-                if (abstraction_set[4] == _tod_feature) {
-                    index_to_use = 7;
-                } else {
-                    index_to_use = 9;
-                }
-            }
+            index_to_use = 1;
+        }
+    } else if (abstraction_set.size() == 5) { // size 5, {2, 3}, {2, 2}, (3, 4)
+        if (abstraction_set[3] == _obstacletype_feature) {
+            index_to_use = 3;
+        } else {
+            index_to_use = 4;
+        }
+    } else { // size 6, {2, 2, 2} {2, 2, 3} (5, 6) // {2, 3, 2}, {2, 2, 3}, {2, 3, 3}, {3, 2, 3} (7, 8, 9, 10)
+        if (abstraction_set[4] == _obstacletype_feature) {
+            index_to_use = 6;
+        } else {
+            index_to_use = 5;
         }
     }
 

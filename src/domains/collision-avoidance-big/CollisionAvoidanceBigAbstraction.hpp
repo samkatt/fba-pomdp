@@ -35,7 +35,7 @@ namespace abstractions {
         static int const _first_obstacle = 6;
 
         const int _num_speeds = 2;
-        const int _num_traffics = 3;
+        const int _num_traffics = 2;
         const int _num_timeofdays = 2;
         const int _num_obstacletypes = 3;
 

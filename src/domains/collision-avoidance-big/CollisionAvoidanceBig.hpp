@@ -199,7 +199,7 @@ State const* getState(int index) const;
     int const _grid_width;
     int const _grid_height;
     int const _num_speeds = 2;
-    int const _num_traffics = 3;
+    int const _num_traffics = 2;
     int const _num_timeofdays = 2;
     int const _num_obstacletypes = 3;
     int const _num_obstacles;
@@ -268,7 +268,7 @@ State const* getState(int index) const;
      *
      * obstacle moves up & down with 25% and stays put with 50%
      */
-    int moveObstacle(int current_position, int speed, int obstacletype) const;
+    int moveObstacle(int current_position, int x, int speed, int obstacletype) const;
     int moveAgent(int current_position, int speed) const;
 
     void assertLegal(State const* s) const;

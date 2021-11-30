@@ -16,7 +16,7 @@ CollisionAvoidanceBigFBAExtension::CollisionAvoidanceBigFBAExtension(
             std::vector<int>(6 + num_obstacles, grid_height),
             std::vector<int>(num_obstacles, grid_height)),
         _state_prior(
-            grid_width * grid_height * 2 * 3 * 2 * 3 * static_cast<int>(std::pow(grid_height, num_obstacles)))
+            grid_width * grid_height * 2 * 2 * 2 * 3 * static_cast<int>(std::pow(grid_height, num_obstacles)))
 {
 
     auto const domain =

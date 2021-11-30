@@ -33,7 +33,7 @@ public:
 private:
     int _grid_width, _grid_height, _num_obstacles;
     int const _num_speeds = 2;
-    int const _num_traffics = 3;
+    int const _num_traffics = 2;
     int const _num_timeofdays = 2;
     int const _num_obstacletypes = 3;
     int x_agent_f = 0;

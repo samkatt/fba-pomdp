@@ -319,18 +319,18 @@ int CollisionAvoidanceBig::changeSpeed(int speed, int traffic) const {
     int newSpeed;
 //    double diff = 0.05;
     if (speed == 1) {
-        if (traffic == 2) {
+        if (traffic == 1) {
             newSpeed = (prob < 0.1) ? speed : keepInBounds(speed - 1, _num_speeds);
-        } else if (traffic == 1) {
-            newSpeed = (prob < 0.8) ? speed : keepInBounds(speed - 1, _num_speeds);
+//        } else if (traffic == 1) {
+//            newSpeed = (prob < 0.8) ? speed : keepInBounds(speed - 1, _num_speeds);
         } else {
             newSpeed = (prob < 0.9) ? speed : keepInBounds(speed - 1, _num_speeds);
         }
     } else {
-        if (traffic == 2) {
+        if (traffic == 1) {
             newSpeed = (prob < 0.9) ? speed : keepInBounds(speed + 1, _num_speeds);
-        } else if (traffic == 1) {
-            newSpeed = (prob < 0.8) ? speed : keepInBounds(speed + 1, _num_speeds);
+//        } else if (traffic == 1) {
+//            newSpeed = (prob < 0.8) ? speed : keepInBounds(speed + 1, _num_speeds);
         } else {
             newSpeed = (prob < 0.1) ? speed : keepInBounds(speed + 1, _num_speeds);
         }
@@ -343,18 +343,18 @@ int CollisionAvoidanceBig::changeTraffic(int traffic, int timeofday) const {
     auto prob = rnd::uniform_rand01();
     int newTraffic;
 //    double diff = 0.05;
-    if (traffic == 2) {
+    if (traffic == 1) {
         if (timeofday == 1) {
             newTraffic = (prob < 0.9) ? traffic : keepInBounds(traffic - 1, _num_traffics);
         } else {
             newTraffic = (prob < 0.1) ? traffic : keepInBounds(traffic - 1, _num_traffics);
         }
-    } else if (traffic == 1) {
-        if (timeofday == 1) {
-            newTraffic = (prob < 0.8) ? traffic : (prob < 0.95) ? keepInBounds(traffic + 1, _num_traffics) : keepInBounds(traffic - 1, _num_traffics);
-        } else {
-            newTraffic = (prob < 0.8) ? traffic : (prob < 0.85) ? keepInBounds(traffic + 1, _num_traffics) : keepInBounds(traffic - 1, _num_traffics);
-        }
+//    } else if (traffic == 1) {
+//        if (timeofday == 1) {
+//            newTraffic = (prob < 0.8) ? traffic : (prob < 0.95) ? keepInBounds(traffic + 1, _num_traffics) : keepInBounds(traffic - 1, _num_traffics);
+//        } else {
+//            newTraffic = (prob < 0.8) ? traffic : (prob < 0.85) ? keepInBounds(traffic + 1, _num_traffics) : keepInBounds(traffic - 1, _num_traffics);
+//        }
     } else {
         if (timeofday == 1) {
             newTraffic = (prob < 0.1) ? traffic : keepInBounds(traffic + 1, _num_traffics);
@@ -385,7 +385,7 @@ Terminal
     // move block
     auto feature_values = collision_state->getFeatureValues();
     for (int i = obstacle_start; i < (int) feature_values.size(); i++) {
-        feature_values[i] = moveObstacle(feature_values[i], collision_state->_state_vector[speed_f], collision_state->_state_vector[obstacle_type_f]);
+        feature_values[i] = moveObstacle(feature_values[i], collision_state->_state_vector[x_agent_f], collision_state->_state_vector[speed_f], collision_state->_state_vector[obstacle_type_f]);
     }
 //    for (auto& b : blocks) { b = moveObstacle(b, collision_state->speed); }
     *s = _states[x][y][speed][traffic][timeofday][obstacletype][indexing::project({feature_values.begin() + obstacle_start, feature_values.end()}, _obstacles_space)];
@@ -503,14 +503,19 @@ int CollisionAvoidanceBig::keepInGrid(int y) const
     return std::max(0, std::min(_grid_height - 1, y));
 }
 
-int CollisionAvoidanceBig::moveObstacle(int current_position, int speed, int obstacletype) const
+int CollisionAvoidanceBig::moveObstacle(int current_position, int x, int speed, int obstacletype) const
 {
     assert(current_position >= 0 && current_position < _grid_height);
-    double diff = 0.025;
+//    double obstacle_diff = 0.025;
+//    double speed_diff = 0.025;
+
+    auto startpointStayprob = 0.05 + obstacletype * 0.1;
+    auto endpointStayprob = 0.6;
+    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/3 * (4 - x);
 
     auto prob = rnd::uniform_rand01();
     int m;
-    auto adjusted_move_prob = BLOCK_MOVE_PROB + diff*(obstacletype+1)*speed + diff*(obstacletype+1)*(speed - 1);
+    auto adjusted_move_prob = 1 - stayprob + speed * 0; //  BLOCK_MOVE_PROB  +x*0 + obstacle_diff*(obstacletype+1)*speed + speed_diff*(obstacletype+1)*(speed - 1);
 
     m = (prob > adjusted_move_prob) ? STAY : (prob > .5 * adjusted_move_prob) ? MOVE_UP : MOVE_DOWN;
 
