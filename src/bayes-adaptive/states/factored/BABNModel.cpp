@@ -409,7 +409,7 @@ int BABNModel::sampleObservationIndex(
     auto feature_values = std::vector<int>(_domain_feature_size->_O.size());
     for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
     { feature_values[n] = observationNode(a, n).sample(parent_values, m); }
-
+    assert(feature_values[0] == parent_values[0]);
     return indexing::project(feature_values, _domain_feature_size->_O);
 }
 
@@ -447,9 +447,11 @@ void BABNModel::incrementCountsOfAbstract(const Action *a, const Observation *o,
     { transitionNode(a, n).increment(parent_values, state_feature_values[feature_set[n]], amount); } // goes wrong here? state_feature_values[n] is not necesarily correct here...
 
     auto observation_feature_values = observationFeatureValues(o);
+    assert(observation_feature_values[0] == state_feature_values[0]);
     // update observation DBN
     for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
-    { observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
+//    { observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); } // observation should be based on the new state...?
+        { observationNode(a, n).increment(state_feature_values, observation_feature_values[n], amount); } // observation should be based on the new state...?
 }
 
 void BABNModel::incrementCountsOf(
@@ -475,7 +477,8 @@ void BABNModel::incrementCountsOf(
     auto observation_feature_values = observationFeatureValues(o); // o->getFeatureValues(); // observationFeatureValues(o);
     // update observation DBN
     for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
-    { observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
+//    { observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); } // observation should be based on the new state...?
+    { observationNode(a, n).increment(state_feature_values, observation_feature_values[n], amount); } // observation based on the new state
 }
 
 void BABNModel::log() const

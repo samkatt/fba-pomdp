@@ -357,7 +357,7 @@ CollisionAvoidanceBigFactoredPrior::CollisionAvoidanceBigFactoredPrior(
         model.resetObservationNode(&action, 0, {_AGENT_X_FEATURE});
         for (auto x = 0; x < _width; ++x) {
             std::vector<float> x_obs_counts(_width, 0);
-            x_obs_counts[x] += 1;
+            x_obs_counts[x] += 10000;
 
             model.observationNode(&action, 0).setDirichletDistribution({x}, x_obs_counts);
         }
@@ -473,7 +473,11 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
 //                parents[a].emplace_back(random_to_add[extra_feature]);
 //            }
 //        }
-        if (rnd::slowRandomInt(1,100) <=50) // randomly add x as parent of obstacle movement
+
+//        for (auto a = 0; a < _domain_size._A; ++a) {  // always add x as parent of obstacle movement
+//            parents[a].emplace_back(0); // _X_FEATURE);
+//        }
+        if (rnd::slowRandomInt(1,100) <=50)  // randomly add x as parent of obstacle movement
         {
             for (auto a = 0; a < _domain_size._A; ++a) {
                 parents[a].emplace_back(0); // _X_FEATURE);
