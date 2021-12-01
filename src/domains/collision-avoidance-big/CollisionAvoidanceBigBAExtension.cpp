@@ -88,12 +88,13 @@ Terminal CollisionAvoidanceBigBAExtension::terminal(
 
 Reward CollisionAvoidanceBigBAExtension::reward(
     State const* /*s*/,
-    Action const* a,
+    Action const* /*a*/,
     State const* new_s) const
 {
-    auto r = std::stoi(a->index()) == domains::CollisionAvoidanceBig::STAY
-                 ? 0
-                 : -domains::CollisionAvoidanceBig::MOVE_PENALTY;
+    auto r = 0;
+//    auto r = 0;  std::stoi(a->index()) == domains::CollisionAvoidanceBig::STAY
+//                 ? 0
+//                 : 0; // TODO testing -domains::CollisionAvoidanceBig::MOVE_PENALTY;
 
     auto const ca_state = static_cast<domains::CollisionAvoidanceBigState const*>(new_s);
 

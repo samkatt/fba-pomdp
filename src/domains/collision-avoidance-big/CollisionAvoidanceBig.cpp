@@ -255,9 +255,9 @@ State const* CollisionAvoidanceBig::getState(int index) const
     return _states[features[0]][features[1]][features[2]][features[3]][features[4]][features[5]][features[6]];
 }
 
-Reward CollisionAvoidanceBig::reward(Action const* a, State const* new_s) const
+Reward CollisionAvoidanceBig::reward(Action const* /*a*/, State const* new_s) const
 {
-    auto r = std::stoi(a->index()) == STAY ? 0 : -MOVE_PENALTY;
+    auto r = 0; // std::stoi(a->index()) == STAY ? 0 : -MOVE_PENALTY;
 
     auto const x_agent = xAgent(new_s);
 
@@ -510,7 +510,7 @@ int CollisionAvoidanceBig::moveObstacle(int current_position, int x, int speed, 
 //    double speed_diff = 0.025;
 
     auto startpointStayprob = 0.05 + obstacletype * 0.1;
-    auto endpointStayprob = 0.6;
+    auto endpointStayprob = 0.9;
     auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/(_grid_width-2) * (_grid_width-1 - x);
 
     auto prob = rnd::uniform_rand01();

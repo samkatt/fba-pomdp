@@ -474,15 +474,15 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
 //            }
 //        }
 
-//        for (auto a = 0; a < _domain_size._A; ++a) {  // always add x as parent of obstacle movement
-//            parents[a].emplace_back(0); // _X_FEATURE);
-//        }
-        if (rnd::slowRandomInt(1,100) <=50)  // randomly add x as parent of obstacle movement
-        {
-            for (auto a = 0; a < _domain_size._A; ++a) {
-                parents[a].emplace_back(0); // _X_FEATURE);
-            }
+        for (auto a = 0; a < _domain_size._A; ++a) {  // always add x as parent of obstacle movement
+            parents[a].emplace_back(0); // _X_FEATURE);
         }
+//        if (rnd::slowRandomInt(1,100) <=50)  // randomly add x as parent of obstacle movement
+//        {
+//            for (auto a = 0; a < _domain_size._A; ++a) {
+//                parents[a].emplace_back(0); // _X_FEATURE);
+//            }
+//        }
 
         if (rnd::slowRandomInt(1,100) <=50) // randomly add speed as parent of obstacle movement
         {

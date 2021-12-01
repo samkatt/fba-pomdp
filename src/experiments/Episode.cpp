@@ -45,10 +45,10 @@ Result
         VLOG(2) << "T=" << t << "\ta=" << a->toString() << "\ts'=" << s->toString()
                 << "\to=" << o->toString() << "\tr=" << r.toDouble();
 
-        if (!terminal.terminated())
-        {
-            belief.updateEstimation(a, o, simulator);
-        }
+//        if (!terminal.terminated()) // Why only if it doesn't terminate...? Now we don't learn about the last step?
+//        {
+        belief.updateEstimation(a, o, simulator);
+//        }
 
         ret.add(r, discount);
         discount.increment();
