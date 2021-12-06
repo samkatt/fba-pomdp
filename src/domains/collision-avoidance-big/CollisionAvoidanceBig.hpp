@@ -237,7 +237,7 @@ State const* getState(int index) const;
 
     // describes the noise of the observation
     mutable std::normal_distribution<float> _observation_distr =
-        std::normal_distribution<float>(0, 0.5);
+        std::normal_distribution<float>(0, 0.35);
 
     mutable std::uniform_int_distribution<int> _y_sampler{
         rnd::integerDistribution(0, _grid_height)};

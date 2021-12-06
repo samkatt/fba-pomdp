@@ -48,17 +48,17 @@ std::vector<float> observationDistrBig(int height, int obstacle_pos)
 {
     auto obs_distr = std::vector<float>(height, 1);
 
-    obs_distr[0] = static_cast<float>(rnd::normal::cdf(-obstacle_pos + .5, 0, 0.5));
+    obs_distr[0] = static_cast<float>(rnd::normal::cdf(-obstacle_pos + .5, 0, 0.35));
 
     for (auto y = 1; y < height - 1; ++y)
     {
         auto dist    = std::abs(y - obstacle_pos);
         obs_distr[y] = static_cast<float>(
-            (rnd::normal::cdf(dist + .5, 0, 0.5) - rnd::normal::cdf(dist - .5, 0, 0.5)));
+            (rnd::normal::cdf(dist + .5, 0, 0.35) - rnd::normal::cdf(dist - .5, 0, 0.35)));
     }
 
     auto dist             = height - 1 - obstacle_pos;
-    obs_distr[height - 1] = static_cast<float>(rnd::normal::cdf(-dist + .5, 0, 0.5));
+    obs_distr[height - 1] = static_cast<float>(rnd::normal::cdf(-dist + .5, 0, 0.35));
 
     return obs_distr;
 }
@@ -474,9 +474,9 @@ FBAPOMDPState* CollisionAvoidanceBigFactoredPrior::sampleFBAPOMDPState(State con
 //            }
 //        }
 
-        for (auto a = 0; a < _domain_size._A; ++a) {  // always add x as parent of obstacle movement
-            parents[a].emplace_back(0); // _X_FEATURE);
-        }
+//        for (auto a = 0; a < _domain_size._A; ++a) {  // always add x as parent of obstacle movement
+//            parents[a].emplace_back(0); // _X_FEATURE);
+//        }
 //        if (rnd::slowRandomInt(1,100) <=50)  // randomly add x as parent of obstacle movement
 //        {
 //            for (auto a = 0; a < _domain_size._A; ++a) {
@@ -574,7 +574,7 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int x,
 std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y) const
 {
 //    double noise = 0.4;
-    auto move_prob = 0.9; // static_cast<float>(.25 - .5 * noise);
+    auto move_prob = 0.1; // static_cast<float>(.25 - .5 * noise);
 
     // probability of staying is most definitely twice the probability
     // of moving- only not if the obstacle is at the top or bottom:
@@ -597,6 +597,30 @@ std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int y)
     position_counts[y] = stay_prob * _counts_total;
 
     return position_counts;
+
+//    auto move_prob = 0.9; // static_cast<float>(.25 - .5 * noise);
+//
+//    // probability of staying is most definitely twice the probability
+//    // of moving- only not if the obstacle is at the top or bottom:
+//    // this is takes on 3 times as many probability
+//    auto stay_prob = (y == 0 || y == _height - 1) ? static_cast<float>(1 - move_prob + 0.5 * move_prob)
+//                                                  : static_cast<float>(1 - move_prob);
+//
+//    std::vector<float> position_counts(_height);
+//
+//    if (y != 0)
+//    {
+//        position_counts[y - 1] = move_prob * _counts_total;
+//    }
+//
+//    if (y != _domain_feature_size._S[_first_obstacle] - 1)
+//    {
+//        position_counts[y + 1] = move_prob * _counts_total;
+//    }
+//
+//    position_counts[y] = stay_prob * _counts_total;
+//
+//    return position_counts;
 }
 
 std::vector<float> CollisionAvoidanceBigFactoredPrior::obstacleTransition(int speed, int y) const

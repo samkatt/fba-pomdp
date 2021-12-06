@@ -138,7 +138,7 @@ CollisionAvoidanceBig::CollisionAvoidanceBig(
     for (auto d = 0; d < grid_height; ++d)
     {
         _observation_error_probability.emplace_back(
-            rnd::normal::cdf(d + .5, 0, 0.5) - rnd::normal::cdf(d - .5, 0, 0.5));
+            rnd::normal::cdf(d + .5, 0, 0.35) - rnd::normal::cdf(d - .5, 0, 0.35));
     }
 
     if (version == INIT_RANDOM_POSITION)
@@ -503,24 +503,36 @@ int CollisionAvoidanceBig::keepInGrid(int y) const
     return std::max(0, std::min(_grid_height - 1, y));
 }
 
-int CollisionAvoidanceBig::moveObstacle(int current_position, int x, int speed, int obstacletype) const
+int CollisionAvoidanceBig::moveObstacle(int current_position, int /*x*/, int /*speed*/, int /*obstacletype*/) const
 {
     assert(current_position >= 0 && current_position < _grid_height);
 //    double obstacle_diff = 0.025;
 //    double speed_diff = 0.025;
-
-    auto startpointStayprob = 0.05 + obstacletype * 0.1;
-    auto endpointStayprob = 0.9;
-    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/(_grid_width-2) * (_grid_width-1 - x);
+    auto endpointStayprob = 0.5;
+    auto stayprob = 1 - endpointStayprob;
 
     auto prob = rnd::uniform_rand01();
     int m;
-    auto adjusted_move_prob = 1 - stayprob + speed * 0; //  BLOCK_MOVE_PROB  +x*0 + obstacle_diff*(obstacletype+1)*speed + speed_diff*(obstacletype+1)*(speed - 1);
+    auto adjusted_move_prob = 1 - stayprob; // + speed * 0; //  BLOCK_MOVE_PROB  +x*0 + obstacle_diff*(obstacletype+1)*speed + speed_diff*(obstacletype+1)*(speed - 1);
 
     m = (prob > adjusted_move_prob) ? STAY : (prob > .5 * adjusted_move_prob) ? MOVE_UP : MOVE_DOWN;
 
     // apply move but stay within bounds
     return keepInGrid(current_position + m - 1);
+
+
+//    auto startpointStayprob = 0.05 + obstacletype * 0.1;
+//    auto endpointStayprob = 0.9;
+//    auto stayprob = startpointStayprob + (endpointStayprob - startpointStayprob)/(_grid_width-2) * (_grid_width-1 - x);
+//
+//    auto prob = rnd::uniform_rand01();
+//    int m;
+//    auto adjusted_move_prob = 1 - stayprob + speed * 0; //  BLOCK_MOVE_PROB  +x*0 + obstacle_diff*(obstacletype+1)*speed + speed_diff*(obstacletype+1)*(speed - 1);
+//
+//    m = (prob > adjusted_move_prob) ? STAY : (prob > .5 * adjusted_move_prob) ? MOVE_UP : MOVE_DOWN;
+//
+//    // apply move but stay within bounds
+//    return keepInGrid(current_position + m - 1);
 }
 
 int CollisionAvoidanceBig::moveAgent(int current_position, int speed) const

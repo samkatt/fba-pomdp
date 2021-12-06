@@ -148,7 +148,12 @@ void AbstractFBAPOMDPState::setAbstraction(bayes_adaptive::factored::BABNModel a
 }
 
 void AbstractFBAPOMDPState::logCounts() const {
-    FBAPOMDPState::model()->log();
+    if (_abstraction != -1) {
+        FBAPOMDPState::model()->log();
+        _abstract_model.log();
+    } else {
+        FBAPOMDPState::model()->log();
+    }
 }
 
 std::string AbstractFBAPOMDPState::toString() const
