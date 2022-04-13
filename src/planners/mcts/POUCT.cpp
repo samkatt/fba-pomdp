@@ -76,8 +76,8 @@ Action const*
 
     // perform simulations
     for (auto i = 0; i < _n; ++i)
-    {
-        auto const state = simulator.copyState(belief.sample());
+    {//why is this copy needed if this gives us a "const state *" ??? apparently we will not modify the state??
+        auto const state = simulator.copyState(belief.sample());//<- FAO perhaps avoid inline call to belief.sample() - this is difficult to debug...!  FAO: 
 
         VLOG(4) << "POUCT sim " << i + 1 << "/" << _n << ": s_0=" << state->toString();
         auto r = traverseActionNode(root, state, simulator, _stats.max_tree_depth);
@@ -133,18 +133,18 @@ double POUCT::UCB(int m, int n) const
 
     return _ucb_table[m * _n + n];
 }
-
+//FAO: some high level explanation of what is happening here would be welcome... Correct me if I am wrong....: We are at an actionNode where we need to decide upon an action. Each of these leads to a chance node (also 'afterstate' in RL), that stores a Q-value. This is used to (possibly together with exploration bonus) to select the highest value action (and hence chance node).
 ChanceNode& POUCT::selectChanceNodeUCB(ActionNode* n, UCBExploration exploration_option) const
 {
     assert(n != nullptr);
-
-    _action_node_holder.clear();
+    //FAO: _action_node_holder will contain all the *CHANCE* nodes that are optimal. (RIGHT??) FAO: name change seems in order...!?  
+    _action_node_holder.clear(); 
 
     double best_q = -std::numeric_limits<double>::max();
 
     auto const m = n->visited();
-    // loop over all action nodes and extract best action
-    for (auto& chance_node : *n)
+    // loop over all action nodes and extract best action //FAO loop over all *chance* nodes??? Some explanation would be useful here... each ActionNode is a (extends) a vector of chance nodes (and vice versa?)
+    for (auto& chance_node : *n)  
     {
         auto q = chance_node.qValue();
 
@@ -161,19 +161,19 @@ ChanceNode& POUCT::selectChanceNodeUCB(ActionNode* n, UCBExploration exploration
             }
 
             best_q = q;
-            _action_node_holder.emplace_back(&chance_node);
+            _action_node_holder.emplace_back(&chance_node);//FAO: this can lead to incremental memoery allocations....(even though perhaps unlikely?)
         }
     }
 
     assert(!_action_node_holder.empty());
 
-    // return random action
+    // return random action   FAO: this is not a random action, but randomly select one of the optimal actions... RIGHT??
     return *_action_node_holder[rnd::slowRandomInt(0, (int)_action_node_holder.size())];
 }
 
-Return POUCT::traverseActionNode(
+Return POUCT::traverseActionNode( //FAO: why does this take a const state? Is the whole issue not that for simulations to be efficient, we may want to modify that state in place? (And that therefore the copy on line 80 is needed??)
     ActionNode* n,
-    State const* s,
+    State const* s, //FAO: pretty much all C++ I read would say "const State * s" (which seems more readable) is there a reason to deviate??? 
     POMDP const& simulator,
     int depth_to_go) const
 {
@@ -213,7 +213,7 @@ Return POUCT::traverseChanceNode(
     Observation const* o(nullptr);
     Reward immediate_reward(0);
     Return delayed_return;
-
+    //FAO: s, o are passed by pointer such that they (themself pointers) can be modified in step(). I.e., after step, s and o will point to something else. FAO: question is if this is the most useful in general... for fast simulations, in many cases we will want to modify the state s 'in place' (but clearly that would mean that it can't be const as assumed here).
     auto terminal = simulator.step(&s, n._action, &o, &immediate_reward);
 
     // continue traverse if not terminated
@@ -235,7 +235,7 @@ Return POUCT::traverseChanceNode(
         }
     } else // terminal
     {
-        simulator.releaseState(s);
+        simulator.releaseState(s); //<- FAO, what functionaluty is expected here? If we have memory allocation in 'step' and deallocation here, this could become quite inefficient.
     }
 
     // collect results
@@ -243,7 +243,7 @@ Return POUCT::traverseChanceNode(
     n.addVisit(ret);
 
     // return
-    simulator.releaseObservation(o);
+    simulator.releaseObservation(o); // <- FAO: same comment as for releaseState above...
     return Return(ret);
 }
 
@@ -294,6 +294,9 @@ Return POUCT::rollout(State const* s, POMDP const& simulator, int depth_to_go) c
 ActionNode* POUCT::createActionNode(std::vector<Action const*> const& actions) const
 {
     _stats.num_action_nodes++;
+    // FAO: is size (capacity) of _action_nodes regulated in a smart way...?
+    // Incremental growing of vector can lead to many memory allocations...
+    // "This effectively increases the container size by one, which causes an automatic reallocation of the allocated storage space if -and only if- the new vector size surpasses the current vector capacity."
     _action_nodes.emplace_back(new ActionNode(actions));
     return _action_nodes.back();
 }

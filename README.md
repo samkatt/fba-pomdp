@@ -60,11 +60,64 @@ make docs
 
 ## Development
 
+### Using IDEs
+
+cmake seems to provide some support for creating project files for various IDEs too. Cf. 
+ cmake --help
+
+E.g., 
+  cmake -G <generator-name> 
+should be able to do this... on my system it says:
+
+The following generators are available on this platform:
+  Unix Makefiles               = Generates standard UNIX makefiles.
+  Ninja                        = Generates build.ninja files.
+  Watcom WMake                 = Generates Watcom WMake makefiles.
+  CodeBlocks - Ninja           = Generates CodeBlocks project files.
+  CodeBlocks - Unix Makefiles  = Generates CodeBlocks project files.
+  CodeLite - Ninja             = Generates CodeLite project files.
+  CodeLite - Unix Makefiles    = Generates CodeLite project files.
+  Sublime Text 2 - Ninja       = Generates Sublime Text 2 project files.
+  Sublime Text 2 - Unix Makefiles
+                               = Generates Sublime Text 2 project files.
+  Kate - Ninja                 = Generates Kate project files.
+  Kate - Unix Makefiles        = Generates Kate project files.
+  Eclipse CDT4 - Ninja         = Generates Eclipse CDT 4.0 project files.
+  Eclipse CDT4 - Unix Makefiles= Generates Eclipse CDT 4.0 project files.
+
+
+
+### Debugging & Profiling
+
+CMake uses different build types (CMAKE_BUILD_TYPE, "Typical values include Debug, Release, RelWithDebInfo and MinSizeRel, but custom build types can also be defined."), for which you can set different flags.
+
+For instance you can do:
+
+cmake -DCMAKE_CXX_FLAGS_DEBUG="-O0 -ggdb -p"  -DCMAKE_BUILD_TYPE=Debug ..
+make VERBOSE=1
+
+Alternatively, you can put these commands directly in CMakeLists.txt. E.g.:
+
+set(CMAKE_CXX_FLAGS_DEBUG "put your flags")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "put your flags")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "put your flags")
+set(CMAKE_CXX_FLAGS_RELEASE "put your flags")
+
+set(CMAKE_C_FLAGS_DEBUG "put your flags")
+set(CMAKE_C_FLAGS_MINSIZEREL "put your flags")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "put your flags")
+set(CMAKE_C_FLAGS_RELEASE "put your flags")
+
+
 ### TODO
 
 * automate clang-tidy static analysis
+FAO: what does this mean??
 
 ### maintenance
+
+FAO: sorry, I cannot follow what this says....
+
 * formatting
     - ``` make clang-format ```
 * static analysis
