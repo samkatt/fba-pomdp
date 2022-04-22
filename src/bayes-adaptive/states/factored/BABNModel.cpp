@@ -52,10 +52,14 @@ BABNModel::BABNModel(
     for (auto a = 0; a < _domain_size->_A; ++a)
     {
         for (auto const& feature_size : _domain_feature_size->_S)
-        { _transition_nodes.emplace_back(DBNNode(&_domain_feature_size->_S, {}, feature_size)); }
+        {
+            _transition_nodes.emplace_back(DBNNode(&_domain_feature_size->_S, {}, feature_size));
+        }
 
         for (auto const& feature_size : _domain_feature_size->_O)
-        { _observation_nodes.emplace_back(DBNNode(&_domain_feature_size->_S, {}, feature_size)); }
+        {
+            _observation_nodes.emplace_back(DBNNode(&_domain_feature_size->_S, {}, feature_size));
+        }
     }
 }
 
@@ -96,8 +100,7 @@ std::vector<std::vector<std::vector<float>>> BABNModel::flattenT() const
 
         std::vector<int> features(_domain_feature_size->_S.size());
         auto s = 0;
-        do
-        {
+        do {
 
             // store probabilities for each feature
             std::vector<std::vector<float>> conditional_expectations;
@@ -110,12 +113,13 @@ std::vector<std::vector<std::vector<float>>> BABNModel::flattenT() const
             // loop over new_s
             std::vector<int> new_features(_domain_feature_size->_S.size());
             auto new_s = 0;
-            do
-            {
+            do {
 
                 // probability is the product of each conditional
                 for (size_t f = 0; f < _domain_feature_size->_S.size(); ++f)
-                { T[s][a][new_s] *= conditional_expectations[f][new_features[f]]; }
+                {
+                    T[s][a][new_s] *= conditional_expectations[f][new_features[f]];
+                }
 
                 new_s++;
             } while (!indexing::increment(new_features, _domain_feature_size->_S));
@@ -143,8 +147,7 @@ std::vector<std::vector<std::vector<float>>> BABNModel::flattenO() const
         // loop over new_s
         std::vector<int> state_features(_domain_feature_size->_S.size());
         auto new_s = 0;
-        do
-        {
+        do {
 
             // store probabilities for each feature
             std::vector<std::vector<float>> conditional_expectations;
@@ -157,12 +160,13 @@ std::vector<std::vector<std::vector<float>>> BABNModel::flattenO() const
             // loop over o
             std::vector<int> observation_features(_domain_feature_size->_O.size());
             auto o = 0;
-            do
-            {
+            do {
 
                 // probability is the product of each conditional
                 for (size_t f = 0; f < _domain_feature_size->_O.size(); ++f)
-                { O[a][new_s][o] *= conditional_expectations[f][observation_features[f]]; }
+                {
+                    O[a][new_s][o] *= conditional_expectations[f][observation_features[f]];
+                }
 
                 o++;
             } while (!indexing::increment(observation_features, _domain_feature_size->_O));
@@ -271,11 +275,15 @@ bayes_adaptive::factored::BABNModel::Structure BABNModel::structure() const
 
         res.O[a] = std::vector<std::vector<int>>(_domain_feature_size->_O.size());
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)
-        { res.O[a][f] = *observationNode(&action, f).parents(); }
+        {
+            res.O[a][f] = *observationNode(&action, f).parents();
+        }
 
         res.T[a] = std::vector<std::vector<int>>(_domain_feature_size->_S.size());
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
-        { res.T[a][f] = *transitionNode(&action, f).parents(); }
+        {
+            res.T[a][f] = *transitionNode(&action, f).parents();
+        }
     }
 
     return res;
@@ -291,7 +299,9 @@ int BABNModel::sampleStateIndex(State const* s, Action const* a, rnd::sample::Di
 
     auto feature_values = std::vector<int>(_domain_feature_size->_S.size());
     for (auto n = 0; n < (int)_domain_feature_size->_S.size(); ++n)
-    { feature_values[n] = transitionNode(a, n).sample(parent_values, m); }
+    {
+        feature_values[n] = transitionNode(a, n).sample(parent_values, m);
+    }
 
     return indexing::project(feature_values, _domain_feature_size->_S);
 }
@@ -308,7 +318,9 @@ int BABNModel::sampleObservationIndex(
 
     auto feature_values = std::vector<int>(_domain_feature_size->_O.size());
     for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
-    { feature_values[n] = observationNode(a, n).sample(parent_values, m); }
+    {
+        feature_values[n] = observationNode(a, n).sample(parent_values, m);
+    }
 
     return indexing::project(feature_values, _domain_feature_size->_O);
 }
@@ -357,12 +369,16 @@ void BABNModel::incrementCountsOf(
 
     // update transition DBN
     for (auto n = 0; n < (int)_domain_feature_size->_S.size(); ++n)
-    { transitionNode(a, n).increment(parent_values, state_feature_values[n], amount); }
+    {
+        transitionNode(a, n).increment(parent_values, state_feature_values[n], amount);
+    }
 
     auto observation_feature_values = observationFeatureValues(o);
     // update observation DBN
     for (auto n = 0; n < (int)_domain_feature_size->_O.size(); ++n)
-    { observationNode(a, n).increment(parent_values, observation_feature_values[n], amount); }
+    {
+        observationNode(a, n).increment(parent_values, observation_feature_values[n], amount);
+    }
 }
 
 void BABNModel::log() const
@@ -448,10 +464,14 @@ double BABNModel::LogBDScore(BABNModel const& prior) const
         action.index(a);
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_S.size()); ++f)
-        { bd_score += transitionNode(&action, f).LogBDScore(prior.transitionNode(&action, f)); }
+        {
+            bd_score += transitionNode(&action, f).LogBDScore(prior.transitionNode(&action, f));
+        }
 
         for (auto f = 0; f < static_cast<int>(_domain_feature_size->_O.size()); ++f)
-        { bd_score += observationNode(&action, f).LogBDScore(prior.observationNode(&action, f)); }
+        {
+            bd_score += observationNode(&action, f).LogBDScore(prior.observationNode(&action, f));
+        }
     }
 
     return bd_score;

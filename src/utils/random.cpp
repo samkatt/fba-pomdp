@@ -154,8 +154,7 @@ double normalRejectFix(long h, unsigned long i)
         // base strip
         if (i == 0)
         {
-            do
-            {
+            do {
                 x = -log(uniform_rand01()) * r_inverse;
                 y = -log(uniform_rand01());
             } while (y + y < x * x);
@@ -197,8 +196,7 @@ double gamma(double shape)
 
     for (;;)
     {
-        do
-        {
+        do {
             x = randomNormal();
             v = 1.0 + c * x;
         } while (v <= 0.0);

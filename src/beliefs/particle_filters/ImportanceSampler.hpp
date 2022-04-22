@@ -77,7 +77,9 @@ void resample(WeightedFilter<T>& belief, POMDP const& d, size_t n)
     // create new (uniformly weighted) filter
     // by sampling particles from our current belief
     while (new_belief.size() != n)
-    { new_belief.add(dynamic_cast<T>(d.copyState(belief.sample())), w); }
+    {
+        new_belief.add(dynamic_cast<T>(d.copyState(belief.sample())), w);
+    }
 
     // We do not need to normalize here, since the weights
     // assigned to the particles do not get multipled by their

@@ -26,6 +26,20 @@ struct BAConf;
 
 /**
  * @brief The Bayes Adaptive POMDP
+ *
+ * # Memory management
+ *
+ * Originally, all of the memory management `State`, `Action`, and
+ * `Observation`, is left to the `POMDP. Here we exploit this fact and delegate
+ * most of the functionality to the underlying `POMDP`. So, when asked with the
+ * legal actions, the `addLegalActions` of the underlying `POMDP` is called
+ * instead.
+ *
+ * Obviously, this class needs to still implement its own `State` management,
+ * which are generally deferred to the underlying `BAPOMDPState`
+ * implementation (e.g. see `copyState`).
+ *
+ * @see `POMDP` and `Environment` for more info
  **/
 class BAPOMDP : public POMDP
 {

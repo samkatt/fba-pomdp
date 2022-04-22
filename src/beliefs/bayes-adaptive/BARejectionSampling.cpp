@@ -51,7 +51,9 @@ void BARejectionSampling::resetDomainStateDistribution(BAPOMDP const& bapomdp)
     assert(_filter.size() == _n);
 
     for (auto& s : _filter.particles())
-    { bapomdp.resetDomainState(dynamic_cast<BAState const*>(s)); }
+    {
+        bapomdp.resetDomainState(dynamic_cast<BAState const*>(s));
+    }
 
     VLOG(3) << "Status of rejection sampling filter after initiating while keeping counts:"
             << _filter.toString();

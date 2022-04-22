@@ -16,8 +16,7 @@ std::string describeParticle(std::pair<BAState const*, FlatFilter<State const*>>
 namespace beliefs { namespace bayes_adaptive {
 
 NestedBelief::NestedBelief(size_t top_filter_size, size_t bottom_filter_size) :
-        _top_filter_size(top_filter_size),
-        _bottom_filter_size(bottom_filter_size)
+        _top_filter_size(top_filter_size), _bottom_filter_size(bottom_filter_size)
 {
 
     if (top_filter_size < 1 || bottom_filter_size < 1)
@@ -44,7 +43,9 @@ void NestedBelief::resetDomainStateDistribution(BAPOMDP const& bapomdp)
         // construct domain state prior
         std::vector<State const*> domain_states;
         for (size_t j = 0; j < _bottom_filter_size; ++j)
-        { domain_states.emplace_back(domain->sampleStartState()); }
+        {
+            domain_states.emplace_back(domain->sampleStartState());
+        }
 
         // reconstruct each nested filter by freeing up current first
 
@@ -80,7 +81,9 @@ void NestedBelief::initiate(POMDP const& domain)
 
     // free up the domain state in the top level filter, as those are usefull
     for (size_t i = 0; i < _top_filter_size; ++i)
-    { bapomdp.releaseDomainState(_filter.particle(i)->particle.first->_domain_state); }
+    {
+        bapomdp.releaseDomainState(_filter.particle(i)->particle.first->_domain_state);
+    }
 
     assertValidBelief();
 }

@@ -16,8 +16,7 @@ public:
         std::vector<int> state_feature_size,
         // cppcheck-suppress passedByValue
         std::vector<int> observation_feature_size) :
-            _S(std::move(state_feature_size)),
-            _O(std::move(observation_feature_size))
+            _S(std::move(state_feature_size)), _O(std::move(observation_feature_size))
     {
     }
 

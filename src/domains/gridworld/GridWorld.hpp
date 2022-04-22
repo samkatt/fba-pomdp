@@ -26,6 +26,7 @@ namespace domains {
  * probability around the agent's real location (that accumulates around
  * the edges).
  *
+ * @see `POMDP` and `Environment` for memory management of `State`, `Action`, and `Observation`
  **/
 class GridWorld : public POMDP
 {
@@ -61,9 +62,7 @@ public:
         };
 
         GridWorldState(pos agent_pos, pos goal_pos, int i) :
-                _agent_position(agent_pos),
-                _goal_position(goal_pos),
-                _index(i)
+                _agent_position(agent_pos), _goal_position(goal_pos), _index(i)
         {
         }
 
@@ -91,9 +90,7 @@ public:
             ::domains::GridWorld::GridWorldState::pos agent_pos,
             ::domains::GridWorld::GridWorldState::pos goal_pos,
             int i) :
-                _agent_pos(agent_pos),
-                _goal_pos(goal_pos),
-                _index(i)
+                _agent_pos(agent_pos), _goal_pos(goal_pos), _index(i)
         {
         }
 

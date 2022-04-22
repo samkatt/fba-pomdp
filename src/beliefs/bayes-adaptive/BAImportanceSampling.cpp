@@ -28,8 +28,7 @@ BAImportanceSampling::BAImportanceSampling(size_t n) : _n(n)
 }
 
 BAImportanceSampling::BAImportanceSampling(WeightedFilter<State const*> f, size_t n) :
-        _filter(std::move(f)),
-        _n(n)
+        _filter(std::move(f)), _n(n)
 {
 
     if (_n < 1)
@@ -52,7 +51,9 @@ void BAImportanceSampling::initiate(POMDP const& d)
     assert(_filter.empty());
 
     for (size_t i = 0; i < _n; ++i)
-    { _filter.add(d.sampleStartState(), 1.0 / static_cast<double>(_n)); }
+    {
+        _filter.add(d.sampleStartState(), 1.0 / static_cast<double>(_n));
+    }
 
     VLOG(3) << "Status of importance sampling filter after initiating:\n"
             << _filter.toString(stateToString);

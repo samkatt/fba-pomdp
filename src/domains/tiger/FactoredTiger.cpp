@@ -8,8 +8,7 @@
 namespace domains {
 
 FactoredTiger::FactoredTiger(FactoredTigerDomainType type, size_t num_irrelevant_features) :
-        _type(type),
-        _S_size(2 << num_irrelevant_features)
+        _type(type), _S_size(2 << num_irrelevant_features)
 {
 
     if (num_irrelevant_features < 1)

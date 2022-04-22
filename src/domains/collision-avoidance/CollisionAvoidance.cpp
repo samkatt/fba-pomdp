@@ -27,8 +27,7 @@ struct CollisionAvoidanceObservation : public Observation
 
     // cppcheck-suppress passedByValue
     CollisionAvoidanceObservation(int index, std::vector<int> pos) :
-            _index(index),
-            obstacles_pos(std::move(pos))
+            _index(index), obstacles_pos(std::move(pos))
     {
     }
 
@@ -46,7 +45,9 @@ struct CollisionAvoidanceObservation : public Observation
         std::string s("{");
 
         for (unsigned int j = 0; j < obstacles_pos.size() - 1; j++)
-        { s += std::to_string(obstacles_pos[j]) + ", "; }
+        {
+            s += std::to_string(obstacles_pos[j]) + ", ";
+        }
 
         return s + std::to_string(obstacles_pos.back()) + "}";
     }
@@ -94,8 +95,7 @@ CollisionAvoidance::CollisionAvoidance(
 
             std::vector<int> obstacles(_num_obstacles);
             auto obs_i = 0;
-            do
-            {
+            do {
                 _states[x][y_agent][obs_i++] =
                     new CollisionAvoidanceState(x, y_agent, obstacles, index++);
             } while (!indexing::increment(obstacles, _obstacles_space));
@@ -106,8 +106,7 @@ CollisionAvoidance::CollisionAvoidance(
     {
         int count = 0;
         std::vector<int> obstacles_pos(_num_obstacles);
-        do
-        {
+        do {
             _observations[count] = new CollisionAvoidanceObservation(count, obstacles_pos);
             count++;
         } while (!indexing::increment(obstacles_pos, _obstacles_space));
@@ -129,8 +128,7 @@ CollisionAvoidance::CollisionAvoidance(
         {
             auto count = 0;
             std::vector<int> obstacles(_num_obstacles);
-            do
-            {
+            do {
                 _state_prior.setRawValue(
                     _states[_grid_width - 1][agent_y][count++]->index(), init_state_prob);
             } while (!indexing::increment(obstacles, _obstacles_space));
@@ -228,7 +226,9 @@ double CollisionAvoidance::computeObservationProbability(
     double p = 1;
 
     for (auto i = 0; i < _num_obstacles; ++i)
-    { p *= _observation_error_probability[std::abs(pos[i] - obs[i])]; }
+    {
+        p *= _observation_error_probability[std::abs(pos[i] - obs[i])];
+    }
 
     return p;
 }
@@ -360,8 +360,9 @@ int CollisionAvoidance::moveObstacle(int current_position) const
 
     auto prob = rnd::uniform_rand01();
 
-    auto m =
-        (prob < BLOCK_MOVE_PROB) ? STAY : (prob > .5 * (1 + BLOCK_MOVE_PROB)) ? MOVE_UP : MOVE_DOWN;
+    auto m = (prob < BLOCK_MOVE_PROB)              ? STAY
+             : (prob > .5 * (1 + BLOCK_MOVE_PROB)) ? MOVE_UP
+                                                   : MOVE_DOWN;
 
     // apply move but stay within bounds
     return keepInGrid(current_position + m - 1);

@@ -8,7 +8,9 @@ SysAdminBAExtension::SysAdminBAExtension(int size) : _size(size), _states() // i
 
     _states.reserve(_domain_size._S);
     for (auto i = 0; i < _domain_size._S; ++i)
-    { _states.emplace_back(domains::SysAdminState(i, _size)); }
+    {
+        _states.emplace_back(domains::SysAdminState(i, _size));
+    }
 }
 
 Domain_Size SysAdminBAExtension::domainSize() const

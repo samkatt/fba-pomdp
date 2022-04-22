@@ -232,17 +232,17 @@ SCENARIO("computing collision avoidance observation probability", "[domain][coll
     auto const a = d.generateRandomAction(s);
 
     auto o = d.getObservation(5);
-    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.38292));
+    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.38292).margin(0.00001));
 
     o = d.getObservation(4);
-    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.24173));
+    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.24173).margin(0.00001));
 
     o = d.getObservation(7);
-    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.0606));
+    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.0606).margin(0.00001));
 
     o = d.getObservation(2);
-    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.006).epsilon(.0002));
+    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.006).margin(.0002));
 
     o = d.getObservation(9);
-    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.0003).epsilon(.0001));
+    REQUIRE(d.computeObservationProbability(o, a, s) == Approx(.0003).margin(.0001));
 }

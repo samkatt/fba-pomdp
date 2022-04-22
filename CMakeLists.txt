@@ -167,7 +167,6 @@ add_custom_target(clang-format
     && echo "no formatting problems found"
     )
 
-
 add_custom_target(docs
     COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}
     && doxygen .doxygen.config

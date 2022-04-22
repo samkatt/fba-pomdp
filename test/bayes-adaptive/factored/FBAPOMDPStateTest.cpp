@@ -340,20 +340,20 @@ SCENARIO("compute fbapomdp observation probabilities", "[domain][factored][bayes
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &listen, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.85).epsilon(.01));
+                    == Approx(.85).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &listen, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.85).epsilon(.01));
+                    == Approx(.85).margin(.01));
 
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &listen, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.15).epsilon(.01));
+                    == Approx(.15).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &listen, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.15).epsilon(.01));
+                    == Approx(.15).margin(.01));
             }
 
             THEN("Opening doors is always 50/50")
@@ -361,20 +361,20 @@ SCENARIO("compute fbapomdp observation probabilities", "[domain][factored][bayes
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &open_door, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &open_door, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
 
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &open_door, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &open_door, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
             }
 
             d.releaseState(s);

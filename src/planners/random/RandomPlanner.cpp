@@ -17,7 +17,7 @@ Action const* RandomPlanner::selectAction(
     POMDP const& simulator,
     Belief const& belief,
     History const& /*h*/
-    ) const
+) const
 {
     auto random_action = simulator.generateRandomAction(belief.sample());
 

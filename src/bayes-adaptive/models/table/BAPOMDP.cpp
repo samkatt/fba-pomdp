@@ -194,9 +194,9 @@ std::unique_ptr<BAPOMDP> makeTBAPOMDP(configurations::BAConf const& c)
     auto ba_domain_ext = factory::makeBADomainExtension(c);
     auto prior         = makeTBAPOMDPPrior(*domain, c);
 
-    auto const sample_method = (c.bayes_sample_method == 0)
-                                   ? rnd::sample::Dir::sampleFromSampledMult
-                                   : rnd::sample::Dir::sampleFromExpectedMult;
+    auto const sample_method       = (c.bayes_sample_method == 0)
+                                         ? rnd::sample::Dir::sampleFromSampledMult
+                                         : rnd::sample::Dir::sampleFromExpectedMult;
     auto const compute_mult_method = (c.bayes_sample_method == 0) ? rnd::sample::Dir::sampleMult
                                                                   : rnd::sample::Dir::expectedMult;
 

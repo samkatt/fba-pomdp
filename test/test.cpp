@@ -40,27 +40,29 @@ TEST_CASE("Main test", "[main][integration]")
 SCENARIO("pomdp integration", "[hide][integration]")
 {
 
-    auto domains          = {"dummy",
-                    "linear_dummy",
-                    "factored-dummy",
-                    "episodic-tiger",
-                    "continuous-tiger",
-                    "independent-sysadmin",
-                    "linear-sysadmin",
-                    "episodic-factored-tiger",
-                    "continuous-factored-tiger",
-                    "random-collision-avoidance",
-                    "centered-collision-avoidance"};
+    auto domains = {
+        "dummy",
+        "linear_dummy",
+        "factored-dummy",
+        "episodic-tiger",
+        "continuous-tiger",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "random-collision-avoidance",
+        "centered-collision-avoidance"};
     auto planners         = {"random", "ts", "po-uct"};
     auto beliefs          = {"point_estimate", "rejection_sampling", "importance_sampling"};
-    auto factored_domains = {"factored-dummy",
-                             "independent-sysadmin",
-                             "linear-sysadmin",
-                             "episodic-factored-tiger",
-                             "continuous-factored-tiger",
-                             "random-collision-avoidance",
-                             "centered-collision-avoidance",
-                             "gridworld"};
+    auto factored_domains = {
+        "factored-dummy",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "random-collision-avoidance",
+        "centered-collision-avoidance",
+        "gridworld"};
 
     configurations::Conf conf;
 
@@ -90,7 +92,7 @@ SCENARIO("pomdp integration", "[hide][integration]")
             {
 
                 // coffee problem
-                for (std::string const& v : {"", "boutilier-"})
+                for (std::string const v : {"", "boutilier-"})
                 {
                     conf.domain_conf.domain = v + "coffee";
 
@@ -108,7 +110,7 @@ SCENARIO("pomdp integration", "[hide][integration]")
                 REQUIRE_NOTHROW(experiment::planning::run(conf));
             }
 
-            for (std::string const& d : domains)
+            for (std::string const d : domains)
             {
                 conf.domain_conf.domain = d;
 
@@ -142,26 +144,28 @@ SCENARIO("pomdp integration", "[hide][integration]")
 SCENARIO("bapomdp integration", "[hide][integration][flat][bayes-adaptive]")
 {
 
-    auto domains  = {"dummy",
-                    "factored-dummy",
-                    "episodic-tiger",
-                    "continuous-tiger",
-                    "episodic-factored-tiger",
-                    "continuous-factored-tiger",
-                    "independent-sysadmin",
-                    "linear-sysadmin",
-                    "random-collision-avoidance",
-                    "centered-collision-avoidance"};
+    auto domains = {
+        "dummy",
+        "factored-dummy",
+        "episodic-tiger",
+        "continuous-tiger",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "random-collision-avoidance",
+        "centered-collision-avoidance"};
     auto planners = {"random", "ts", "po-uct"};
     auto beliefs  = {"point_estimate", "rejection_sampling", "importance_sampling", "nested"};
 
-    auto factored_domains = {"factored-dummy",
-                             "independent-sysadmin",
-                             "linear-sysadmin",
-                             "episodic-factored-tiger",
-                             "continuous-factored-tiger",
-                             "random-collision-avoidance",
-                             "centered-collision-avoidance"};
+    auto factored_domains = {
+        "factored-dummy",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "random-collision-avoidance",
+        "centered-collision-avoidance"};
 
     configurations::BAConf conf;
 
@@ -189,7 +193,7 @@ SCENARIO("bapomdp integration", "[hide][integration][flat][bayes-adaptive]")
                 // regular 100 particles is way too much for that belief
                 conf.belief_conf.particle_amount = (conf.belief == "nested") ? 5 : 100;
 
-                for (std::string const& d : domains)
+                for (std::string const d : domains)
                 {
                     conf.domain_conf.domain = d;
 
@@ -240,28 +244,31 @@ SCENARIO("bapomdp integration", "[hide][integration][flat][bayes-adaptive]")
 SCENARIO("fbapomdp integration", "[hide][integration][bayes-adaptive][factored]")
 {
 
-    auto domains            = {"factored-dummy",
-                    "episodic-factored-tiger",
-                    "continuous-factored-tiger",
-                    "independent-sysadmin",
-                    "linear-sysadmin",
-                    "random-collision-avoidance",
-                    "centered-collision-avoidance"};
-    auto planners           = {"random", "ts", "po-uct"};
-    auto beliefs            = {"point_estimate",
-                    "rejection_sampling",
-                    "importance_sampling",
-                    "reinvigoration",
-                    "incubator",
-                    "nested"};
+    auto domains = {
+        "factored-dummy",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "random-collision-avoidance",
+        "centered-collision-avoidance"};
+    auto planners = {"random", "ts", "po-uct"};
+    auto beliefs  = {
+        "point_estimate",
+        "rejection_sampling",
+        "importance_sampling",
+        "reinvigoration",
+        "incubator",
+        "nested"};
     auto resampling_beliefs = {"reinvigoration", "incubator"};
-    auto factored_domains   = {"factored-dummy",
-                             "independent-sysadmin",
-                             "linear-sysadmin",
-                             "episodic-factored-tiger",
-                             "continuous-factored-tiger",
-                             "random-collision-avoidance",
-                             "centered-collision-avoidance"};
+    auto factored_domains   = {
+        "factored-dummy",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "random-collision-avoidance",
+        "centered-collision-avoidance"};
 
     configurations::FBAConf conf;
 
@@ -297,7 +304,7 @@ SCENARIO("fbapomdp integration", "[hide][integration][bayes-adaptive][factored]"
                 // regular 100 particles is way too much for that belief
                 conf.belief_conf.particle_amount = (conf.belief == "nested") ? 5 : 100;
 
-                for (std::string const& d : domains)
+                for (std::string const d : domains)
                 {
                     conf.domain_conf.domain = d;
 

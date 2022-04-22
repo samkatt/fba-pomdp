@@ -122,8 +122,9 @@ void SysAdminFlatPrior::setTrueTCountsRecur(
 
             auto const fail_prob = 1
                                    - (1 - d.params()->_fail_prob)
-                                         * pow(1 - d.params()->_fail_neighbour_factor,
-                                               d.numFailingNeighbours(computer, &s));
+                                         * pow(
+                                             1 - d.params()->_fail_neighbour_factor,
+                                             d.numFailingNeighbours(computer, &s));
 
             // scenario keeps working
             setTrueTCountsRecur(
@@ -207,8 +208,9 @@ void SysAdminFlatPrior::setTrueTCountsRecur(
         {
             auto const fail_prob = 1
                                    - (1 - d.params()->_fail_prob)
-                                         * pow(1 - d.params()->_fail_neighbour_factor,
-                                               d.numFailingNeighbours(computer, &s));
+                                         * pow(
+                                             1 - d.params()->_fail_neighbour_factor,
+                                             d.numFailingNeighbours(computer, &s));
 
             setTrueTCountsRecur(
                 s,

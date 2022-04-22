@@ -61,8 +61,8 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                     REQUIRE(
                         bapomdp_state->model()->count(bapomdp_state, action, new_s)
                         == Approx(
-                               total_counts * d.params()->_fail_prob
-                               * pow(1 - d.params()->_fail_prob, 2)));
+                            total_counts * d.params()->_fail_prob
+                            * pow(1 - d.params()->_fail_prob, 2)));
 
                     d.releaseAction(action);
                     d.releaseState(new_s);
@@ -83,8 +83,8 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                     REQUIRE(
                         bapomdp_state->model()->count(bapomdp_state, &action, new_s)
                         == Approx(
-                               total_counts * (1 - d.params()->_fail_prob)
-                               * pow(d.params()->_fail_prob, 2)));
+                            total_counts * (1 - d.params()->_fail_prob)
+                            * pow(d.params()->_fail_prob, 2)));
 
                     d.releaseState(tmp_s);
                     d.releaseState(new_s);
@@ -101,11 +101,10 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                     REQUIRE(
                         bapomdp_state->model()->count(bapomdp_state, &action, bapomdp_state)
                         == Approx(
-                               total_counts
-                               * (pow(1 - d.params()->_fail_prob, size)
-                                  + d.params()->_fail_prob
-                                        * pow(1 - d.params()->_fail_prob, size - 1)
-                                        * d.params()->_reboot_success_rate)));
+                            total_counts
+                            * (pow(1 - d.params()->_fail_prob, size)
+                               + d.params()->_fail_prob * pow(1 - d.params()->_fail_prob, size - 1)
+                                     * d.params()->_reboot_success_rate)));
                 }
             }
         }
@@ -219,8 +218,8 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                 REQUIRE(
                     bapomdp_state->model()->count(s_init, &observe, s_compl)
                     == Approx(
-                           total_counts * pow(1 - d.params()->_fail_prob, 2)
-                           * d.params()->_fail_prob));
+                        total_counts * pow(1 - d.params()->_fail_prob, 2)
+                        * d.params()->_fail_prob));
 
                 REQUIRE(
                     bapomdp_state->model()->count(s_compl, &observe, s_compl)
@@ -230,36 +229,36 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                 REQUIRE(
                     bapomdp_state->model()->count(s_init, &reboot, s_compl)
                     == Approx(
-                           total_counts
-                           * (pow(1 - d.params()->_fail_prob, 2) * d.params()->_fail_prob
-                              + (1 - d.params()->_fail_prob) * pow(d.params()->_fail_prob, 2)
-                                    * d.params()->_reboot_success_rate)));
+                        total_counts
+                        * (pow(1 - d.params()->_fail_prob, 2) * d.params()->_fail_prob
+                           + (1 - d.params()->_fail_prob) * pow(d.params()->_fail_prob, 2)
+                                 * d.params()->_reboot_success_rate)));
 
                 REQUIRE(
                     bapomdp_state->model()->count(s_compl, &reboot, s_compl)
                     == Approx(
-                           total_counts
-                           * (pow(1 - d.params()->_fail_prob, 2)
-                              + d.params()->_fail_prob * (1 - d.params()->_fail_prob)
-                                    * d.params()->_reboot_success_rate)));
+                        total_counts
+                        * (pow(1 - d.params()->_fail_prob, 2)
+                           + d.params()->_fail_prob * (1 - d.params()->_fail_prob)
+                                 * d.params()->_reboot_success_rate)));
 
                 reboot = IndexAction(size + broken_computer);
                 REQUIRE(
                     bapomdp_state->model()->count(s_compl, &reboot, s_compl)
                     == Approx(
-                           total_counts * (1 - d.params()->_reboot_success_rate)
-                           * pow(1 - d.params()->_fail_prob, 2)));
+                        total_counts * (1 - d.params()->_reboot_success_rate)
+                        * pow(1 - d.params()->_fail_prob, 2)));
                 REQUIRE(
                     bapomdp_state->model()->count(s_compl, &reboot, s_init)
                     == Approx(
-                           total_counts * pow(1 - d.params()->_fail_prob, 2)
-                           * d.params()->_reboot_success_rate));
+                        total_counts * pow(1 - d.params()->_fail_prob, 2)
+                        * d.params()->_reboot_success_rate));
 
                 REQUIRE(
                     bapomdp_state->model()->count(s_compl, &reboot, s_init)
                     == Approx(
-                           total_counts * pow(1 - d.params()->_fail_prob, 2)
-                           * d.params()->_reboot_success_rate));
+                        total_counts * pow(1 - d.params()->_fail_prob, 2)
+                        * d.params()->_reboot_success_rate));
 
                 auto broken_state = d.breakComputer(s_compl, 0);
                 REQUIRE(bapomdp_state->model()->count(broken_state, &observe, s_init) == 0);
@@ -267,19 +266,18 @@ SCENARIO("bapomdp independent sysadmin transition prior", "[bayes-adaptive][sysa
                 REQUIRE(
                     bapomdp_state->model()->count(s_compl, &reboot, broken_state)
                     == Approx(
-                           total_counts * (1 - d.params()->_fail_prob) * d.params()->_fail_prob
-                           * (1 - d.params()->_reboot_success_rate)));
+                        total_counts * (1 - d.params()->_fail_prob) * d.params()->_fail_prob
+                        * (1 - d.params()->_reboot_success_rate)));
                 REQUIRE(
                     bapomdp_state->model()->count(s_init, &observe, broken_state)
                     == Approx(
-                           total_counts * pow(d.params()->_fail_prob, 2)
-                           * (1 - d.params()->_fail_prob)));
+                        total_counts * pow(d.params()->_fail_prob, 2)
+                        * (1 - d.params()->_fail_prob)));
                 REQUIRE(
                     bapomdp_state->model()->count(s_init, &reboot, broken_state)
                     == Approx(
-                           total_counts * pow(d.params()->_fail_prob, 2)
-                           * (1 - d.params()->_fail_prob)
-                           * (1 - d.params()->_reboot_success_rate)));
+                        total_counts * pow(d.params()->_fail_prob, 2) * (1 - d.params()->_fail_prob)
+                        * (1 - d.params()->_reboot_success_rate)));
 
                 d.releaseState(broken_state);
             }
@@ -326,23 +324,23 @@ SCENARIO(
             REQUIRE(
                 bapomdp_state->model()->count(same_state, reboot, same_state)
                 == Approx(
-                       total_counts
-                       * (pow(1 - d.params()->_fail_prob, 6)
-                          + pow(1 - d.params()->_fail_prob, 5) * d.params()->_reboot_success_rate
-                                * d.params()->_fail_prob)));
+                    total_counts
+                    * (pow(1 - d.params()->_fail_prob, 6)
+                       + pow(1 - d.params()->_fail_prob, 5) * d.params()->_reboot_success_rate
+                             * d.params()->_fail_prob)));
 
             auto other_failure_state = d.breakComputer(same_state, 1);
             REQUIRE(
                 bapomdp_state->model()->count(same_state, observe, other_failure_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, 5) * d.params()->_fail_prob));
+                    total_counts * pow(1 - d.params()->_fail_prob, 5) * d.params()->_fail_prob));
             REQUIRE(
                 bapomdp_state->model()->count(same_state, reboot, other_failure_state)
                 == Approx(
-                       total_counts
-                       * (pow(1 - d.params()->_fail_prob, 5) * d.params()->_fail_prob
-                          + pow(1 - d.params()->_fail_prob, 4) * pow(d.params()->_fail_prob, 2)
-                                * d.params()->_reboot_success_rate)));
+                    total_counts
+                    * (pow(1 - d.params()->_fail_prob, 5) * d.params()->_fail_prob
+                       + pow(1 - d.params()->_fail_prob, 4) * pow(d.params()->_fail_prob, 2)
+                             * d.params()->_reboot_success_rate)));
 
             d.releaseState(same_state);
             d.releaseState(other_failure_state);
@@ -362,26 +360,26 @@ SCENARIO(
             REQUIRE(
                 bapomdp_state->model()->count(bapomdp_state, a, broken_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, 5)
-                       * (1 - d.params()->_reboot_success_rate) * d.params()->_fail_prob));
+                    total_counts * pow(1 - d.params()->_fail_prob, 5)
+                    * (1 - d.params()->_reboot_success_rate) * d.params()->_fail_prob));
 
             REQUIRE(
                 bapomdp_state->model()->count(broken_state, a, broken_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, 5)
-                       * (1 - d.params()->_reboot_success_rate)));
+                    total_counts * pow(1 - d.params()->_fail_prob, 5)
+                    * (1 - d.params()->_reboot_success_rate)));
 
             REQUIRE(
                 bapomdp_state->model()->count(broken_state, a, broken_twice_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, 4)
-                       * (1 - d.params()->_reboot_success_rate) * d.params()->_fail_prob));
+                    total_counts * pow(1 - d.params()->_fail_prob, 4)
+                    * (1 - d.params()->_reboot_success_rate) * d.params()->_fail_prob));
 
             REQUIRE(
                 bapomdp_state->model()->count(broken_state, a, bapomdp_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, 5)
-                       * d.params()->_reboot_success_rate));
+                    total_counts * pow(1 - d.params()->_fail_prob, 5)
+                    * d.params()->_reboot_success_rate));
 
             d.releaseAction(a);
             d.releaseState(broken_state);
@@ -427,69 +425,66 @@ SCENARIO("linear sysadmin ba-table prior", "[bayes-adaptive][sysadmin][flat]")
             REQUIRE(
                 model->count(start_state, observe, broken_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, size - 1)
-                       * d.params()->_fail_prob));
+                    total_counts * pow(1 - d.params()->_fail_prob, size - 1)
+                    * d.params()->_fail_prob));
             REQUIRE(
                 model->count(broken_state, observe, broken_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, size - 3)
-                       * pow((1 - d.params()->_fail_prob)
-                                 * (1 - d.params()->_fail_neighbour_factor),
-                             2)));
+                    total_counts * pow(1 - d.params()->_fail_prob, size - 3)
+                    * pow(
+                        (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor),
+                        2)));
 
             auto const broken_computer_2 = 3;
             auto const brokenst_state    = d.breakComputer(broken_state, broken_computer_2);
             REQUIRE(
                 model->count(start_state, observe, brokenst_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, 3)
-                       * pow(d.params()->_fail_prob, 2)));
+                    total_counts * pow(1 - d.params()->_fail_prob, 3)
+                    * pow(d.params()->_fail_prob, 2)));
 
             REQUIRE(
                 model->count(broken_state, observe, brokenst_state)
                 == Approx(
-                       total_counts * (1 - d.params()->_fail_prob)
-                       * pow(1 - d.params()->_fail_prob, 2)
-                       * pow(1 - d.params()->_fail_neighbour_factor, 2) * d.params()->_fail_prob));
+                    total_counts * (1 - d.params()->_fail_prob) * pow(1 - d.params()->_fail_prob, 2)
+                    * pow(1 - d.params()->_fail_neighbour_factor, 2) * d.params()->_fail_prob));
 
             auto const broken_computer_3 = 2;
             auto const brokenst_state_2  = d.breakComputer(broken_state, broken_computer_3);
             REQUIRE(
                 model->count(broken_state, observe, brokenst_state_2)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, 2)
-                       * (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor)
-                       * (1
-                          - (1 - d.params()->_fail_prob)
-                                * (1 - d.params()->_fail_neighbour_factor))));
+                    total_counts * pow(1 - d.params()->_fail_prob, 2) * (1 - d.params()->_fail_prob)
+                    * (1 - d.params()->_fail_neighbour_factor)
+                    * (1
+                       - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor))));
 
             auto const reboot_random = d.rebootAction(0);
             REQUIRE(
                 model->count(broken_state, reboot_random, brokenst_state_2)
                 == Approx(
-                       total_counts * (1 - d.params()->_fail_prob)
-                       * (1 - d.params()->_fail_prob
-                          + d.params()->_fail_prob * d.params()->_reboot_success_rate)
-                       * (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor)
-                       * (1
-                          - (1 - d.params()->_fail_prob)
-                                * (1 - d.params()->_fail_neighbour_factor))));
+                    total_counts * (1 - d.params()->_fail_prob)
+                    * (1 - d.params()->_fail_prob
+                       + d.params()->_fail_prob * d.params()->_reboot_success_rate)
+                    * (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor)
+                    * (1
+                       - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor))));
 
             auto const reboot_broken = d.rebootAction(broken_computer_1);
             REQUIRE(
                 model->count(start_state, reboot_broken, broken_state)
                 == Approx(
-                       total_counts * pow(1 - d.params()->_fail_prob, size - 1)
-                       * d.params()->_fail_prob * (1 - d.params()->_reboot_success_rate)));
+                    total_counts * pow(1 - d.params()->_fail_prob, size - 1)
+                    * d.params()->_fail_prob * (1 - d.params()->_reboot_success_rate)));
 
             REQUIRE(
                 model->count(broken_state, reboot_broken, broken_state)
                 == Approx(
-                       total_counts * (1 - d.params()->_reboot_success_rate)
-                       * pow(1 - d.params()->_fail_prob, size - 3)
-                       * pow((1 - d.params()->_fail_prob)
-                                 * (1 - d.params()->_fail_neighbour_factor),
-                             2)));
+                    total_counts * (1 - d.params()->_reboot_success_rate)
+                    * pow(1 - d.params()->_fail_prob, size - 3)
+                    * pow(
+                        (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor),
+                        2)));
 
             d.releaseState(broken_state);
             d.releaseState(brokenst_state);
@@ -506,7 +501,7 @@ SCENARIO("linear sysadmin ba-table prior", "[bayes-adaptive][sysadmin][flat]")
 
 SCENARIO("sysadmin bayes-adaptive observation prior", "[bayes-adaptive][sysadmin][flat]")
 {
-    for (auto const& network_type : {"independent", "linear"})
+    for (std::string const network_type : {"independent", "linear"})
     {
 
         GIVEN("a state in the " + network_type + " network")
@@ -663,14 +658,14 @@ SCENARIO("fbapomdp independent sysadmin transition prior", "[bayes-adaptive][sys
                     REQUIRE(
                         factored_state->model()->transitionNode(action, comp).count(initial_X, 0)
                         == Approx(
-                               10000 * d.params()->_fail_prob
-                               * (1 - d.params()->_reboot_success_rate)));
+                            10000 * d.params()->_fail_prob
+                            * (1 - d.params()->_reboot_success_rate)));
                     REQUIRE(
                         factored_state->model()->transitionNode(action, comp).count(initial_X, 1)
                         == Approx(
-                               10000
-                               * (d.params()->_fail_prob * d.params()->_reboot_success_rate
-                                  + (1 - d.params()->_fail_prob))));
+                            10000
+                            * (d.params()->_fail_prob * d.params()->_reboot_success_rate
+                               + (1 - d.params()->_fail_prob))));
                     d.releaseAction(action);
                 }
             }
@@ -681,8 +676,7 @@ SCENARIO("fbapomdp independent sysadmin transition prior", "[bayes-adaptive][sys
                 for (auto comp = 0; comp < size; ++comp)
                 {
                     // get a feature other than comp
-                    do
-                    {
+                    do {
                         feature = rnd::slowRandomInt(0, size);
                     } while (feature == comp);
 
@@ -737,8 +731,7 @@ SCENARIO("fbapomdp independent sysadmin transition prior", "[bayes-adaptive][sys
                 for (auto comp = 0; comp < size; ++comp)
                 {
                     // get a feature other than comp
-                    do
-                    {
+                    do {
                         feature = rnd::slowRandomInt(0, size);
                     } while (feature == comp);
 

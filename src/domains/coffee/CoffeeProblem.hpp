@@ -40,6 +40,8 @@ namespace domains {
  * coffee and has coffee, and it is penalized otherwise. The robot is further
  * penalized if it gets wet. A small cost of 1.0 is incurred each time it gets
  * coffee, and 0.5 e ach time it checks whether the user wants coffee.
+ *
+ * @see `POMDP` and `Environment` for memory management of `State`, `Action`, and `Observation`
  **/
 class CoffeeProblem : public POMDP
 {

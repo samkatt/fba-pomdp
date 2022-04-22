@@ -25,7 +25,9 @@ WeightedFilter<T>::WeightedFilter(size_t size, Allocator alloc) : _total_weight(
     _particles.reserve(size);
 
     for (size_t i = 0; i < size; ++i)
-    { _particles.emplace_back(WeightedParticle<T>(alloc(), 1 / static_cast<double>(size))); }
+    {
+        _particles.emplace_back(WeightedParticle<T>(alloc(), 1 / static_cast<double>(size)));
+    }
 }
 
 template<typename T>
@@ -148,7 +150,9 @@ std::string WeightedFilter<T>::toString(particleDescriptor const& partDescr) con
     std::string descr = "{";
 
     for (auto const& p : _particles)
-    { descr += std::to_string(p.w) + ": " + partDescr(p.particle) + "\n"; }
+    {
+        descr += std::to_string(p.w) + ": " + partDescr(p.particle) + "\n";
+    }
 
     descr.back() = '}';
 

@@ -86,8 +86,7 @@ CollisionAvoidanceTablePrior::CollisionAvoidanceTablePrior(
         for (auto i = 0; i < _height; ++i) { obs_distr[i] = observationDistr(_height, i); }
 
         std::vector<int> obstacles(_num_obstacles);
-        do
-        {
+        do {
 
             for (auto x = 0; x < _width; ++x)
             {
@@ -104,8 +103,7 @@ CollisionAvoidanceTablePrior::CollisionAvoidanceTablePrior(
                         // loop over position of obstacles
                         std::vector<int> new_obstacles(_num_obstacles);
                         auto count = 0;
-                        do
-                        {
+                        do {
                             IndexObservation const o(count);
 
                             /***** transition counts ****/
@@ -114,7 +112,9 @@ CollisionAvoidanceTablePrior::CollisionAvoidanceTablePrior(
                             /*** observation counts ****/
                             double observation_prob = 1;
                             for (auto i = 0; i < _num_obstacles; ++i)
-                            { observation_prob *= obs_distr[obstacles[i]][new_obstacles[i]]; }
+                            {
+                                observation_prob *= obs_distr[obstacles[i]][new_obstacles[i]];
+                            }
 
                             _prior.count(&action, s, &o) = observation_prob * 10000;
 
@@ -258,12 +258,16 @@ CollisionAvoidanceFactoredPrior::CollisionAvoidanceFactoredPrior(
         // set agent x feature [0] for each action
         model.resetTransitionNode(&action, _AGENT_X_FEATURE, {_AGENT_X_FEATURE});
         for (auto x = 1; x < _width; ++x)
-        { model.transitionNode(&action, _AGENT_X_FEATURE).count({x}, x - 1) = 1; }
+        {
+            model.transitionNode(&action, _AGENT_X_FEATURE).count({x}, x - 1) = 1;
+        }
 
         // set agent y feature [1] for each action
         model.resetTransitionNode(&action, _AGENT_Y_FEATURE, {_AGENT_Y_FEATURE});
         for (auto y = 0; y < _height; ++y)
-        { setAgentYTransition(action, y, model.transitionNode(&action, _AGENT_Y_FEATURE)); }
+        {
+            setAgentYTransition(action, y, model.transitionNode(&action, _AGENT_Y_FEATURE));
+        }
     }
 
     /////// store it
@@ -331,8 +335,7 @@ CollisionAvoidanceFactoredPrior::CollisionAvoidanceFactoredPrior(
         {
 
             model.resetTransitionNode(&action, f, parents);
-            do
-            {
+            do {
                 model.transitionNode(&action, f)
                     .setDirichletDistribution(parent_values, obstacleTransition(parent_values[f]));
             } while (!indexing::increment(parent_values, parent_ranges));
@@ -510,7 +513,9 @@ bayes_adaptive::factored::BABNModel CollisionAvoidanceFactoredPrior::computePrio
         // extract parents of block feature from structure
         std::vector<std::vector<int>> block_feature_structure(_domain_size._A);
         for (auto a = 0; a < _domain_size._A; ++a)
-        { block_feature_structure[a] = structure.T[a][f]; }
+        {
+            block_feature_structure[a] = structure.T[a][f];
+        }
 
         // actually add a model for the block feature according
         // to the extracted structure
@@ -553,8 +558,7 @@ void CollisionAvoidanceFactoredPrior::sampleBlockTModel(
         if (correct_edge != -1)
         {
 
-            do
-            {
+            do {
                 model->transitionNode(&action, obstacle_feature)
                     .setDirichletDistribution(
                         parent_values, obstacleTransition(parent_values[correct_edge]));
@@ -576,8 +580,7 @@ void CollisionAvoidanceFactoredPrior::sampleBlockTModel(
             } else
             {
                 // at least one parent
-                do
-                {
+                do {
                     model->transitionNode(&action, obstacle_feature)
                         .setDirichletDistribution(parent_values, counts);
                 } while (!indexing::increment(parent_values, parent_ranges));

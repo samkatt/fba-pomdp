@@ -18,6 +18,10 @@ namespace domains {
 
 /**
  * @brief The abstract tiger class, implemented by continuous & episodic subclass
+ *
+ * We decided to do memory management of `State`, `Action` and `Observation` by
+ * pre-allocating all elements, and then simply manipulate pointers.
+ * @see `POMDP` and `Environment`
  **/
 class Tiger : public POMDP
 {

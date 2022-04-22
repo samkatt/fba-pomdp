@@ -94,6 +94,7 @@ private:
  * both to the left and to the right of the target's initial position  (i.e.
  * there are 2n + 1 cells in total.  Each of them could be the possible target.
  *
+ * @see `POMDP` and `Environment` for memory management of `State`, `Action`, and `Observation`
  **/
 class AGR : public POMDP
 {

@@ -31,8 +31,7 @@ CollisionAvoidanceFBAExtension::CollisionAvoidanceFBAExtension(
         for (auto agent_y = 0; agent_y < grid_height; ++agent_y)
         {
             std::vector<int> obstacles(num_obstacles);
-            do
-            {
+            do {
 
                 _state_prior.setRawValue(
                     domain.getState(grid_width - 1, agent_y, obstacles)->index(), init_state_prob);

@@ -11,9 +11,7 @@ namespace domains {
 SysAdmin_Parameters const SysAdmin::param = SysAdmin_Parameters(.025f, .95f, .95f, 1.0f, .075f);
 
 SysAdmin::SysAdmin(int n, std::string const& version) :
-        _version(UNINITIALIZED),
-        _size(n),
-        _states({}) // initiated below
+        _version(UNINITIALIZED), _size(n), _states({}) // initiated below
 {
 
     if (_size < 1)

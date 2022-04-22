@@ -34,9 +34,7 @@ BAFlatModel::BAFlatModel(
     std::shared_ptr<std::vector<float> const> phi,
     std::shared_ptr<std::vector<float> const> psi,
     Domain_Size const* domain_size) :
-        _domain_size(domain_size),
-        _phi(std::move(phi)),
-        _psi(std::move(psi))
+        _domain_size(domain_size), _phi(std::move(phi)), _psi(std::move(psi))
 {
     assert(
         _phi->size()
@@ -155,7 +153,9 @@ void BAFlatModel::logCounts() const
             std::string dirichlet_descr = "{" + std::to_string(phi(s, a, 0));
 
             for (auto new_s = 1; new_s < _domain_size->_S; ++new_s)
-            { dirichlet_descr += ", " + std::to_string(phi(s, a, new_s)); }
+            {
+                dirichlet_descr += ", " + std::to_string(phi(s, a, new_s));
+            }
 
             dirichlet_descr += "}";
 
@@ -171,7 +171,9 @@ void BAFlatModel::logCounts() const
             std::string dirichlet_descr = "{" + std::to_string(psi(a, s, 0));
 
             for (auto o = 1; o < _domain_size->_O; ++o)
-            { dirichlet_descr += ", " + std::to_string(psi(a, s, o)); }
+            {
+                dirichlet_descr += ", " + std::to_string(psi(a, s, o));
+            }
 
             dirichlet_descr += "}";
 
@@ -192,12 +194,12 @@ float& BAFlatModel::phi(int s, int a, int new_s)
 
         auto const phi_index = indexing::threeToOne(s, a, 0, _domain_size->_A, _domain_size->_S);
 
-        cached_phi =
-            _phi_cache
-                .insert({delta_index,
-                         std::vector<float>(
-                             &_phi->at(phi_index), &_phi->at(phi_index) + _domain_size->_S)})
-                .first;
+        cached_phi = _phi_cache
+                         .insert(
+                             {delta_index,
+                              std::vector<float>(
+                                  &_phi->at(phi_index), &_phi->at(phi_index) + _domain_size->_S)})
+                         .first;
     }
 
     return cached_phi->second[new_s];
@@ -227,12 +229,12 @@ float& BAFlatModel::psi(int a, int new_s, int o)
         auto const psi_index =
             indexing::threeToOne(a, new_s, 0, _domain_size->_S, _domain_size->_O);
 
-        cached_psi =
-            _psi_cache
-                .insert({delta_index,
-                         std::vector<float>(
-                             &_psi->at(psi_index), &_psi->at(psi_index) + _domain_size->_O)})
-                .first;
+        cached_psi = _psi_cache
+                         .insert(
+                             {delta_index,
+                              std::vector<float>(
+                                  &_psi->at(psi_index), &_psi->at(psi_index) + _domain_size->_O)})
+                         .first;
     }
 
     return cached_psi->second[o];

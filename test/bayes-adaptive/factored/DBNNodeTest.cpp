@@ -50,7 +50,9 @@ SCENARIO("dbn node sampling", "[bayes-adaptive][factored][dbn]")
 
         // random initiate cpt
         for (auto input = 0; input < 3; ++input)
-        { node.count({input}, 0) = (float)rnd::slowRandomInt(1, 100); }
+        {
+            node.count({input}, 0) = (float)rnd::slowRandomInt(1, 100);
+        }
 
         THEN("all counts in 1 should output that 1")
         {
@@ -162,7 +164,9 @@ SCENARIO("dbn node sampling", "[bayes-adaptive][factored][dbn]")
                 for (auto in_2 = 0; in_2 < 3; ++in_2)
                 {
                     for (auto in_3 = 0; in_3 < 3; ++in_3)
-                    { node.count({in_1, in_2, in_3}, 0) = (float)rnd::slowRandomInt(1, 10); }
+                    {
+                        node.count({in_1, in_2, in_3}, 0) = (float)rnd::slowRandomInt(1, 10);
+                    }
                 }
             }
 
@@ -276,7 +280,9 @@ SCENARIO("dbn node incrementing", "[bayes-adaptive][factored][dbn]")
 
                 std::vector<int> parent_sizes(parents_num);
                 for (auto i = 0; i < parents_num; ++i)
-                { parent_sizes[i] = rnd::slowRandomInt(1, 10); }
+                {
+                    parent_sizes[i] = rnd::slowRandomInt(1, 10);
+                }
 
                 // test 5 random count increments
                 for (auto m = 0; m < 5; ++m)
@@ -287,7 +293,9 @@ SCENARIO("dbn node incrementing", "[bayes-adaptive][factored][dbn]")
 
                     std::vector<int> values(parents_num);
                     for (auto i = 0; i < parents_num; ++i)
-                    { values[i] = rnd::slowRandomInt(0, parent_sizes[i]); }
+                    {
+                        values[i] = rnd::slowRandomInt(0, parent_sizes[i]);
+                    }
 
                     auto old_count = node.count(values, output);
                     node.increment(values, output);

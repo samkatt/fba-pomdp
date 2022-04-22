@@ -59,8 +59,7 @@ DBNNode DBNNode::marginalizeOut(std::vector<int> new_parents) const
     // loop over all our distributions and add them to our new node
     size_t cpt_start   = 0;
     auto parent_values = std::vector<int>(_parent_nodes.size());
-    do
-    {
+    do {
 
         // add our dirichlet counts to the new node
         // the new node transforms our parent values into
@@ -86,7 +85,9 @@ double DBNNode::LogBDScore(DBNNode const& prior) const
     assert(_parent_nodes.size() == prior._parent_nodes.size());
 
     for (size_t i = 0; i < _parent_nodes.size(); ++i)
-    { assert(_parent_nodes[i] == prior._parent_nodes[i]); }
+    {
+        assert(_parent_nodes[i] == prior._parent_nodes[i]);
+    }
 
     assert(_cpts.size() == prior._cpts.size());
 
@@ -210,7 +211,9 @@ void DBNNode::parentValues(std::vector<int> const& node_input, std::vector<int>*
 
     // make sure none of the input exceeds the allowed values
     for (size_t i = 0; i < _parent_nodes.size(); ++i)
-    { assert(node_input[_parent_nodes[i]] < _parent_sizes[i]); }
+    {
+        assert(node_input[_parent_nodes[i]] < _parent_sizes[i]);
+    }
 
     // populate parent values
     parent_values->clear();
@@ -224,7 +227,9 @@ void DBNNode::logCPTs() const
     {
         std::string descr = std::to_string(_cpts[0]);
         for (auto output = 1; output < _output_size; ++output)
-        { descr += "," + std::to_string(_cpts[output]); }
+        {
+            descr += "," + std::to_string(_cpts[output]);
+        }
 
         LOG(INFO) << descr;
     } else // at least one parent
@@ -238,12 +243,16 @@ void DBNNode::logCPTs() const
             // parent description
             auto descr = "\t{" + std::to_string(_parent_nodes[0]) + ":" + std::to_string(input[0]);
             for (size_t p = 1; p < input.size(); ++p)
-            { descr += "," + std::to_string(_parent_nodes[p]) + ":" + std::to_string(input[p]); }
+            {
+                descr += "," + std::to_string(_parent_nodes[p]) + ":" + std::to_string(input[p]);
+            }
             descr += "}: {" + std::to_string(_cpts[i * _output_size]);
 
             // dirichlet description
             for (auto output = 1; output < _output_size; ++output)
-            { descr += "," + std::to_string(_cpts[i * _output_size + output]); }
+            {
+                descr += "," + std::to_string(_cpts[i * _output_size + output]);
+            }
             descr += "}";
 
             LOG(INFO) << descr;

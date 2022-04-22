@@ -3,8 +3,7 @@
 namespace bayes_adaptive { namespace domain_extensions {
 
 FactoredDummyDomainFBAExtension::FactoredDummyDomainFBAExtension(size_t nr_features) :
-        _size(nr_features),
-        _state_prior(_size * _size)
+        _size(nr_features), _state_prior(_size * _size)
 {
 
     _state_prior.setRawValue(0, 1); // prior concentrates on the first state

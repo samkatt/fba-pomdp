@@ -28,9 +28,7 @@ CheatingReinvigoration::CheatingReinvigoration(
     size_t size,
     size_t cheat_amount,
     double resample_threshold) :
-        _size(size),
-        _cheat_amount(cheat_amount),
-        _resample_threshold(resample_threshold)
+        _size(size), _cheat_amount(cheat_amount), _resample_threshold(resample_threshold)
 {
 
     if (_size < 1 || _cheat_amount < 1)

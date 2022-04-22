@@ -34,7 +34,7 @@ double DummyDomain::computeObservationProbability(
     Observation const* /*o*/,
     Action const* /*a*/,
     State const* /*new_s*/
-    ) const
+) const
 {
     return 1;
 }

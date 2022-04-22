@@ -15,8 +15,7 @@
 
 // cppcheck-suppress passedByValue
 FBAPOMDPState::FBAPOMDPState(State const* domain_state, bayes_adaptive::factored::BABNModel model) :
-        BAState(domain_state),
-        _model(std::move(model))
+        BAState(domain_state), _model(std::move(model))
 {
 }
 

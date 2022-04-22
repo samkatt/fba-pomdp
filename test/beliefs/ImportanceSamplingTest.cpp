@@ -51,7 +51,9 @@ SCENARIO("weighted filter", "[state estimation][weighted filter]")
 
             auto s = IndexState(0);
             for (auto i = 0; i < 4; ++i)
-            { filter.add(&s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 100)); }
+            {
+                filter.add(&s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 100));
+            }
 
             THEN("sampling should return that specific state")
             REQUIRE(filter.sample() == &s);
@@ -64,7 +66,9 @@ SCENARIO("weighted filter", "[state estimation][weighted filter]")
             for (auto i = 0; i < 4; ++i) { states.emplace_back(IndexState(2)); }
 
             for (auto const& s : states)
-            { filter.add(&s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 100)); }
+            {
+                filter.add(&s, rnd::uniform_rand01() * rnd::slowRandomInt(1, 100));
+            }
 
             THEN("sampling should return a state with that specific index")
             REQUIRE(filter.sample()->index() == 2);

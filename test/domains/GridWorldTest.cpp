@@ -212,7 +212,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(goals.size() == test_goals.size());
             for (auto const& g : test_goals)
-            { REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end()); }
+            {
+                REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end());
+            }
         }
     }
 
@@ -246,7 +248,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(goals.size() == test_goals.size());
             for (auto const& g : test_goals)
-            { REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end()); }
+            {
+                REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end());
+            }
         }
     }
 
@@ -263,7 +267,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(locs.size() == test_locations.size());
             for (auto const& l : test_locations)
-            { REQUIRE(std::find(locs.begin(), locs.end(), l) != locs.end()); }
+            {
+                REQUIRE(std::find(locs.begin(), locs.end(), l) != locs.end());
+            }
         }
 
         WHEN("querying goal locations")
@@ -273,7 +279,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(goals.size() == test_locations.size());
             for (auto const& g : test_locations)
-            { REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end()); }
+            {
+                REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end());
+            }
         }
     }
 
@@ -290,7 +298,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(locs.size() == test_locations.size());
             for (auto const& l : test_locations)
-            { REQUIRE(std::find(locs.begin(), locs.end(), l) != locs.end()); }
+            {
+                REQUIRE(std::find(locs.begin(), locs.end(), l) != locs.end());
+            }
         }
 
         WHEN("querying goal locations")
@@ -300,7 +310,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(goals.size() == test_locations.size());
             for (auto const& g : test_locations)
-            { REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end()); }
+            {
+                REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end());
+            }
         }
     }
 
@@ -317,7 +329,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(locs.size() == test_locations.size());
             for (auto const& l : test_locations)
-            { REQUIRE(std::find(locs.begin(), locs.end(), l) != locs.end()); }
+            {
+                REQUIRE(std::find(locs.begin(), locs.end(), l) != locs.end());
+            }
         }
 
         WHEN("querying goal locations")
@@ -328,7 +342,9 @@ SCENARIO("size specific settings", "[domains][gridworld]")
 
             REQUIRE(goals.size() == test_locations.size());
             for (auto const& g : test_locations)
-            { REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end()); }
+            {
+                REQUIRE(std::find(goals.begin(), goals.end(), g) != goals.end());
+            }
         }
     }
 }

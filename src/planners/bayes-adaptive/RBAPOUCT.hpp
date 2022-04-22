@@ -22,6 +22,9 @@ namespace planners {
 
 /**
  * @brief Plans with respect to b(s) and a sampled model ~ p(D)
+ *
+ * @todo: Most functions are a direct copy of `POUCT`. Design wise, this is a
+ * shame, and could be improved upon.
  **/
 class RBAPOUCT : public BAPlanner
 {
@@ -46,11 +49,26 @@ private:
 
     std::vector<double> _ucb_table; // quick ucb lookup table
 
-    mutable std::vector<ActionNode*> _action_nodes =
-        {}; // memory efficient way of storing action nodes
-    mutable std::vector<Action const*> _actions = {}; // temporary container for actions
-    mutable std::vector<ChanceNode*> _action_node_holder =
-        {}; // temporary container for ChanceNodes
+    /*
+     * @brief memory efficient way of storing action nodes
+     *
+     * @see `POUCT:_action_nodes`
+     */
+    mutable std::vector<ActionNode*> _action_nodes = {};
+
+    /*
+     * @brief temporary container for actions
+     *
+     * @see `POUCT:_actions`
+     */
+    mutable std::vector<Action const*> _actions = {};
+
+    /*
+     * @brief container for temporary `ChanceNodes`
+     *
+     * @see `POUCT:_best_chance_nodes`
+     */
+    mutable std::vector<ChanceNode*> _best_chance_nodes = {};
 
     mutable struct treeStatistics
     {
@@ -62,16 +80,14 @@ private:
     /**
      * @brief returns the next chance node based on current statistics in action
      *
-     * Applies UCB if UCBExploration::ON is used as input
+     * @see `POUCT::selectChanceNodeUCB`
      **/
     ChanceNode& selectChanceNodeUCB(ActionNode* n, UCBExploration exploration_option) const;
 
     /**
-     * @brief traverses into the tree
+     * @brief Traverses recursively the tree from node `n`
      *
-     * Here we are at the top of a MCTSTree, meaning
-     * that we will need to take an action and continue
-     * traversing the tree from that action node
+     * @see `POUCT::traverseActionNode`
      **/
     Return
         traverseActionNode(ActionNode* n, State const* s, BAPOMDP const& simulator, int depth_to_go)
@@ -80,9 +96,7 @@ private:
     /**
      * @brief traverses into the tree
      *
-     * Here we have picked an action at some MCTSTree,
-     * meaning that we will simulate a step and continue
-     * traversing from the respective child MCTSTree
+     * @see `POUCT::tranverseChanceNode`
      **/
     Return
         traverseChanceNode(ChanceNode& n, State const* s, BAPOMDP const& simulator, int depth_to_go)
@@ -111,6 +125,8 @@ private:
 
     /**
      * @brief creates an action node and returns a pointer to it
+     *
+     * @see `POUCT::createActionNode`
      **/
     ActionNode* createActionNode(std::vector<Action const*> const& actions) const;
 

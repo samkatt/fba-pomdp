@@ -140,7 +140,9 @@ FactoredTigerFactoredPrior::FactoredTigerFactoredPrior(configurations::FBAConf c
     model.resetTransitionNode(&listen, _tiger_loc_feature, std::vector<int>({_tiger_loc_feature}));
     // non-informative features after listening depends on previous non-informative feature
     for (auto f = 1; f < (int)_domain_feature_size._S.size(); ++f)
-    { model.resetTransitionNode(&listen, f, std::vector<int>({f})); }
+    {
+        model.resetTransitionNode(&listen, f, std::vector<int>({f}));
+    }
 
     /* listening */
     // T: listening deterministically keeps all state features the same
@@ -162,7 +164,9 @@ FactoredTigerFactoredPrior::FactoredTigerFactoredPrior(configurations::FBAConf c
         for (auto f = 0; f < (int)_domain_feature_size._S.size(); f++)
         {
             for (auto f_val = 0; f_val < 2; ++f_val)
-            { model.transitionNode(&action, f).count({}, f_val) = _known_counts; }
+            {
+                model.transitionNode(&action, f).count({}, f_val) = _known_counts;
+            }
         }
     }
 
@@ -239,8 +243,7 @@ void FactoredTigerFactoredPrior::setObservationModel(
     // if we have tiger location as feature, we have informed counts
     if (parents[0] == 0)
     {
-        do
-        {
+        do {
             model->observationNode(&listen, 0).count(parent_values, domains::FactoredTiger::LEFT) =
                 parent_values[0] == domains::FactoredTiger::LEFT ? _acc_O_count : _inacc_O_count;
 
@@ -250,8 +253,7 @@ void FactoredTigerFactoredPrior::setObservationModel(
         } while (!indexing::increment(parent_values, parent_ranges));
     } else // we don't have informative counts as tiger location is not part of parents
     {
-        do
-        {
+        do {
             model->observationNode(&listen, 0)
                 .setDirichletDistribution(
                     parent_values, std::vector<float>({_uniform_O_count, _uniform_O_count}));
@@ -299,7 +301,9 @@ bayes_adaptive::factored::BABNModel FactoredTigerFactoredPrior::computePriorMode
     {
         assert(structure.O[action].size() == _domain_feature_size._O.size());
         for (auto const& parents : structure.O[action])
-        { assert(std::is_sorted(parents.begin(), parents.end())); }
+        {
+            assert(std::is_sorted(parents.begin(), parents.end()));
+        }
 
         assert(structure.T[action].size() == _domain_feature_size._S.size());
         for (auto const& parents : structure.T[action]) { assert(parents.size() <= 1); }
@@ -355,7 +359,9 @@ bayes_adaptive::factored::BABNModel::Structure FactoredTigerFactoredPrior::mutat
 
         assert(structure.O[action].size() == _domain_feature_size._O.size());
         for (auto const& parents : structure.O[action])
-        { assert(std::is_sorted(parents.begin(), parents.end())); }
+        {
+            assert(std::is_sorted(parents.begin(), parents.end()));
+        }
 
         assert(structure.T[action].size() == _domain_feature_size._S.size());
         for (auto const& parents : structure.T[action]) { assert(parents.size() <= 1); }

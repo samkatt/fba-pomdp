@@ -11,9 +11,7 @@
 namespace domains {
 
 CoffeeProblem::CoffeeProblem(std::string const& version) :
-        _states(_S),
-        _actions(_A),
-        _observations(_O)
+        _states(_S), _actions(_A), _observations(_O)
 {
     // change probabilitie if boutilier's version
     if (version == "boutilier")

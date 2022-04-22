@@ -37,8 +37,7 @@ FBAPOMDPState* breed(
 ReinvigoratingRejectionSampling::ReinvigoratingRejectionSampling(
     size_t size,
     size_t reinvigoration_amount) :
-        _size(size),
-        _reinvigoration_amount(reinvigoration_amount)
+        _size(size), _reinvigoration_amount(reinvigoration_amount)
 {
 
     if (_size < 1 || _reinvigoration_amount < 1)
@@ -61,12 +60,16 @@ void ReinvigoratingRejectionSampling::initiate(POMDP const& domain)
 
     auto tmp_states = std::vector<FBAPOMDPState const*>();
     for (size_t i = 0; i < _size; ++i)
-    { tmp_states.emplace_back(dynamic_cast<FBAPOMDPState const*>(domain.sampleStartState())); }
+    {
+        tmp_states.emplace_back(dynamic_cast<FBAPOMDPState const*>(domain.sampleStartState()));
+    }
     _belief = FlatFilter<FBAPOMDPState const*>(tmp_states);
 
     tmp_states.clear();
     for (size_t i = 0; i < _size; ++i)
-    { tmp_states.emplace_back(fbapomdp.sampleFullyConnectedState()); }
+    {
+        tmp_states.emplace_back(fbapomdp.sampleFullyConnectedState());
+    }
     _fully_connected_belief = FlatFilter<FBAPOMDPState const*>(std::move(tmp_states));
 
     VLOG(3) << "Status of rejection sampling filter after initiating:\n" << _belief.toString();

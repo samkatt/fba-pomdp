@@ -151,7 +151,7 @@ SCENARIO("tiger bapomdp prior test for real experiment", "[tiger][bayes-adaptive
 {
     GIVEN("The configurations of a real experiment")
     {
-        auto conf = configurations::FBAConf();
+        auto conf = configurations::BAConf();
 
         conf.domain_conf.domain = "episodic-tiger";
         conf.num_episodes       = 200;
@@ -190,7 +190,9 @@ SCENARIO("tiger bapomdp prior test for real experiment", "[tiger][bayes-adaptive
             LOG(INFO) << "After no noise 10 counts run of 200 episodes, these 10 are sampled from "
                          "the belief:";
             for (auto i = 0; i < 10; ++i)
-            { static_cast<BAPOMDPState const*>(belief->sample())->logCounts(); }
+            {
+                static_cast<BAPOMDPState const*>(belief->sample())->logCounts();
+            }
         }
 
         WHEN("There is .2 noise and 2 counts")
@@ -218,7 +220,9 @@ SCENARIO("tiger bapomdp prior test for real experiment", "[tiger][bayes-adaptive
             LOG(INFO) << "After .2 noise 2 counts run of 200 episodes, these 10 are sampled from "
                          "the belief:";
             for (auto i = 0; i < 10; ++i)
-            { static_cast<BAPOMDPState const*>(belief->sample())->logCounts(); }
+            {
+                static_cast<BAPOMDPState const*>(belief->sample())->logCounts();
+            }
         }
     }
 }
@@ -383,7 +387,7 @@ SCENARIO("factored tiger FBAPOMDPPrior", "[bayes-adaptive][factored][tiger]")
 
     for (auto type : tiger_types)
     {
-        for (std::string const& struct_noise_enabled : {"", "uniform"})
+        for (std::string const struct_noise_enabled : {"", "uniform"})
         {
             auto descr = struct_noise_enabled.empty() ? " without structure noise "
                                                       : " with structure noise ";

@@ -86,7 +86,7 @@ SCENARIO("factored bayes-adaptive sysadmin", "[domain][bayes-adaptive][sysadmin]
     WHEN("We request the domain feature size of the sysadmin problem")
     {
 
-        auto size = rnd::slowRandomInt(2, 10);
+        std::size_t size = rnd::slowRandomInt(2, 10);
 
         auto const f_ext = bayes_adaptive::domain_extensions::SysAdminFBAExtension(size);
 
@@ -108,7 +108,7 @@ SCENARIO("sysadmin state prior", "[bayes-adaptive][domain][sysadmin][factored]")
 
     auto const _s_size = ext.domainSize()._S;
 
-    REQUIRE(f_ext.statePrior()->sample() == _s_size - 1);
+    REQUIRE(static_cast<int>(f_ext.statePrior()->sample()) == _s_size - 1);
     ;
-    REQUIRE(f_ext.statePrior()->prob(_s_size - 1) == 1);
+    REQUIRE(static_cast<int>(f_ext.statePrior()->prob(_s_size - 1)) == 1);
 }

@@ -8,8 +8,7 @@
 namespace bayes_adaptive { namespace domain_extensions {
 
 FactoredDummyDomainBAExtension::FactoredDummyDomainBAExtension(int size) :
-        _size(size),
-        _num_states(size * size)
+        _size(size), _num_states(size * size)
 {
 }
 

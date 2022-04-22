@@ -34,21 +34,22 @@ void DomainConf::validate() const
 {
     using boost::program_options::error;
 
-    std::vector<std::string> valid_domains = {"dummy",
-                                              "linear_dummy",
-                                              "factored-dummy",
-                                              "episodic-tiger",
-                                              "continuous-tiger",
-                                              "agr",
-                                              "coffee",
-                                              "boutilier-coffee",
-                                              "independent-sysadmin",
-                                              "linear-sysadmin",
-                                              "episodic-factored-tiger",
-                                              "continuous-factored-tiger",
-                                              "gridworld",
-                                              "random-collision-avoidance",
-                                              "centered-collision-avoidance"};
+    std::vector<std::string> valid_domains = {
+        "dummy",
+        "linear_dummy",
+        "factored-dummy",
+        "episodic-tiger",
+        "continuous-tiger",
+        "agr",
+        "coffee",
+        "boutilier-coffee",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "gridworld",
+        "random-collision-avoidance",
+        "centered-collision-avoidance"};
 
     if (std::find(valid_domains.begin(), valid_domains.end(), domain) == valid_domains.end())
     {

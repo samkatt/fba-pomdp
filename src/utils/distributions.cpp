@@ -10,15 +10,13 @@
 namespace utils {
 
 categoricalDistr::categoricalDistr(size_t size, float init) :
-        _values(size, init),
-        _total(init * size)
+        _values(size, init), _total(init * size)
 {
     assert(init >= 0);
 }
 
 categoricalDistr::categoricalDistr(std::vector<float> const& distr) :
-        _values(),
-        _total(std::accumulate(distr.begin(), distr.end(), 0.0))
+        _values(), _total(std::accumulate(distr.begin(), distr.end(), 0.0))
 {
 
     assert(_total > 1e-10);

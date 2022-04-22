@@ -159,15 +159,15 @@ SCENARIO("updating BAPOMDPState", "[bayes-adaptive][flat]")
                                     REQUIRE(
                                         ba_state->model()->count(&state, &action, &new_state)
                                         == Approx(ba_state_copy->model()->count(
-                                               &state, &action, &new_state)));
+                                            &state, &action, &new_state)));
                                 } else
                                 { // the exact update!!! should be incremented
                                     REQUIRE(
                                         ba_state->model()->count(&state, &action, &new_state)
                                         == Approx(
-                                               ba_state_copy->model()->count(
-                                                   &state, &action, &new_state)
-                                               - 1));
+                                            ba_state_copy->model()->count(
+                                                &state, &action, &new_state)
+                                            - 1));
                                 }
 
                                 if (a_i != a->index() || o_i != o->index()
@@ -176,15 +176,15 @@ SCENARIO("updating BAPOMDPState", "[bayes-adaptive][flat]")
                                     REQUIRE(
                                         ba_state->model()->count(&action, &new_state, &observation)
                                         == Approx(ba_state_copy->model()->count(
-                                               &action, &new_state, &observation)));
+                                            &action, &new_state, &observation)));
                                 } else
                                 { // the exact update!!! should be incremented
                                     REQUIRE(
                                         ba_state->model()->count(&action, &new_state, &observation)
                                         == Approx(
-                                               ba_state_copy->model()->count(
-                                                   &action, &new_state, &observation)
-                                               - 1));
+                                            ba_state_copy->model()->count(
+                                                &action, &new_state, &observation)
+                                            - 1));
                                 }
                             }
                         }
@@ -301,20 +301,20 @@ SCENARIO("compute BAPOMDP observation probabilitieis", "[bayes-adaptive][flat][d
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &listen, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.85).epsilon(.01));
+                    == Approx(.85).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &listen, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.85).epsilon(.01));
+                    == Approx(.85).margin(.01));
 
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &listen, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.15).epsilon(.01));
+                    == Approx(.15).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &listen, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.15).epsilon(.01));
+                    == Approx(.15).margin(.01));
             }
 
             THEN("Opening doors is always 50/50")
@@ -322,20 +322,20 @@ SCENARIO("compute BAPOMDP observation probabilitieis", "[bayes-adaptive][flat][d
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &open_door, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &correct_ob, &open_door, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
 
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &open_door, s, rnd::sample::Dir::sampleMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
                 REQUIRE(
                     ba_state->computeObservationProbability(
                         &incorrt_ob, &open_door, s, rnd::sample::Dir::expectedMult)
-                    == Approx(.5).epsilon(.01));
+                    == Approx(.5).margin(.01));
             }
 
             d.releaseState(s);

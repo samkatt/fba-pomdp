@@ -19,9 +19,7 @@ int countSetBits(int n)
 namespace domains {
 
 SysAdminState::SysAdminState(int i, int num_computers) :
-        _num_computers(num_computers),
-        _num_operational_computers(countSetBits(i)),
-        _index(i)
+        _num_computers(num_computers), _num_operational_computers(countSetBits(i)), _index(i)
 {
 }
 

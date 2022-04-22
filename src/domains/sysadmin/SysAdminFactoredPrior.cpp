@@ -119,8 +119,7 @@ bayes_adaptive::factored::BABNModel SysAdminFactoredPrior::computePriorModel(
             std::vector<int> parent_values(parents.size(), 0);
             std::vector<int> const parent_dimensions(parents.size(), 2);
 
-            do
-            {
+            do {
 
                 auto const fail_prob =
                     computeFailureProbability(&action, c, &parents, &parent_values);
@@ -253,8 +252,7 @@ std::vector<DBNNode> SysAdminFactoredPrior::linearTransitions()
             std::vector<int> const parent_dimensions(parents.size(), 2);
 
             model.resetTransitionNode(&action, c, parents);
-            do
-            {
+            do {
                 auto const p = computeFailureProbability(&action, c, &parents, &parent_values);
                 std::vector<float> counts{p * _known_total_counts, (1 - p) * _known_total_counts};
 
@@ -288,8 +286,7 @@ std::vector<DBNNode> SysAdminFactoredPrior::fullyConnectedT(domains::SysAdmin co
             model.resetTransitionNode(&action, c, all_parents);
 
             std::vector<int> parent_values(n, 0);
-            do
-            {
+            do {
                 auto const fail_prob = d.failProbability(d.getState(parent_values), &action, c);
                 model.transitionNode(&action, c)
                     .setDirichletDistribution(parent_values, {fail_prob, 1 - fail_prob});

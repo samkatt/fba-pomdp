@@ -176,8 +176,8 @@ GridWorldFactBAPrior::GridWorldFactBAPrior(
     _domain_size         = ba_ext.domainSize();
     _domain_feature_size = fba_ext.domainFeatureSize();
 
-    _indexing_steps = {indexing::stepSize(_domain_feature_size._S),
-                       indexing::stepSize(_domain_feature_size._O)};
+    _indexing_steps = {
+        indexing::stepSize(_domain_feature_size._S), indexing::stepSize(_domain_feature_size._O)};
 
     _correct_struct_prior = {&_domain_size, &_domain_feature_size, &_indexing_steps};
 
@@ -282,10 +282,11 @@ void GridWorldFactBAPrior::setNoisyTransitionNode(
                               {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}, &action)
                           .y;
 
-            float const trans_prob = (_domain.agentOnSlowLocation({static_cast<unsigned int>(x),
-                                                                   static_cast<unsigned int>(y)}))
-                                         ? GridWorld::slow_move_prob + _noise
-                                         : GridWorld::move_prob;
+            float const trans_prob =
+                (_domain.agentOnSlowLocation(
+                    {static_cast<unsigned int>(x), static_cast<unsigned int>(y)}))
+                    ? GridWorld::slow_move_prob + _noise
+                    : GridWorld::move_prob;
 
             for (auto g = 0; g < _domain_feature_size._S[_goal_feature]; ++g)
             {

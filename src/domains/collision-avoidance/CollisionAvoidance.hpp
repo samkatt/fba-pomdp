@@ -51,7 +51,9 @@ struct CollisionAvoidanceState : public State
         std::string obsts = "{";
 
         for (size_t i = 0; i < obstacles_pos.size() - 1; ++i)
-        { obsts += std::to_string(obstacles_pos[i]) + ","; }
+        {
+            obsts += std::to_string(obstacles_pos[i]) + ",";
+        }
 
         return "(index:" + std::to_string(_index) + " (" + std::to_string(x_agent) + ","
                + std::to_string(y_agent) + "), " + obsts + std::to_string(obstacles_pos.back())
@@ -64,7 +66,6 @@ struct CollisionAvoidanceState : public State
 };
 
 /** \brief The collision avoidance domain
-  >>>>>>> domain_ba_separation
  *
  * The agent starts moving from a random position in the right-most column
  * of a x by y 30 grid map. An obstacle randomly moves in the left-most
@@ -78,6 +79,9 @@ struct CollisionAvoidanceState : public State
  * the left-most column. The agent knows its own position exactly, but
  * observes the obstacle’s position with a Gaussian noise N(0; 1).
  *
+ * We decided to do memory management of `State`, `Action` and `Observation` by
+ * pre-allocating all elements, and then simply manipulate pointers.
+ * @see `POMDP` and `Environment`
  **/
 class CollisionAvoidance : public POMDP
 {

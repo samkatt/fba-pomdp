@@ -11,10 +11,8 @@
 
 namespace domains {
 
-std::vector<std::string> const GridWorld::GridWorldAction::action_descriptions = {"UP",
-                                                                                  "RIGHT",
-                                                                                  "DOWN",
-                                                                                  "LEFT"};
+std::vector<std::string> const GridWorld::GridWorldAction::action_descriptions =
+    {"UP", "RIGHT", "DOWN", "LEFT"};
 
 std::vector<GridWorld::GridWorldState::pos> const GridWorld::start_locations = {{0, 0}};
 
@@ -178,7 +176,9 @@ float GridWorld::obsDisplProb(unsigned int loc, unsigned int observed_loc) const
     if (observed_loc == _size - 1 || observed_loc == 0)
     {
         for (size_t i = displacement + 1; i < _obs_displacement_probs.size(); ++i)
-        { res += _obs_displacement_probs[i] * .5; }
+        {
+            res += _obs_displacement_probs[i] * .5;
+        }
     }
 
     return res;
@@ -376,20 +376,18 @@ Observation const* GridWorld::generateObservation(
 
     // calculate observed positions
     auto const observed_x =
-        (rnd::boolean())
-            ? std::max(
-                  0, static_cast<int>(agent_pos.x - x_displacement)) // x_displacement to the left
-            : std::min(
-                  agent_pos.x + x_displacement,
-                  static_cast<unsigned int>(_size) - 1); // displacement to the right
+        (rnd::boolean()) ? std::max(
+            0, static_cast<int>(agent_pos.x - x_displacement)) // x_displacement to the left
+                         : std::min(
+                             agent_pos.x + x_displacement,
+                             static_cast<unsigned int>(_size) - 1); // displacement to the right
 
     auto const observed_y =
-        (rnd::boolean())
-            ? std::max(
-                  0, static_cast<int>(agent_pos.y - y_displacement)) // y_displacement to the left
-            : std::min(
-                  agent_pos.y + y_displacement,
-                  static_cast<unsigned int>(_size) - 1); // displacement to the right
+        (rnd::boolean()) ? std::max(
+            0, static_cast<int>(agent_pos.y - y_displacement)) // y_displacement to the left
+                         : std::min(
+                             agent_pos.y + y_displacement,
+                             static_cast<unsigned int>(_size) - 1); // displacement to the right
 
     // return corresponding indexed observation
     return &_O[positionsToIndex({observed_x, observed_y}, goal_pos)];

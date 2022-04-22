@@ -145,10 +145,10 @@ TEST_CASE("random", "[utils][random]")
 SCENARIO("calculating normal cdf", "[random][utils]")
 {
     REQUIRE(rnd::normal::cdf(0, 0, 1) == .5);
-    REQUIRE(rnd::normal::cdf(-3, 0, 1) == Approx(0.00135));
-    REQUIRE(rnd::normal::cdf(.5, 0, 1) == Approx(.69146));
-    REQUIRE(rnd::normal::cdf(.5, 2, 1) == Approx(.06681));
-    REQUIRE(rnd::normal::cdf(.5, 2, 1.857417562100671) == Approx(.20967));
+    REQUIRE(rnd::normal::cdf(-3, 0, 1) == Approx(0.00135).margin(0.00001));
+    REQUIRE(rnd::normal::cdf(.5, 0, 1) == Approx(.69146).margin(0.00001));
+    REQUIRE(rnd::normal::cdf(.5, 2, 1) == Approx(.06681).margin(0.00001));
+    REQUIRE(rnd::normal::cdf(.5, 2, 1.857417562100671) == Approx(.20967).margin(0.00001));
 }
 
 SCENARIO("random ints", "[random][utils]")

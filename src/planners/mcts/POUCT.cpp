@@ -118,7 +118,9 @@ Action const*
         std::stringstream ss;
         ss << "Entropies:";
         for (auto h : entropies)
-        { ss << " " << std::fixed << std::setprecision(1) << 100 * h << "%"; }
+        {
+            ss << " " << std::fixed << std::setprecision(1) << 100 * h << "%";
+        }
         VLOG(4) << ss.str();
     }
 
@@ -137,12 +139,18 @@ ChanceNode& POUCT::selectChanceNodeUCB(ActionNode* n, UCBExploration exploration
 {
     assert(n != nullptr);
 
-    _action_node_holder.clear();
+    // will contain all the candidate 'best' nodes to pick from The reason we
+    // need this, is because it is possible that multiple candidates have the
+    // same (best) value, from which we will the need to pick randomly
+    _best_chance_nodes.clear();
 
     double best_q = -std::numeric_limits<double>::max();
 
     auto const m = n->visited();
-    // loop over all action nodes and extract best action
+
+    // Loop over all children `ChanceNode` and extract the 'best'.
+    // Here we evaluate the Q/UCB value of each `Action`, where
+    // each `Action` has its own `ChanceNode`.
     for (auto& chance_node : *n)
     {
         auto q = chance_node.qValue();
@@ -152,22 +160,24 @@ ChanceNode& POUCT::selectChanceNodeUCB(ActionNode* n, UCBExploration exploration
             q += UCB(m, chance_node.visited());
         }
 
+        // Test if as good as current 'best'
         if (q >= best_q)
         {
             if (q > best_q)
             {
-                _action_node_holder.clear();
+                // Ignore previous 'best' if this one is superior
+                _best_chance_nodes.clear();
             }
 
             best_q = q;
-            _action_node_holder.emplace_back(&chance_node);
+            _best_chance_nodes.emplace_back(&chance_node);
         }
     }
 
-    assert(!_action_node_holder.empty());
+    assert(!_best_chance_nodes.empty());
 
-    // return random action
-    return *_action_node_holder[rnd::slowRandomInt(0, (int)_action_node_holder.size())];
+    // return random node *from 'best' candidates*
+    return *_best_chance_nodes[rnd::slowRandomInt(0, (int)_best_chance_nodes.size())];
 }
 
 Return POUCT::traverseActionNode(
@@ -254,7 +264,9 @@ void POUCT::fillHistograms(std::vector<std::vector<int>>& histograms, ActionNode
         histograms[node_depth][chance_node._action->index()] += chance_node.visited();
 
         for (auto& action_node : chance_node)
-        { fillHistograms(histograms, action_node.second, node_depth + 1); }
+        {
+            fillHistograms(histograms, action_node.second, node_depth + 1);
+        }
     }
 }
 
@@ -293,7 +305,12 @@ Return POUCT::rollout(State const* s, POMDP const& simulator, int depth_to_go) c
 ActionNode* POUCT::createActionNode(std::vector<Action const*> const& actions) const
 {
     _stats.num_action_nodes++;
+
+    // `_action_nodes` is a private member that will persist over multiple
+    // planning calls, so over time we expect there is no more need for
+    // re-allocating memory due to 'growing'
     _action_nodes.emplace_back(new ActionNode(actions));
+
     return _action_nodes.back();
 }
 

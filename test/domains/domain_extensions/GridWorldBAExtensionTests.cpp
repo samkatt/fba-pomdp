@@ -99,8 +99,8 @@ SCENARIO("gridworld domain sizes", "[domain][gridworld][bayes-adaptive]")
         auto const size = ext.domainSize();
 
         REQUIRE(size._A == 4);
-        REQUIRE(size._O == num_locations * d.goalLocations(n).size());
-        REQUIRE(size._S == num_locations * d.goalLocations(n).size());
+        REQUIRE(static_cast<std::size_t>(size._O) == num_locations * d.goalLocations(n).size());
+        REQUIRE(static_cast<std::size_t>(size._S) == num_locations * d.goalLocations(n).size());
     }
 
     WHEN("asking the domain feature size")
@@ -110,12 +110,12 @@ SCENARIO("gridworld domain sizes", "[domain][gridworld][bayes-adaptive]")
         REQUIRE(size._O.size() == 3);
         REQUIRE(size._O[0] == n);
         REQUIRE(size._O[1] == n);
-        REQUIRE(size._O[2] == d.goalLocations(n).size());
+        REQUIRE(static_cast<std::size_t>(size._O[2]) == d.goalLocations(n).size());
 
         REQUIRE(size._S.size() == 3);
         REQUIRE(size._S[0] == n);
         REQUIRE(size._S[1] == n);
-        REQUIRE(size._S[2] == d.goalLocations(n).size());
+        REQUIRE(static_cast<std::size_t>(size._S[2]) == d.goalLocations(n).size());
     }
 }
 

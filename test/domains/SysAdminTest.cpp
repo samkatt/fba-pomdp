@@ -78,7 +78,9 @@ SCENARIO("sysadmin state modifiers", "[domains][sysadmin]")
                 THEN("the computer works again")
                 {
                     for (auto i = 0; i < size; ++i)
-                    { REQUIRE(static_cast<SysAdminState const*>(s_fixed)->isOperational(i)); }
+                    {
+                        REQUIRE(static_cast<SysAdminState const*>(s_fixed)->isOperational(i));
+                    }
                 }
 
                 d.releaseState(s_fixed);
@@ -288,7 +290,9 @@ SCENARIO("sysadmin steps", "[domain][sysadmin]")
             d.step(&s, a, &o, &r);
 
             for (auto i = 0; i < 3; ++i)
-            { REQUIRE(!static_cast<SysAdminState const*>(s)->isOperational(i)); }
+            {
+                REQUIRE(!static_cast<SysAdminState const*>(s)->isOperational(i));
+            }
 
             d.releaseAction(a);
             d.releaseState(s);
@@ -333,8 +337,11 @@ SCENARIO("sysadmin domain", "[domain][sysadmin]")
 
             d.addLegalActions(&state, &actions);
 
-            REQUIRE(actions.size() == 2 * size);
-            for (size_t i = 0; i < actions.size(); ++i) { REQUIRE(actions[i]->index() == i); }
+            REQUIRE(actions.size() == static_cast<std::size_t>(2 * size));
+            for (size_t i = 0; i < actions.size(); ++i)
+            {
+                REQUIRE(static_cast<std::size_t>(actions[i]->index()) == i);
+            }
         }
 
         WHEN("all computers are working & testing observation probabilities")
@@ -620,8 +627,7 @@ SCENARIO("sysadmin calculates probability of computer failing", "[domains][sysad
             REQUIRE(
                 d.failProbability(state, action, 1)
                 == Approx(
-                       1
-                       - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor)));
+                    1 - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor)));
 
             auto state_2 = d.breakComputer(state, 2);
             d.releaseState(state);
@@ -629,15 +635,14 @@ SCENARIO("sysadmin calculates probability of computer failing", "[domains][sysad
             REQUIRE(
                 d.failProbability(state_2, action, 3)
                 == Approx(
-                       1
-                       - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor)));
+                    1 - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor)));
 
             REQUIRE(
                 d.failProbability(state_2, action, 1)
                 == Approx(
-                       1
-                       - (1 - d.params()->_fail_prob)
-                             * pow(1 - d.params()->_fail_neighbour_factor, 2)));
+                    1
+                    - (1 - d.params()->_fail_prob)
+                          * pow(1 - d.params()->_fail_neighbour_factor, 2)));
 
             d.releaseState(state_2);
             d.releaseAction(action);
@@ -673,8 +678,8 @@ SCENARIO("sysadmin calculates probability of computer failing", "[domains][sysad
             REQUIRE(
                 d.failProbability(state_2, reboot, 1)
                 == Approx(
-                       (1 - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor))
-                       * (1 - d.params()->_reboot_success_rate)));
+                    (1 - (1 - d.params()->_fail_prob) * (1 - d.params()->_fail_neighbour_factor))
+                    * (1 - d.params()->_reboot_success_rate)));
 
             d.releaseAction(reboot);
             d.releaseState(state_2);

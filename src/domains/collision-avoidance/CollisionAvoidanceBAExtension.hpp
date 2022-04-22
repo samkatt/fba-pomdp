@@ -33,10 +33,10 @@ public:
 private:
     int _grid_width, _grid_height, _num_obstacles;
 
-    Domain_Size _domain_size = {_grid_width * _grid_height
-                                    * static_cast<int>(std::pow(_grid_height, _num_obstacles)),
-                                domains::CollisionAvoidance::NUM_ACTIONS,
-                                static_cast<int>(std::pow(_grid_height, _num_obstacles))};
+    Domain_Size _domain_size = {
+        _grid_width * _grid_height * static_cast<int>(std::pow(_grid_height, _num_obstacles)),
+        domains::CollisionAvoidance::NUM_ACTIONS,
+        static_cast<int>(std::pow(_grid_height, _num_obstacles))};
 
     std::vector<std::vector<std::vector<State const*>>> _states{
         static_cast<size_t>(_grid_width),

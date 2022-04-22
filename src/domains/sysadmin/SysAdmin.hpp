@@ -36,6 +36,10 @@ namespace domains {
  *
  *  The agent receives noisy signal on whether the computer it is rebooting
  *  or pinging is working (w/ the same probability)
+ *
+ * We decided to do memory management of `State`, `Action` and `Observation` by
+ * pre-allocating all elements, and then simply manipulate pointers.
+ * @see `POMDP` and `Environment`
  **/
 class SysAdmin : public POMDP
 {

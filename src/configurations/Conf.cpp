@@ -83,15 +83,16 @@ void Conf::validate() const
         throw error("Please enter a legit planner: random, ts or po-uct");
     }
 
-    std::vector<std::string> valid_belief = {"point_estimate",
-                                             "rejection_sampling",
-                                             "importance_sampling",
-                                             "reinvigoration",
-                                             "mh-nips",
-                                             "mh-within-gibbs",
-                                             "cheating-reinvigoration",
-                                             "incubator",
-                                             "nested"};
+    std::vector<std::string> valid_belief = {
+        "point_estimate",
+        "rejection_sampling",
+        "importance_sampling",
+        "reinvigoration",
+        "mh-nips",
+        "mh-within-gibbs",
+        "cheating-reinvigoration",
+        "incubator",
+        "nested"};
 
     if (std::find(valid_belief.begin(), valid_belief.end(), belief) == valid_belief.end())
     {

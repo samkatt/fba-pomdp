@@ -8,8 +8,7 @@ namespace bayes_adaptive { namespace domain_extensions {
 FactoredTigerBAExtension::FactoredTigerBAExtension(
     domains::FactoredTiger::FactoredTigerDomainType type,
     size_t num_irrelevant_features) :
-        _domain_size(2 << num_irrelevant_features, 3, 2),
-        _type(type)
+        _domain_size(2 << num_irrelevant_features, 3, 2), _type(type)
 {
 }
 

@@ -36,8 +36,9 @@ GridWorldFBAExtension::GridWorldFBAExtension(size_t size) :
 
 Domain_Feature_Size GridWorldFBAExtension::domainFeatureSize() const
 {
-    return {{static_cast<int>(_size), static_cast<int>(_size), static_cast<int>(_goal_amount)},
-            {static_cast<int>(_size), static_cast<int>(_size), static_cast<int>(_goal_amount)}};
+    return {
+        {static_cast<int>(_size), static_cast<int>(_size), static_cast<int>(_goal_amount)},
+        {static_cast<int>(_size), static_cast<int>(_size), static_cast<int>(_goal_amount)}};
 }
 
 utils::categoricalDistr const* GridWorldFBAExtension::statePrior() const

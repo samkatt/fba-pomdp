@@ -22,9 +22,7 @@ AGRState::AGRState(int n, int i) : target_pos(0), target_goal(0), _n(n)
 }
 
 AGRState::AGRState(int n_in, int target_pos_in, int target_goal_in) :
-        target_pos(target_pos_in),
-        target_goal(target_goal_in),
-        _n(n_in)
+        target_pos(target_pos_in), target_goal(target_goal_in), _n(n_in)
 {
 }
 
@@ -70,9 +68,7 @@ AGRAction::AGRAction(int n, int i) : type(""), help_pos(), _n(n)
 
 // cppcheck-suppress passedByValue
 AGRAction::AGRAction(int n_in, std::string type_in, int help_pos_in) :
-        type(std::move(type_in)),
-        help_pos(help_pos_in),
-        _n(n_in)
+        type(std::move(type_in)), help_pos(help_pos_in), _n(n_in)
 {
 }
 
@@ -147,9 +143,7 @@ AGRObservation::AGRObservation(int n, int i) : type(""), target_pos(0), _n(n)
 
 // cppcheck-suppress passedByValue
 AGRObservation::AGRObservation(int n_in, std::string type_in, int target_pos_in) :
-        type(std::move(type_in)),
-        target_pos(target_pos_in),
-        _n(n_in)
+        type(std::move(type_in)), target_pos(target_pos_in), _n(n_in)
 {
 }
 

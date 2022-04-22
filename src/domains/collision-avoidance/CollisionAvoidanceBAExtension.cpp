@@ -8,9 +8,7 @@ CollisionAvoidanceBAExtension::CollisionAvoidanceBAExtension(
     int grid_width,
     int grid_height,
     int num_obstacles) :
-        _grid_width(grid_width),
-        _grid_height(grid_height),
-        _num_obstacles(num_obstacles)
+        _grid_width(grid_width), _grid_height(grid_height), _num_obstacles(num_obstacles)
 {
 
     // locally create & store all states
@@ -24,8 +22,7 @@ CollisionAvoidanceBAExtension::CollisionAvoidanceBAExtension(
 
             std::vector<int> obstacles(_num_obstacles);
             auto obs_i = 0;
-            do
-            {
+            do {
                 _states[x][y_agent][obs_i++] =
                     new domains::CollisionAvoidanceState(x, y_agent, obstacles, index++);
             } while (!indexing::increment(obstacles, obstacles_range));

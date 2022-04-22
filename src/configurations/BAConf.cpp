@@ -69,17 +69,18 @@ void BAConf::addOptions(boost::program_options::options_description* descr)
 
 void BAConf::validate() const
 {
-    std::vector<std::string> const valid_bapomdps = {"dummy",
-                                                     "factored-dummy",
-                                                     "episodic-tiger",
-                                                     "continuous-tiger",
-                                                     "episodic-factored-tiger",
-                                                     "continuous-factored-tiger",
-                                                     "independent-sysadmin",
-                                                     "linear-sysadmin",
-                                                     "random-collision-avoidance",
-                                                     "centered-collision-avoidance",
-                                                     "gridworld"};
+    std::vector<std::string> const valid_bapomdps = {
+        "dummy",
+        "factored-dummy",
+        "episodic-tiger",
+        "continuous-tiger",
+        "episodic-factored-tiger",
+        "continuous-factored-tiger",
+        "independent-sysadmin",
+        "linear-sysadmin",
+        "random-collision-avoidance",
+        "centered-collision-avoidance",
+        "gridworld"};
 
     Conf::validate();
 

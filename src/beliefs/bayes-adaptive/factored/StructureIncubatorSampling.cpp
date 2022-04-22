@@ -55,7 +55,9 @@ void StructureIncubatorSampling::resetDomainStateDistribution(BAPOMDP const& bap
     for (auto& p : _fully_connected_belief.particles()) { bapomdp.resetDomainState(p); }
 
     for (size_t i = 0; i < _size; ++i)
-    { bapomdp.resetDomainState(_shadow_belief.particle(i)->particle); }
+    {
+        bapomdp.resetDomainState(_shadow_belief.particle(i)->particle);
+    }
 }
 
 /***** Belief interface *****/
@@ -65,14 +67,18 @@ void StructureIncubatorSampling::initiate(POMDP const& domain)
     tmp_states.reserve(_size);
 
     for (size_t i = 0; i < _size; ++i)
-    { tmp_states.emplace_back(dynamic_cast<FBAPOMDPState const*>(domain.sampleStartState())); }
+    {
+        tmp_states.emplace_back(dynamic_cast<FBAPOMDPState const*>(domain.sampleStartState()));
+    }
 
     _belief = FlatFilter<FBAPOMDPState const*>(tmp_states);
 
     tmp_states.clear();
     auto& fbapomdp = dynamic_cast<FBAPOMDP const&>(domain);
     for (size_t i = 0; i < _size; ++i)
-    { tmp_states.emplace_back(fbapomdp.sampleFullyConnectedState()); }
+    {
+        tmp_states.emplace_back(fbapomdp.sampleFullyConnectedState());
+    }
     _fully_connected_belief = FlatFilter<FBAPOMDPState const*>(std::move(tmp_states));
 
     // start shadow belief with mutations

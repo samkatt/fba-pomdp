@@ -26,6 +26,10 @@ namespace domains {
  *
  * This doubles the number of states into 4, making it one of the smallest
  * possible factored POMDPs.
+ *
+ * We decided to do memory management of `State`, `Action` and `Observation` by
+ * pre-allocating all elements, and then simply manipulate pointers.
+ * @see `POMDP` and `Environment`
  **/
 class FactoredTiger : public POMDP
 {
