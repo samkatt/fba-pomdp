@@ -1,3 +1,4 @@
 doc
-.ccls-cache
 .cache
+.ccls-cache
+.clangd
