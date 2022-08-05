@@ -24,7 +24,7 @@ public:
     explicit PointEstimation(State const* s);
 
     // deny shallow copies
-    PointEstimation(PointEstimation const&) = delete;
+    PointEstimation(PointEstimation const&)            = delete;
     PointEstimation& operator=(PointEstimation const&) = delete;
 
     /*** implement Belief interface ***/

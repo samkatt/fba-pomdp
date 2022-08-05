@@ -20,14 +20,20 @@ void testIndexClass(std::string const& name, GENERATOR& distr)
         auto i       = distr(rnd::rng());
         auto to_test = T(i);
 
-        THEN("index should be as initiated") { REQUIRE(to_test.index() == i); }
+        THEN("index should be as initiated")
+        {
+            REQUIRE(to_test.index() == i);
+        }
 
         WHEN("changing index")
         {
             auto j = distr(rnd::rng());
             to_test.index(j);
 
-            THEN("index should be as changed") { REQUIRE(to_test.index() == j); }
+            THEN("index should be as changed")
+            {
+                REQUIRE(to_test.index() == j);
+            }
         }
     }
 }

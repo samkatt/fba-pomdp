@@ -29,7 +29,7 @@ public:
         int output_size);
 
     // allow shallow copies
-    DBNNode(DBNNode const&) = default;
+    DBNNode(DBNNode const&)            = default;
     DBNNode& operator=(DBNNode const&) = default;
 
     /**

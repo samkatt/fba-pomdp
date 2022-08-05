@@ -40,7 +40,7 @@ public:
     // allow shallow copies
     BAFlatModel(BAFlatModel const&);
     BAFlatModel(BAFlatModel&&) noexcept = default;
-    BAFlatModel& operator               =(BAFlatModel const&);
+    BAFlatModel& operator=(BAFlatModel const&);
     BAFlatModel& operator=(BAFlatModel&&) = default;
 
     float& count(State const* s, Action const* a, State const* new_s);

@@ -67,10 +67,10 @@ public:
         std::vector<DBNNode> observation_nodes);
 
     // allow shallow copies
-    BABNModel(BABNModel const&) = default;
-    BABNModel(BABNModel&&)      = default;
+    BABNModel(BABNModel const&)            = default;
+    BABNModel(BABNModel&&)                 = default;
     BABNModel& operator=(BABNModel const&) = default;
-    BABNModel& operator=(BABNModel&&) = default;
+    BABNModel& operator=(BABNModel&&)      = default;
 
     int sampleStateIndex(State const* s, Action const* a, rnd::sample::Dir::sampleMethod m) const;
     int sampleObservationIndex(

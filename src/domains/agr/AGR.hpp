@@ -103,7 +103,7 @@ public:
     ~AGR() override;
 
     // allow shallow copies
-    AGR(AGR const&) = default;
+    AGR(AGR const&)            = default;
     AGR& operator=(AGR const&) = default;
 
     State const* sampleStartState() const override;

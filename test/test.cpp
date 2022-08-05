@@ -254,21 +254,21 @@ SCENARIO("fbapomdp integration", "[hide][integration][bayes-adaptive][factored]"
         "centered-collision-avoidance"};
     auto planners = {"random", "ts", "po-uct"};
     auto beliefs  = {
-        "point_estimate",
-        "rejection_sampling",
-        "importance_sampling",
-        "reinvigoration",
-        "incubator",
-        "nested"};
+         "point_estimate",
+         "rejection_sampling",
+         "importance_sampling",
+         "reinvigoration",
+         "incubator",
+         "nested"};
     auto resampling_beliefs = {"reinvigoration", "incubator"};
     auto factored_domains   = {
-        "factored-dummy",
-        "independent-sysadmin",
-        "linear-sysadmin",
-        "episodic-factored-tiger",
-        "continuous-factored-tiger",
-        "random-collision-avoidance",
-        "centered-collision-avoidance"};
+          "factored-dummy",
+          "independent-sysadmin",
+          "linear-sysadmin",
+          "episodic-factored-tiger",
+          "continuous-factored-tiger",
+          "random-collision-avoidance",
+          "centered-collision-avoidance"};
 
     configurations::FBAConf conf;
 

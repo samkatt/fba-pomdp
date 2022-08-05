@@ -32,7 +32,7 @@ struct DomainConf;
  * implementations to provide a `copyState` and `copyObservation`, and
  * `releaseState` and `releaseObservation`. The whole point here is to
  * hopefully avoid as many allocations as possible (e.g. store all
- * actions/observations in a single table). For example, if a caller 
+ * actions/observations in a single table). For example, if a caller
  *
  * This also (to some degree) explains (justifies) the fact that *all* calls
  * return or expect `const` members (see `step`): outside of this (and derived)
@@ -76,7 +76,7 @@ public:
      * @param[in] a: the taken action
      * @param[out] o: the resulting observation
      * @param[out] r: the reward associated with step
-     * 
+     *
      * @return whether or not the step was terminal
      **/
     virtual Terminal

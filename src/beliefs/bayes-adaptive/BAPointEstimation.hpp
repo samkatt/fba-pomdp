@@ -25,7 +25,7 @@ public:
     explicit BAPointEstimation(State const* s);
 
     // deny shallow copies
-    BAPointEstimation(BAPointEstimation const&) = delete;
+    BAPointEstimation(BAPointEstimation const&)            = delete;
     BAPointEstimation& operator=(BAPointEstimation const&) = delete;
 
     /*** implement Belief interface ***/

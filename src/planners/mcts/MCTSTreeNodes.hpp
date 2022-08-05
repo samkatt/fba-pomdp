@@ -52,10 +52,10 @@ public:
     explicit ChanceNode(Action const* a);
 
     // disallow shallow copies
-    ChanceNode(ChanceNode const&) = default;
-    ChanceNode(ChanceNode&&)      = default;
+    ChanceNode(ChanceNode const&)            = default;
+    ChanceNode(ChanceNode&&)                 = default;
     ChanceNode& operator=(ChanceNode const&) = default;
-    ChanceNode& operator=(ChanceNode&&) = default;
+    ChanceNode& operator=(ChanceNode&&)      = default;
 
     // registers visiting the node with return r
     void addVisit(double r);

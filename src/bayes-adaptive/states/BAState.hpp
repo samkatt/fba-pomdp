@@ -22,7 +22,7 @@ public:
     explicit BAState(State const* domain_state);
 
     // deny shallow copies
-    BAState(const BAState&) = delete;
+    BAState(const BAState&)            = delete;
     BAState& operator=(const BAState&) = delete;
 
     /**
