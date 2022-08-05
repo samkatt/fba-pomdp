@@ -40,8 +40,6 @@ FactoredTigerFlatPrior::FactoredTigerFlatPrior(configurations::BAConf const& c) 
         throw "noise has to be between -.15 and .3";
     }
 
-    IndexState const tmp_state(0);
-
     // listening does not alter the state
     // so we set the counts for listening to 0
     // unless the states match

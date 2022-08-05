@@ -38,7 +38,7 @@ ImportanceSampler::ImportanceSampler(WeightedFilter<State const*> f, size_t n) :
     }
 
     VLOG(1) << "Initiated Importance Sampling belief of size " << _n
-            << " with initial weighted filter of size " << f.size();
+            << " with initial weighted filter of size " << _filter.size();
 }
 
 void ImportanceSampler::initiate(POMDP const& d)

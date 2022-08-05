@@ -49,9 +49,7 @@ template<typename T>
 template<typename Deallocator>
 void FlatFilter<T>::free(Deallocator const& dealloc)
 {
-
     for (auto s : _particles) { dealloc(s); }
-
     _particles.clear();
 }
 

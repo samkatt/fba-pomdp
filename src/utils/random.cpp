@@ -1,5 +1,7 @@
 #include "random.hpp"
 
+#include <algorithm>
+
 #include "easylogging++.h"
 
 namespace rnd {
@@ -298,7 +300,7 @@ std::vector<float> sampleMult(float const* dir, int n)
     assert(sum > 1e-300);
 
     // normalize
-    for (auto& x : res) x = x / sum;
+    std::transform(res.cbegin(), res.cend(), res.begin(), [sum](double x) { return x / sum; });
 
     return res;
 }

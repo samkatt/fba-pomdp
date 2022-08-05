@@ -1,4 +1,5 @@
 #include "MCTSTreeNodes.hpp"
+#include <algorithm>
 
 ChanceNode::ChanceNode(Action const* a) : _action(a)
 {
@@ -53,7 +54,11 @@ ActionNode::ActionNode(std::vector<Action const*> const& legal_actions)
     assert(!legal_actions.empty());
 
     _children.reserve(legal_actions.size());
-    for (auto const& a : legal_actions) { _children.emplace_back(ChanceNode(a)); }
+    std::transform(
+        legal_actions.cbegin(),
+        legal_actions.cend(),
+        std::back_inserter(_children),
+        [](Action const* a) { return ChanceNode(a); });
 }
 
 void ActionNode::addVisit()

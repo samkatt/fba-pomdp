@@ -126,7 +126,7 @@ TEST_CASE("random", "[utils][random]")
         dir  = std::vector<float>({.1, .1, .1, .1, .1, .1});
         mult = rnd::sample::Dir::sampleMult(&dir[0], 6);
 
-        for (auto& i : mult)
+        for (auto i : mult)
         {
             REQUIRE(i < 1);
             REQUIRE(i > 0);
@@ -135,9 +135,9 @@ TEST_CASE("random", "[utils][random]")
         dir  = std::vector<float>({10000000, 10000000, 10000000, 10000000, 10000000});
         mult = rnd::sample::Dir::sampleMult(&dir[0], 5);
 
-        for (auto& i : mult)
+        for (auto i : mult)
         {
-            for (auto& j : mult) { REQUIRE(i == Approx(j).epsilon(0.001)); }
+            for (auto j : mult) { REQUIRE(i == Approx(j).epsilon(0.001)); }
         }
     }
 }

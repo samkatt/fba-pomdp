@@ -41,19 +41,19 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
     auto const h        = Horizon(conf.horizon);
 
     boost::timer timer;
-    for (auto run = 0; run < conf.num_runs; ++run)
+    for (auto ep = 0; ep < conf.num_runs; ++ep)
     {
         belief->initiate(*bapomdp);
 
         if (VLOG_IS_ON(3))
         {
-            VLOG(3) << "Example BA counts from prior in run " << run << ":";
+            VLOG(3) << "Example BA counts from prior in run " << ep << ":";
             dynamic_cast<BAState const*>(belief->sample())->logCounts();
         }
 
         for (auto episode = 0; episode < conf.num_episodes; ++episode)
         {
-            VLOG(1) << "run " << run + 1 << "/" << conf.num_runs << ", episode " << episode + 1
+            VLOG(1) << "episode " << ep + 1 << "/" << conf.num_runs << ", episode " << episode + 1
                     << "/" << conf.num_episodes;
 
             belief->resetDomainStateDistribution(*bapomdp);
@@ -67,7 +67,7 @@ Result run(BAPOMDP const* bapomdp, configurations::BAConf const& conf)
 
         if (VLOG_IS_ON(3))
         {
-            VLOG(3) << "Example BA counts at end of run " << run << ":";
+            VLOG(3) << "Example BA counts at end of episode " << ep << ":";
             dynamic_cast<BAState const*>(belief->sample())->logCounts();
         }
 

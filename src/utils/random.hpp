@@ -91,7 +91,7 @@ using sampleMethod = int(float const* dir, int n);
  * Expects: T to be float or double
  **/
 template<typename T>
-int sampleFromMult(T* mult, size_t n, double total_prob)
+int sampleFromMult(T const* mult, size_t n, double total_prob)
 {
 
     // get sample using uniform distribution scaled by the total

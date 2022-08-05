@@ -283,8 +283,8 @@ BAFlatModel::BAFlatModel(BAFlatModel const& other) : _domain_size()
 
 BAFlatModel& BAFlatModel::operator=(BAFlatModel const& other)
 {
-
-    _domain_size = other._domain_size;
+    _cache_ratio_threshold = other._cache_ratio_threshold;
+    _domain_size           = other._domain_size;
 
     // merge if necessary
     if (other._phi_cache.size() < _cache_ratio_threshold * _domain_size->_A * _domain_size->_S)
@@ -300,7 +300,7 @@ BAFlatModel& BAFlatModel::operator=(BAFlatModel const& other)
         _phi_cache = {};
 
         // base case is a copy of other phi
-        auto phi = *other._phi;
+        auto phi_counts = *other._phi;
 
         // update all dir in phi_cache
         for (auto const& it : other._phi_cache)
@@ -311,11 +311,11 @@ BAFlatModel& BAFlatModel::operator=(BAFlatModel const& other)
             auto phi_index = indexing::threeToOne(s, a, 0, _domain_size->_A, _domain_size->_S);
 
             // update all entries in dir
-            std::copy(it.second.begin(), it.second.end(), &phi[phi_index]);
+            std::copy(it.second.begin(), it.second.end(), &phi_counts[phi_index]);
         }
 
         // store our new phi as shared pointer
-        _phi = std::make_shared<std::vector<float>>(std::move(phi));
+        _phi = std::make_shared<std::vector<float>>(std::move(phi_counts));
     }
 
     // merge if necessary
@@ -332,7 +332,7 @@ BAFlatModel& BAFlatModel::operator=(BAFlatModel const& other)
         _psi_cache = {};
 
         // base case is a copy of other psi
-        auto psi = *other._psi;
+        auto psi_counts = *other._psi;
 
         // update all dir in psi_cache
         for (auto const& it : other._psi_cache)
@@ -343,11 +343,11 @@ BAFlatModel& BAFlatModel::operator=(BAFlatModel const& other)
             auto psi_index = indexing::threeToOne(a, new_s, 0, _domain_size->_S, _domain_size->_O);
 
             // update all entries in dir
-            std::copy(it.second.begin(), it.second.end(), &psi[psi_index]);
+            std::copy(it.second.begin(), it.second.end(), &psi_counts[psi_index]);
         }
 
         // store our new psi as shared pointer
-        _psi = std::make_shared<std::vector<float>>(std::move(psi));
+        _psi = std::make_shared<std::vector<float>>(std::move(psi_counts));
     }
 
     return *this;

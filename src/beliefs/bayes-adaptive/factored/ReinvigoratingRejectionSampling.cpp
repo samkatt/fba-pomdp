@@ -110,9 +110,9 @@ void ReinvigoratingRejectionSampling::resetDomainStateDistribution(BAPOMDP const
     assert(_belief.size() == _size);
     assert(_fully_connected_belief.size() == _size);
 
-    for (auto& p : _belief.particles()) { bapomdp.resetDomainState(p); }
+    for (auto p : _belief.particles()) { bapomdp.resetDomainState(p); }
 
-    for (auto& p : _fully_connected_belief.particles()) { bapomdp.resetDomainState(p); }
+    for (auto p : _fully_connected_belief.particles()) { bapomdp.resetDomainState(p); }
 
     VLOG(3) << "Status of rejection sampling filter after initiating while keeping counts:\n"
             << _belief.toString();

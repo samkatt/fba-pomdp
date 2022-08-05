@@ -217,7 +217,11 @@ void DBNNode::parentValues(std::vector<int> const& node_input, std::vector<int>*
 
     // populate parent values
     parent_values->clear();
-    for (auto const& p : _parent_nodes) { parent_values->emplace_back(node_input[p]); }
+    std::transform(
+        _parent_nodes.cbegin(),
+        _parent_nodes.cend(),
+        std::back_inserter(*parent_values),
+        [&node_input](int p) { return node_input[p]; });
 }
 
 void DBNNode::logCPTs() const

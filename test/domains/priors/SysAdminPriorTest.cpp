@@ -771,7 +771,7 @@ SCENARIO("linear sysadmin factored prior", "[bayes-adaptive][sysadmin][factored]
         auto const start_state = d.sampleStartState();
         auto const ba_s        = static_cast<FBAPOMDPState*>(p->sample(start_state));
 
-        auto const& model = ba_s->model();
+        auto const model = ba_s->model();
 
         THEN("probability of failing depends on failing neighbours")
         {

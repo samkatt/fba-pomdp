@@ -305,7 +305,12 @@ CollisionAvoidanceFactoredPrior::CollisionAvoidanceFactoredPrior(
             {
 
                 auto obsDistr = observationDistr(_height, y);
-                for (auto& p : obsDistr) p *= 10000;
+
+                // this part of the observation model is known _with certainty_
+                // so set the counts to high values
+                std::transform(obsDistr.cbegin(), obsDistr.cend(), obsDistr.begin(), [](float p) {
+                    return p * 10000;
+                });
 
                 model.observationNode(&action, f).setDirichletDistribution({y}, obsDistr);
             }

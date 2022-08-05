@@ -50,9 +50,9 @@ void StructureIncubatorSampling::resetDomainStateDistribution(BAPOMDP const& bap
     assert(_fully_connected_belief.size() == _size);
     assert(_shadow_belief.size() == _size);
 
-    for (auto& p : _belief.particles()) { bapomdp.resetDomainState(p); }
+    for (auto p : _belief.particles()) { bapomdp.resetDomainState(p); }
 
-    for (auto& p : _fully_connected_belief.particles()) { bapomdp.resetDomainState(p); }
+    for (auto p : _fully_connected_belief.particles()) { bapomdp.resetDomainState(p); }
 
     for (size_t i = 0; i < _size; ++i)
     {

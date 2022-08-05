@@ -285,7 +285,7 @@ void RBAPOUCT::fillHistograms(
     {
         histograms[node_depth][chance_node._action->index()] += chance_node.visited();
 
-        for (auto& action_node : chance_node)
+        for (auto const& action_node : chance_node)
         {
             fillHistograms(histograms, action_node.second, node_depth + 1);
         }
@@ -338,7 +338,7 @@ void RBAPOUCT::freeTree(BAPOMDP const& simulator) const
     for (auto& n : _action_nodes)
     {
 
-        for (auto& chance_node : *n) { simulator.releaseAction(chance_node._action); }
+        for (auto const& chance_node : *n) { simulator.releaseAction(chance_node._action); }
 
         delete (n);
     }

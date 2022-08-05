@@ -34,7 +34,7 @@ public:
     {
 
         // clean up all elements created with new
-        for (auto& e : _elements) { delete e; }
+        for (auto e : _elements) { delete e; }
     }
 
     T const* get(int n) const

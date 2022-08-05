@@ -33,9 +33,9 @@ CollisionAvoidanceBAExtension::CollisionAvoidanceBAExtension(
 CollisionAvoidanceBAExtension::~CollisionAvoidanceBAExtension()
 {
     // clean up allocated states
-    for (auto& outer : _states)
+    for (auto const& outer : _states)
     {
-        for (auto& inner : outer)
+        for (auto const& inner : outer)
         {
             for (auto s : inner) { delete s; }
         }

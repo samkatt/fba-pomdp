@@ -644,7 +644,7 @@ SCENARIO(
         {
             auto const domain_state = d.sampleStartState();
             auto const hyper_state  = static_cast<FBAPOMDPState const*>(p->sample(domain_state));
-            auto const& model       = hyper_state->model();
+            auto const model        = hyper_state->model();
 
             REQUIRE(model->observationNode(&a, 0).parents()->at(0) == 0);
 

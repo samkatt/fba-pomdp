@@ -153,9 +153,9 @@ CollisionAvoidance::CollisionAvoidance(
 CollisionAvoidance::~CollisionAvoidance()
 {
     // clean up allocated states
-    for (auto& outer : _states)
+    for (auto const& outer : _states)
     {
-        for (auto& inner : outer)
+        for (auto const& inner : outer)
         {
             for (auto s : inner) { delete s; }
         }
@@ -248,7 +248,9 @@ Terminal
 
     // move block
     auto blocks = collision_state->obstacles_pos;
-    for (auto& b : blocks) { b = moveObstacle(b); }
+    std::transform(
+        blocks.cbegin(), blocks.cend(), blocks.begin(), [this](int b) { return moveObstacle(b); });
+
     *s = _states[x][y][indexing::project(blocks, _obstacles_space)];
 
     // generate observation

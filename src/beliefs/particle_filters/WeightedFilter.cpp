@@ -3,6 +3,7 @@
 
 #include "WeightedFilter.hpp"
 
+#include <algorithm>
 #include <functional>
 #include <map>
 #include <queue>
@@ -112,11 +113,9 @@ WeightedParticle<T> const* WeightedFilter<T>::particle(size_t i) const
 template<typename T>
 void WeightedFilter<T>::normalize()
 {
-    double w = 0;
-
-    for (auto const& p : _particles) { w += p.w; }
-
-    normalize(w);
+    auto cum_f = [](double cum_weight, WeightedParticle<T> const& p) { return cum_weight + p.w; };
+    double const total_weight = std::accumulate(_particles.cbegin(), _particles.cend(), 0.0, cum_f);
+    normalize(total_weight);
 }
 
 template<typename T>

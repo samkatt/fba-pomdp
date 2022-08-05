@@ -13,7 +13,7 @@ namespace utils {
 struct categoricalDistr
 {
 public:
-    categoricalDistr(size_t size, float init = 0);
+    explicit categoricalDistr(size_t size, float init = 0);
 
     explicit categoricalDistr(std::vector<float> const& distr);
 

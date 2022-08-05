@@ -1,5 +1,7 @@
 #include "BABNModel.hpp"
 
+#include <algorithm> // std::transform
+
 #include "easylogging++.h"
 
 #include "bayes-adaptive/models/Domain_Size.hpp"
@@ -51,15 +53,23 @@ BABNModel::BABNModel(
 
     for (auto a = 0; a < _domain_size->_A; ++a)
     {
-        for (auto const& feature_size : _domain_feature_size->_S)
-        {
-            _transition_nodes.emplace_back(DBNNode(&_domain_feature_size->_S, {}, feature_size));
-        }
+        // create transition nodes from their feature sizes
+        std::transform(
+            _domain_feature_size->_S.cbegin(),
+            _domain_feature_size->_S.cend(),
+            std::back_inserter(_transition_nodes),
+            [this](int feature_size) {
+                return DBNNode(&_domain_feature_size->_S, {}, feature_size);
+            });
 
-        for (auto const& feature_size : _domain_feature_size->_O)
-        {
-            _observation_nodes.emplace_back(DBNNode(&_domain_feature_size->_S, {}, feature_size));
-        }
+        // create observation nodes from their feature sizes
+        std::transform(
+            _domain_feature_size->_O.cbegin(),
+            _domain_feature_size->_O.cend(),
+            std::back_inserter(_observation_nodes),
+            [this](int feature_size) {
+                return DBNNode(&_domain_feature_size->_O, {}, feature_size);
+            });
     }
 }
 

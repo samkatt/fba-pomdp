@@ -43,7 +43,7 @@ BAImportanceSampling::BAImportanceSampling(WeightedFilter<State const*> f, size_
     }
 
     VLOG(1) << "Initiated Importance Sampling belief of size " << _n
-            << " with initial weighted filter of size " << f.size();
+            << " with initial weighted filter of size " << _filter.size();
 }
 
 void BAImportanceSampling::initiate(POMDP const& d)

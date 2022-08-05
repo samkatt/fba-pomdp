@@ -159,7 +159,7 @@ add_executable(tests "test/test.cpp" ${SRC} ${BA_SRC} ${TEST_SRC})
 
 add_custom_target(cppcheck
     COMMAND cppcheck --enable=all --project=compile_commands.json --inline-suppr --suppressions-list=../.cppcheck.suppressions --output-file=/tmp/cppcheck.log
-    && echo "output written to /tmp/cppecheck.log"
+    && echo "output written to /tmp/cppcheck.log"
     && less /tmp/cppcheck.log)
 
 add_custom_target(clang-format

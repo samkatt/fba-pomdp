@@ -122,14 +122,13 @@ std::vector<IndexState> msgSampleStateHistory(
                 O[episode.back().action->index()][state][episode.back().observation->index()];
         }
 
-        double tot = 0;
         // message T-1 .. 0: p( o_t^last | s_t )
         for (int step = episode.length() - 1; step >= 0; --step)
         {
 
             auto const a = episode[step].action->index();
 
-            tot = 0;
+            double tot = 0;
             // compute message for each state
             for (auto state = 0; state < s->_S; ++state)
             {
@@ -174,7 +173,7 @@ std::vector<IndexState> msgSampleStateHistory(
         for (size_t step = 0; step < episode.length(); ++step)
         {
 
-            tot = 0;
+            double tot = 0;
             for (auto new_state = 0; new_state < s->_S; ++new_state)
             {
 

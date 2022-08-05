@@ -66,7 +66,6 @@ FBAPOMDPState* FactoredDummyPrior::sampleFullyConnectedState(State const* domain
 FBAPOMDPState* FactoredDummyPrior::sampleCorrectGraphState(State const* /*domain_state*/) const
 {
     throw "CollisionAvoidance::sampleCorrectGraphState nyi";
-    return nullptr;
 }
 
 bayes_adaptive::factored::BABNModel::Structure

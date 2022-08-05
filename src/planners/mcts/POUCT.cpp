@@ -263,7 +263,7 @@ void POUCT::fillHistograms(std::vector<std::vector<int>>& histograms, ActionNode
     {
         histograms[node_depth][chance_node._action->index()] += chance_node.visited();
 
-        for (auto& action_node : chance_node)
+        for (auto const& action_node : chance_node)
         {
             fillHistograms(histograms, action_node.second, node_depth + 1);
         }

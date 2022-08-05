@@ -36,9 +36,9 @@ Result run(configurations::Conf const& conf)
     auto const h         = Horizon(conf.horizon);
 
     boost::timer timer;
-    for (auto run = 0; run < conf.num_runs; ++run)
+    for (auto ep = 0; ep < conf.num_runs; ++ep)
     {
-        VLOG(1) << "run " << run + 1 << "/" << conf.num_runs;
+        VLOG(1) << "episode " << ep + 1 << "/" << conf.num_runs;
 
         belief->initiate(*simulator);
 
